@@ -1,5 +1,5 @@
-#ifndef ALONE_VOCAB__
-#define ALONE_VOCAB__
+#ifndef PHRASE_TABLE_VOCAB__
+#define PHRASE_TABLE_VOCAB__
 
 #include "lm/word_index.hh"
 #include "util/murmur_hash.hh"
@@ -11,11 +11,9 @@
 
 #include <string>
 
-namespace lm { namespace base { class Vocabulary; } }
-
-namespace alone {
+namespace phrase_table {
   
-  class Vocab {
+class Vocab {
   public:
     explicit Vocab(const lm::base::Vocabulary &backing);
     
@@ -64,4 +62,4 @@ namespace alone {
 
 
 } // namespace alone
-#endif // ALONE_VCOAB__
+#endif // PHRASE_TABLE_VCOAB__
