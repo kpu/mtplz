@@ -270,12 +270,12 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
     // Assumes that the key is unique.  Multiple insertions won't cause a failure, just inconsistent lookup.
     template <class T> MutableIterator Insert(const T &t) {
       DoubleIfNeeded();
-      backend_.UncheckedInsert(t);
+      return backend_.UncheckedInsert(t);
     }
 
-    template <class T> MutableIterator FindOrInsert(const T &t) {
+    template <class T> bool FindOrInsert(const T &t, MutableIterator &out) {
       DoubleIfNeeded();
-      backend_.FindOrInsert(t);
+      return backend_.FindOrInsert(t, out);
     }
 
     template <class Key> bool UnsafeMutableFind(const Key key, MutableIterator &out) {
@@ -295,7 +295,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
     }
 
     std::size_t Size() const {
-      return backend_.SizeNoSerialzation();
+      return backend_.SizeNoSerialization();
     }
 
     void Clear() {

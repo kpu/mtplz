@@ -1,24 +1,29 @@
-#include "alone/vocab.hh"
+#include "phrase_table/vocab.hh"
 
-#include "lm/virtual_interface.hh"
-#include "util/string_piece.hh"
+#include "util/murmur_hash.hh"
 
-namespace alone {
+namespace phrase_table {
 
-Vocab::Vocab(const lm::base::Vocabulary &backing) : backing_(backing) {}
-
-const Vocab::Entry &Vocab::FindOrAdd(const StringPiece &str) {
-#if BOOST_VERSION >= 104200
-  Map::const_iterator i= map_.find(str, Hash(), Equals());
-#else
-  std::string copied_str(str.data(), str.size());
-  Map::const_iterator i = map_.find(copied_str.c_str());
-#endif
-  if (i != map_.end()) return *i;
-  char *copied = static_cast<char*>(piece_backing_.Allocate(str.size() + 1));
-  memcpy(copied, str.data(), str.size());
-  copied[str.size()] = 0;
-  return *map_.insert(Entry(copied, backing_.Index(str))).first;
+bool Vocab::Find(const StringPiece &str, uint32_t &out) {
+  Map::ConstIterator it;
+  bool ret = map_.Find(util::MurmurHashNative(str.data(), str.size()), it);
+  if (ret) out = it->id;
+  return ret;
 }
 
-} // namespace alone
+uint32_t Vocab::FindOrAdd(const StringPiece &str) {
+  VocabInternal entry;
+  entry.key = util::MurmurHashNative(str.data(), str.size());
+  Map::MutableIterator it;
+  if (map_.FindOrInsert(entry, it)) {
+    return it->id;
+  }
+  it->id = strings_.size();
+  
+  char *copied = static_cast<char*>(piece_backing_.Allocate(str.size()));
+  memcpy(copied, str.data(), str.size());
+  strings_.push_back(StringPiece(copied, str.size()));
+  return it->id;
+}
+
+} // namespace phrase_table
