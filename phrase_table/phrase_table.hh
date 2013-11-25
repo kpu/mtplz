@@ -11,7 +11,9 @@
 
 namespace phrase_table {
 
+  // This is a temporary typedef until we have a better VocabEntry class
   typedef alone::VocabEntry VocabItem;
+
   typedef std::vector<VocabItem> Phrase;
 
 
@@ -32,8 +34,6 @@ namespace phrase_table {
     PhraseTable(const std::string & file, alone::Vocab &vocab, const Filter *const filter=NULL);
     ~PhraseTable() { }
 
-    // TODO: Right now this is returned by value because I don't think there's a simple way around that using 
-    // the unordered_map container.
     const Entry *getPhrases(const Phrase & source_phrase) const;
   private:
     struct Hash : public std::unary_function<uint64_t, std::size_t> {
@@ -51,10 +51,4 @@ namespace phrase_table {
 
 #endif
 
-
-//     struct Equals : public std::binary_function<Phrase, Phrase, bool> {
-//       bool operator()(const Phrase& first, const Phrase& second) const {
-//         return first == second;
-//       }
-//     };
 
