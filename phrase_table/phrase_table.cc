@@ -3,9 +3,20 @@
 #include "util/tokenize_piece.hh"
 #include "util/exception.hh"
 
+#include <math.h>
+
 using namespace util;
 
 namespace phrase_table {
+
+namespace {
+static const double_conversion::StringToDoubleConverter kConverter(
+    double_conversion::StringToDoubleConverter::NO_FLAGS,
+    std::numeric_limits<double>::quiet_NaN(),
+    std::numeric_limits<double>::quiet_NaN(),
+    "inf",
+    "NaN");
+} // namespace
 
   PhraseTable::PhraseTable(const std::string & file, alone::Vocab &vocab, const Filter *const filter /* =NULL */) {
     FilePiece in(file.c_str(), &std::cout);
@@ -41,15 +52,15 @@ namespace phrase_table {
 	  }
 
 	// Error checking of fields read
-	UTIL_THROW_IF(regions.size() != 3, ErrnoException, "Invalidly formatted phrase table line: " << line);
-	UTIL_THROW_IF(regions.at(0).size()==0, ErrnoException, "No source words in phrase table line: " << line);
-	UTIL_THROW_IF(regions.at(1).size()==0, ErrnoException, "No target words in phrase table line: " << line);
+	UTIL_THROW_IF(regions.size() != 3, Exception, "Invalidly formatted phrase table line: " << line);
+	UTIL_THROW_IF(regions.at(0).size()==0, Exception, "No source words in phrase table line: " << line);
+	UTIL_THROW_IF(regions.at(1).size()==0, Exception, "No target words in phrase table line: " << line);
 	if(expected_num_scores==0) { // This condition means this is the first line of the phrase table
-	  UTIL_THROW_IF(regions.at(2).size()==0, ErrnoException, "No scores in phrase table line: " << line);
+	  UTIL_THROW_IF(regions.at(2).size()==0, Exception, "No scores in phrase table line: " << line);
 	  expected_num_scores = regions.at(2).size();
 	}
 	else {
-	  UTIL_THROW_IF(regions.at(2).size()!=expected_num_scores, ErrnoException, "Unexpected #scores in phrase table line: " << line);
+	  UTIL_THROW_IF(regions.at(2).size()!=expected_num_scores, Exception, "Unexpected #scores in phrase table line: " << line);
 	}
 
 	// Create vocabulary items for source and target words
@@ -68,7 +79,9 @@ namespace phrase_table {
 	for(std::vector<StringPiece>::iterator i=regions.at(2).begin(); i!=regions.at(2).end(); i++) {
 	  SparseScore score;
 	  score.index = score_index++;
-	  score.val = atof((i->as_string()).c_str());
+          int length;
+          score.val = kConverter.StringToFloat(i->data(), i->size(), &length);
+          UTIL_THROW_IF(isnan(score.val), "Bad score in the phrase table: " << *i);
 	  scoredTargetPhrase.scores.push_back(score);
 	}
 
@@ -79,12 +92,13 @@ namespace phrase_table {
 	  (*most_recent_hash_iterator).second.push_back(scoredTargetPhrase);
 	}
 	else {
+          
 	  Map::iterator hash_iterator = map_.find(hash_code);
 	  if(hash_iterator==map_.end()) {
 	    Entry entry;
 	    entry.push_back(scoredTargetPhrase);
 	    std::pair<Map::iterator,bool> pair = map_.insert(std::make_pair(hash_code,entry));
-	    UTIL_THROW_IF(!pair.second, ErrnoException, "Item not successfully inserted into phrase table.");
+	    UTIL_THROW_IF(!pair.second, Exception, "Item not successfully inserted into phrase table.");
 	    hash_iterator = pair.first;
 	  }
 	  else {

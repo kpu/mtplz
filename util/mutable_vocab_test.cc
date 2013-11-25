@@ -1,9 +1,9 @@
-#include "phrase_table/vocab.hh"
+#include "util/mutable_vocab.hh"
 
 #define BOOST_TEST_MODULE VocabTest
 #include <boost/test/unit_test.hpp>
 
-namespace phrase_table {
+namespace util {
 namespace {
 
 BOOST_AUTO_TEST_CASE(small) {
@@ -15,4 +15,4 @@ BOOST_AUTO_TEST_CASE(small) {
 }
 
 } // namespace
-} // namespace phrase_table
+} // namespace util

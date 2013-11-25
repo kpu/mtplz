@@ -1,8 +1,8 @@
-#include "phrase_table/vocab.hh"
+#include "util/mutable_vocab.hh"
 
 #include "util/murmur_hash.hh"
 
-namespace phrase_table {
+namespace util {
 
 Vocab::Vocab() {
   strings_.push_back(StringPiece("<unk>"));
@@ -32,4 +32,4 @@ uint32_t Vocab::FindOrInsert(const StringPiece &str) {
   return it->id;
 }
 
-} // namespace phrase_table
+} // namespace util

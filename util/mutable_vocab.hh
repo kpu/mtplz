@@ -1,5 +1,9 @@
-#ifndef PHRASE_TABLE_VOCAB__
-#define PHRASE_TABLE_VOCAB__
+#ifndef UTIL_MUTABLE_VOCAB__
+#define UTIL_MUTABLE_VOCAB__
+
+/* A vocabulary mapping class that's mutable at runtime.  The kenlm code has
+ * a specialized immutable vocabulary.
+ */
 
 #include "util/pool.hh"
 #include "util/probing_hash_table.hh"
@@ -7,7 +11,7 @@
 
 #include <stdint.h>
 
-namespace phrase_table {
+namespace util {
 
 #pragma pack(push)
 #pragma pack(4)
@@ -49,5 +53,5 @@ class Vocab {
     std::vector<StringPiece> strings_;
 };
 
-} // namespace phrase_table
-#endif // PHRASE_TABLE_VOCAB__
+} // namespace util
+#endif // UTIL_MUTABLE_VOCAB__
