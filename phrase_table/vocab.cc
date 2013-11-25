@@ -4,14 +4,20 @@
 
 namespace phrase_table {
 
-bool Vocab::Find(const StringPiece &str, uint32_t &out) {
-  Map::ConstIterator it;
-  bool ret = map_.Find(util::MurmurHashNative(str.data(), str.size()), it);
-  if (ret) out = it->id;
-  return ret;
+Vocab::Vocab() {
+  strings_.push_back(StringPiece("<unk>"));
 }
 
-uint32_t Vocab::FindOrAdd(const StringPiece &str) {
+Vocab::ID Vocab::Find(const StringPiece &str) const {
+  Map::ConstIterator it;
+  if (map_.Find(util::MurmurHashNative(str.data(), str.size()), it)) {
+    return it->id;
+  } else {
+    return kUNK;
+  }
+}
+
+uint32_t Vocab::FindOrInsert(const StringPiece &str) {
   VocabInternal entry;
   entry.key = util::MurmurHashNative(str.data(), str.size());
   Map::MutableIterator it;

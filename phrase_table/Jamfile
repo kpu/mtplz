@@ -1,1 +1,5 @@
 fakelib phrase_table : vocab.cc ../util//kenutil ;
+
+import testing ;
+
+unit-test vocab_test : vocab_test.cc phrase_table /top//boost_unit_test_framework ;

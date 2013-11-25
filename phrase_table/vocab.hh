@@ -25,15 +25,20 @@ class Vocab {
   public:
     typedef uint32_t ID;
 
-    Vocab() {}
-    
-    bool Find(const StringPiece &str, uint32_t &out);
+    static const ID kUNK = 0;
 
-    ID FindOrAdd(const StringPiece &str);
+    Vocab();
+    
+    uint32_t Find(const StringPiece &str) const;
+
+    ID FindOrInsert(const StringPiece &str);
 
     StringPiece String(ID id) const {
       return strings_[id];
     }
+
+    // Includes kUNK.
+    std::size_t Size() const { return strings_.size(); }
     
   private:
     util::Pool piece_backing_;
