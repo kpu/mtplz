@@ -11,7 +11,6 @@
 
 namespace phrase_table {
 
-  // This is a temporary typedef until we have a better VocabEntry class
   typedef util::MutableVocab::ID VocabEntry;
   typedef std::vector<VocabEntry> Phrase;
 
@@ -32,8 +31,11 @@ namespace phrase_table {
     PhraseTable(const std::string & file, util::MutableVocab &vocab, const Filter *const filter=NULL);
     ~PhraseTable() { }
 
+    // Get all target phrases matching the source phrase specified by *(begin), *(begin+1), ..., *(end)
+    // Returns NULL if the source phrase does not exist in the table.
     const Entry *getPhrases(Phrase::iterator begin, Phrase::iterator end) const;
     std::size_t getMaxSourcePhraseLength() const { return max_source_phrase_length_; }
+
   private:
     struct Hash : public std::unary_function<uint64_t, std::size_t> {
       std::size_t operator()(const uint64_t p) const {

@@ -34,18 +34,18 @@ namespace {
       while(getline(fs, line)) {
 	std::stringstream ls(line);
 	std::string token;
-	bool should_find_phrases;
+	bool should_find_phrase;
 	Phrase phrase;
 
-	ls >> should_find_phrases;
+	ls >> should_find_phrase;
 	while(ls >> token) {
 	  std::cerr << "   " << token;
 	  phrase.push_back(vocab.FindOrInsert(token));
 	}
 	std::cerr << std::endl;
-	bool does_find_phrases = (phrase_table.getPhrases(phrase.begin(), phrase.end()) != NULL);
-	std::cerr << "does_find_phrases: " << does_find_phrases << "  should_find_phrases: " << should_find_phrases << std::endl;
-	BOOST_CHECK_EQUAL(does_find_phrases, should_find_phrases);
+	bool does_find_phrase = (phrase_table.getPhrases(phrase.begin(), phrase.end()) != NULL);
+	std::cerr << "does_find_phrase: " << does_find_phrase << "  should_find_phrase: " << should_find_phrase << std::endl;
+	BOOST_CHECK_EQUAL(does_find_phrase, should_find_phrase);
       }
     }
     else {
