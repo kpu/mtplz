@@ -19,7 +19,7 @@ namespace phrase_table {
 
   struct SparseScore {
     uint32_t index;
-    double val;
+    float val;
   };
 
   struct ScoredPhrase {
