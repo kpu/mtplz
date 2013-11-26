@@ -1,7 +1,8 @@
 #include "phrase_table/phrase_table.hh"
+#include "util/double-conversion/double-conversion.h"
+#include "util/exception.hh"
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
-#include "util/exception.hh"
 
 #include <math.h>
 
