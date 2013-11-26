@@ -10,7 +10,9 @@ namespace phrase_table {
   
   
   PhraseTable::PhraseTable(const std::string & file, util::MutableVocab &vocab, const Filter *const filter /* =NULL */) {
-    FilePiece in(file.c_str(), &std::cout);
+    max_source_phrase_length_ = 0;
+    //FilePiece in(file.c_str(), &std::cout);
+    FilePiece in(file.c_str());
     
     try {
       std::size_t expected_num_scores = 0;
@@ -55,15 +57,15 @@ namespace phrase_table {
 	}
 
 	// Create vocabulary items for source and target words
-	Phrase sourcePhrase;
-	ScoredPhrase scoredTargetPhrase;
+	Phrase source_phrase;
+	ScoredPhrase scored_target_phrase;
 	
 	for(std::vector<StringPiece>::iterator i=regions.at(0).begin(); i!=regions.at(0).end(); i++) {
-	  sourcePhrase.push_back(vocab.FindOrInsert(*i));
+	  source_phrase.push_back(vocab.FindOrInsert(*i));
 	}
 	
 	for(std::vector<StringPiece>::iterator i=regions.at(1).begin(); i!=regions.at(1).end(); i++) {
-	  scoredTargetPhrase.phrase.push_back(vocab.FindOrInsert(*i));
+	  scored_target_phrase.phrase.push_back(vocab.FindOrInsert(*i));
 	}
 	
 	std::size_t score_index=0;
@@ -71,24 +73,30 @@ namespace phrase_table {
 	  SparseScore score;
 	  score.index = score_index++;
 	  score.val = atof((i->as_string()).c_str());
-	  scoredTargetPhrase.scores.push_back(score);
+	  scored_target_phrase.scores.push_back(score);
 	}
-	
+
+	// Update max_source_phrase_length_ if necessary
+	if(source_phrase.size() > max_source_phrase_length_)
+	  max_source_phrase_length_ = source_phrase.size();
+
 	// Add this phrase pair to the map. 
 	// Get hash for source phrase
-	uint64_t hash_code = MurmurHashNative(sourcePhrase.data(), sizeof(VocabEntry)*sourcePhrase.size());
+	uint64_t hash_code = MurmurHashNative(source_phrase.data(), sizeof(VocabEntry)*source_phrase.size());
 	if(most_recent_entry_ptr==NULL || hash_code!=most_recent_hash_code) {
 	  most_recent_entry_ptr = &map_[hash_code];
 	  most_recent_hash_code = hash_code;
 	}
-	most_recent_entry_ptr->push_back(scoredTargetPhrase);
+	std::cerr << "Adding phrase to " << most_recent_hash_code << std::endl;
+	most_recent_entry_ptr->push_back(scored_target_phrase);
       }
     } catch (const util::EndOfFileException &e) { }  
   }
   
   
-  const PhraseTable::Entry* PhraseTable::getPhrases(Phrase::const_iterator &begin, Phrase::const_iterator &end) const {
-    uint64_t hash_code = MurmurHashNative(&(*begin), end-begin);
+  const PhraseTable::Entry* PhraseTable::getPhrases(Phrase::iterator begin, Phrase::iterator end) const {
+    uint64_t hash_code = MurmurHashNative(&(*begin), (end-begin) * sizeof(VocabEntry));
+    std::cerr << "Querying (length " << (end-begin) << ") phrase at " << hash_code << std::endl;
     Map::const_iterator hash_iterator = map_.find(hash_code);
     if(hash_iterator==map_.end()) {
       return NULL;

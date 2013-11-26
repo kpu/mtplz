@@ -3,3 +3,4 @@ fakelib phrase_table : filter.cc phrase_table.cc ../util//kenutil ;
 import testing ;
 
 run filter_test.cc phrase_table /top//boost_unit_test_framework : : test.filter_queries test.filter_text ;
+run phrase_table_test.cc phrase_table /top//boost_unit_test_framework : : test.phrase_table test.source_text ;

@@ -54,10 +54,5 @@ namespace {
   }
 
 
-  // BOOST_AUTO_TEST_CASE(other) {
-  //   BOOST_CHECK_EQUAL(true, false);
-  // }
-
-
 } // namespace
 } // namespace phrase_table

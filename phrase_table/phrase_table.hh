@@ -32,7 +32,8 @@ namespace phrase_table {
     PhraseTable(const std::string & file, util::MutableVocab &vocab, const Filter *const filter=NULL);
     ~PhraseTable() { }
 
-    const Entry *getPhrases(Phrase::const_iterator &begin, Phrase::const_iterator &end) const;
+    const Entry *getPhrases(Phrase::iterator begin, Phrase::iterator end) const;
+    std::size_t getMaxSourcePhraseLength() const { return max_source_phrase_length_; }
   private:
     struct Hash : public std::unary_function<uint64_t, std::size_t> {
       std::size_t operator()(const uint64_t p) const {
@@ -42,7 +43,7 @@ namespace phrase_table {
 
     typedef boost::unordered_map<uint64_t, Entry, Hash> Map;
     Map map_;
-    
+    std::size_t max_source_phrase_length_;
   };
 
 } // namespace phrase_table
