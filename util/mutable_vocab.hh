@@ -15,7 +15,7 @@ namespace util {
 
 #pragma pack(push)
 #pragma pack(4)
-struct VocabInternal {
+struct MutableVocabInternal {
   typedef uint64_t Key;
   uint64_t GetKey() const { return key; }
   void SetKey(uint64_t to) { key = to; }
@@ -25,13 +25,13 @@ struct VocabInternal {
 };
 #pragma pack(pop)
  
-class Vocab {
+class MutableVocab {
   public:
     typedef uint32_t ID;
 
     static const ID kUNK = 0;
 
-    Vocab();
+    MutableVocab();
     
     uint32_t Find(const StringPiece &str) const;
 
@@ -47,7 +47,7 @@ class Vocab {
   private:
     util::Pool piece_backing_;
 
-    typedef util::AutoProbing<VocabInternal, util::IdentityHash> Map;
+    typedef util::AutoProbing<MutableVocabInternal, util::IdentityHash> Map;
     Map map_;
 
     std::vector<StringPiece> strings_;

@@ -6,18 +6,20 @@
 using namespace util;
 
 namespace phrase_table {
-
-  PhraseTable::PhraseTable(const std::string & file, alone::Vocab &vocab, const Filter *const filter /* =NULL */) {
+  
+  
+  
+  PhraseTable::PhraseTable(const std::string & file, util::MutableVocab &vocab, const Filter *const filter /* =NULL */) {
     FilePiece in(file.c_str(), &std::cout);
-
+    
     try {
       std::size_t expected_num_scores = 0;
       uint64_t most_recent_hash_code = 0;
-      Map::iterator most_recent_hash_iterator = map_.end();
-
+      Entry* most_recent_entry_ptr = NULL;
+      
       while (true) {
 	//frage ||| issue ||| 0.25 0.285714 0.25 0.166667 2.718
-
+	
 	StringPiece line = in.ReadLine();
 	std::vector<std::vector<StringPiece> > regions;
 
@@ -41,29 +43,29 @@ namespace phrase_table {
 	  }
 
 	// Error checking of fields read
-	UTIL_THROW_IF(regions.size() != 3, ErrnoException, "Invalidly formatted phrase table line: " << line);
-	UTIL_THROW_IF(regions.at(0).size()==0, ErrnoException, "No source words in phrase table line: " << line);
-	UTIL_THROW_IF(regions.at(1).size()==0, ErrnoException, "No target words in phrase table line: " << line);
+	UTIL_THROW_IF(regions.size() != 3, Exception, "Invalidly formatted phrase table line: " << line);
+	UTIL_THROW_IF(regions.at(0).size()==0, Exception, "No source words in phrase table line: " << line);
+	UTIL_THROW_IF(regions.at(1).size()==0, Exception, "No target words in phrase table line: " << line);
 	if(expected_num_scores==0) { // This condition means this is the first line of the phrase table
-	  UTIL_THROW_IF(regions.at(2).size()==0, ErrnoException, "No scores in phrase table line: " << line);
+	  UTIL_THROW_IF(regions.at(2).size()==0, Exception, "No scores in phrase table line: " << line);
 	  expected_num_scores = regions.at(2).size();
 	}
 	else {
-	  UTIL_THROW_IF(regions.at(2).size()!=expected_num_scores, ErrnoException, "Unexpected #scores in phrase table line: " << line);
+	  UTIL_THROW_IF(regions.at(2).size()!=expected_num_scores, Exception, "Unexpected #scores in phrase table line: " << line);
 	}
 
 	// Create vocabulary items for source and target words
 	Phrase sourcePhrase;
 	ScoredPhrase scoredTargetPhrase;
-
+	
 	for(std::vector<StringPiece>::iterator i=regions.at(0).begin(); i!=regions.at(0).end(); i++) {
-	  sourcePhrase.push_back(VocabItem(vocab.FindOrAdd(*i)));
+	  sourcePhrase.push_back(vocab.FindOrInsert(*i));
 	}
-
+	
 	for(std::vector<StringPiece>::iterator i=regions.at(1).begin(); i!=regions.at(1).end(); i++) {
-	  scoredTargetPhrase.phrase.push_back(VocabItem(vocab.FindOrAdd(*i)));
+	  scoredTargetPhrase.phrase.push_back(vocab.FindOrInsert(*i));
 	}
-
+	
 	std::size_t score_index=0;
 	for(std::vector<StringPiece>::iterator i=regions.at(2).begin(); i!=regions.at(2).end(); i++) {
 	  SparseScore score;
@@ -71,34 +73,22 @@ namespace phrase_table {
 	  score.val = atof((i->as_string()).c_str());
 	  scoredTargetPhrase.scores.push_back(score);
 	}
-
+	
 	// Add this phrase pair to the map. 
 	// Get hash for source phrase
-	uint64_t hash_code = MurmurHashNative(sourcePhrase.data(), sizeof(VocabItem)*sourcePhrase.size());
-	if(hash_code==most_recent_hash_code) {
-	  (*most_recent_hash_iterator).second.push_back(scoredTargetPhrase);
-	}
-	else {
-	  Map::iterator hash_iterator = map_.find(hash_code);
-	  if(hash_iterator==map_.end()) {
-	    Entry entry;
-	    entry.push_back(scoredTargetPhrase);
-	    std::pair<Map::iterator,bool> pair = map_.insert(std::make_pair(hash_code,entry));
-	    UTIL_THROW_IF(!pair.second, ErrnoException, "Item not successfully inserted into phrase table.");
-	    hash_iterator = pair.first;
-	  }
-	  else {
-	    (*hash_iterator).second.push_back(scoredTargetPhrase);
-	  }
-	  most_recent_hash_iterator = hash_iterator;
+	uint64_t hash_code = MurmurHashNative(sourcePhrase.data(), sizeof(VocabEntry)*sourcePhrase.size());
+	if(most_recent_entry_ptr==NULL || hash_code!=most_recent_hash_code) {
+	  most_recent_entry_ptr = &map_[hash_code];
 	  most_recent_hash_code = hash_code;
 	}
+	most_recent_entry_ptr->push_back(scoredTargetPhrase);
       }
     } catch (const util::EndOfFileException &e) { }  
   }
   
-  const PhraseTable::Entry* PhraseTable::getPhrases(const Phrase & source_phrase) const {
-    uint64_t hash_code = MurmurHashNative(source_phrase.data(), sizeof(VocabItem)*source_phrase.size());
+  
+  const PhraseTable::Entry* PhraseTable::getPhrases(Phrase::const_iterator &begin, Phrase::const_iterator &end) const {
+    uint64_t hash_code = MurmurHashNative(&(*begin), end-begin);
     Map::const_iterator hash_iterator = map_.find(hash_code);
     if(hash_iterator==map_.end()) {
       return NULL;
@@ -107,6 +97,6 @@ namespace phrase_table {
       return &(hash_iterator->second);
     }
   }
-
+  
 }
 

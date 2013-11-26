@@ -58,6 +58,7 @@ external-lib z ;
 
 build-project lm ;
 build-project util ;
+build-project phrase_table ;
 
 lib kenlm : lm//kenlm ;
 

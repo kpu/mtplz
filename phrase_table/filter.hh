@@ -9,40 +9,25 @@
 #include <boost/unordered_set.hpp>
 
 #include "util/murmur_hash.hh"
-#include "alone/vocab.hh"
+#include "util/mutable_vocab.hh"
 
 namespace phrase_table {
 
-  //typedef alone::Vocab::Entry VocabItem;
-  typedef alone::VocabEntry VocabItem;
-  typedef std::vector<VocabItem> Phrase;
-  typedef std::vector<std::string> WordVec;
+  typedef util::MutableVocab::ID VocabEntry;
+  typedef std::vector<VocabEntry> Phrase;
 
   // Provides a function which returns a bool for a token sequence.
-  // If the return val is true, the token sequence passes the filter.
+  // The return val is true iff the token sequence passes the filter.
   // This can be used, e.g., for phrase table filtering based on
   // a known source file to translate.
   class Filter {
   public:
     Filter() : ngram_length_(0) { }
-    Filter(const std::string& file, const std::size_t ngram_length);
-    bool PassesFilter(std::vector<VocabItem> const& words) const;
+    Filter(const std::string& file, util::MutableVocab& vocab, const std::size_t ngram_length = 3);
+    bool PassesFilter(Phrase const& phrase) const;
 
   private:
-//     struct Hash : public std::unary_function<WordVec, std::size_t> {
-//       std::size_t operator()(const WordVec& p) const {
-// 	return util::MurmurHashNative(p.data(), p.size()*sizeof(VocabItem));
-//       }
-//     };
-    
-//     struct Equals : public std::binary_function<WordVec, WordVec, bool> {
-//       bool operator()(const WordVec& first, const WordVec& second) const {
-//         return first == second;
-//       }
-//     };
-
-//    typedef boost::unordered_set<Phrase, Hash, Equals> Map;
-    typedef boost::unordered_set<WordVec> Map;
+    typedef boost::unordered_set<Phrase> Map;
     Map ngram_map_;
     std::size_t ngram_length_;
 
