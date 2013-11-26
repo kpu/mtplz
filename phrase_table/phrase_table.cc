@@ -97,7 +97,7 @@ namespace phrase_table {
 	  most_recent_entry_ptr = &map_[hash_code];
 	  most_recent_hash_code = hash_code;
 	}
-	std::cerr << "Adding phrase to " << most_recent_hash_code << std::endl;
+	//std::cerr << "Adding phrase to " << most_recent_hash_code << std::endl;
 	most_recent_entry_ptr->push_back(scored_target_phrase);
       }
     } catch (const util::EndOfFileException &e) { }  
@@ -106,7 +106,7 @@ namespace phrase_table {
   
   const PhraseTable::Entry* PhraseTable::getPhrases(Phrase::iterator begin, Phrase::iterator end) const {
     uint64_t hash_code = MurmurHashNative(&(*begin), (end-begin) * sizeof(VocabEntry));
-    std::cerr << "Querying (length " << (end-begin) << ") phrase at " << hash_code << std::endl;
+    //std::cerr << "Querying (length " << (end-begin) << ") phrase at " << hash_code << std::endl;
     Map::const_iterator hash_iterator = map_.find(hash_code);
     if(hash_iterator==map_.end()) {
       return NULL;
