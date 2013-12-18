@@ -1,0 +1,8 @@
+fakelib standalone : output.cc features.cc feature_computer.cc read.cc threading.cc vocab.cc ../lm//kenlm ../util//kenutil ../util/double-conversion//double-conversion ../search//search : <include>.. : : <include>.. <threading>multi:<library>..//boost_thread ;
+
+exe decode : main.cc standalone /top//boost_program_options ;
+
+exe check_scores : check_scores.cc standalone ;
+
+import testing ;
+unit-test features_test : features_test.cc standalone ../search//search ../util//kenutil /top//boost_unit_test_framework ;

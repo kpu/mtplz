@@ -1,4 +1,4 @@
-#BUILDING KENLM
+#BUILDING LAZY
 #
 #DEPENDENCIES
 #Remember that some distributions split packages into development and binary
@@ -50,19 +50,23 @@
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
 
-boost 103600 ;
-project : requirements $(requirements) <include>. ;
-project : default-build <threading>multi <warnings>on <variant>release ;
+boost 104100 ;
 
 external-lib z ;
 
-build-project lm ;
-build-project util ;
-build-project phrase_table ;
+if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
+  external-lib tcmalloc_minimal ;
+  requirements += <threading>multi:<library>tcmalloc_minimal ;
+}
+
+project : requirements $(requirements) <threading>multi:<define>WITH_THREADS <library>boost_system <define>HAVE_BOOST ;
+project : default-build <threading>multi <warnings>on <variant>release ;
+
+build-projects search lm util phrase_table ;
 
 lib kenlm : lm//kenlm ;
+install-bin-libs alone//decode lm//programs kenlm ;
 
-install-bin-libs lm//programs kenlm ;
 install-headers headers : [ glob-tree *.hh : dist include ] : . ;
 alias install : prefix-bin prefix-lib prefix-include ; 
 explicit headers ;
