@@ -22,6 +22,13 @@ struct HypoState {
   Score score;
 };
 
+// Custom enum to save memory: valid values of policy_.
+// Branch based on left state only, because right ran out or this is a left tree.
+const unsigned char kPolicyLeft = 1;
+// Branch based on right state only.
+const unsigned char kPolicyRight = 2;
+const unsigned char kPolicyAll = 3;
+
 class VertexNode {
   public:
     VertexNode() {}
@@ -49,9 +56,9 @@ class VertexNode {
     }
 
     // Sort hypotheses for the root.
-    void FinishRoot();
+    void FinishRoot(const unsigned char policy);
 
-    void FinishedAppending(const unsigned char common_left, const unsigned char common_right);
+    void FinishedAppending(const unsigned char common_left, const unsigned char common_right, const unsigned char policy);
 
     void BuildExtend();
 
@@ -180,6 +187,8 @@ class Vertex {
         return top.End();
       }
     }
+
+    VertexNode &Root() { return root_; }
 
   private:
     template <class Output> friend class VertexGenerator;

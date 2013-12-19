@@ -1,4 +1,4 @@
-fakelib phrase_table : filter.cc phrase_table.cc ../util//kenutil ;
+fakelib phrase_table : [ glob *.cc : *_test.cc *_main.cc ] ../util//kenutil ../lm//kenlm ../search//search ;
 
 import testing ;
 
