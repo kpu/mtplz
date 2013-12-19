@@ -2,5 +2,5 @@ fakelib phrase_table : [ glob *.cc : *_test.cc *_main.cc ] ../util//kenutil ../l
 
 import testing ;
 
-run filter_test.cc phrase_table /top//boost_unit_test_framework : : test.filter_queries test.filter_text ;
-run phrase_table_test.cc phrase_table /top//boost_unit_test_framework : : test.phrase_table test.source_text ;
+run filter_test.cc phrase_table /top//boost_unit_test_framework : : ../lm/test.arpa test.filter_queries test.filter_text ;
+run phrase_table_test.cc phrase_table /top//boost_unit_test_framework : : ../lm/test.arpa test.phrase_table test.source_text ;

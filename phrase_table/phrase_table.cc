@@ -16,7 +16,8 @@ PhraseTable::PhraseTable(const std::string &file, util::MutableVocab &vocab, Sco
   uint64_t previous_text_hash = 0;
   Entry *entry = NULL;
   std::vector<ID> source;
-  while (true) {
+  StringPiece line;
+  try { while (true) {
     TokenIter<MultiCharacter> pipes(in.ReadLine(), "|||");
     // Setup the source phrase correctly.
     uint64_t source_text_hash = util::MurmurHashNative(pipes->data(), pipes->size());
@@ -43,7 +44,7 @@ PhraseTable::PhraseTable(const std::string &file, util::MutableVocab &vocab, Sco
     hypo.score = scorer.Parse(*++pipes) + scorer.LM(&*entry->content.back().begin(), &*entry->content.back().end(), hypo.state);
     entry->vertex.Root().AppendHypothesis(hypo);
     UTIL_THROW_IF(++pipes, Exception, "Extra fields in phrase table: " << *pipes);
-  }
+  } } catch (const util::EndOfFileException &e) {}
   if (entry) entry->vertex.Root().FinishRoot(search::kPolicyLeft);
 }
 

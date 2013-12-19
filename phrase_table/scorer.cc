@@ -37,7 +37,7 @@ float Scorer::Parse(const StringPiece &features) const {
     int length;
     float val = kConverter.StringToFloat(token->data(), token->size(), &length);
     UTIL_THROW_IF(isnan(val), util::Exception, "Bad score " << *token);
-    UTIL_THROW_IF(w == phrase_weights_.end(), util::Exception, "More features than weights in " << features);
+    UTIL_THROW_IF(w == phrase_weights_.end(), util::Exception, "Have " << phrase_weights_.size() << " weights but was given feature vector " << features);
     ret += *w * val;
   }
   UTIL_THROW_IF(w != phrase_weights_.end(), util::Exception, "Expected " << phrase_weights_.size() << " features, but got " << features);
