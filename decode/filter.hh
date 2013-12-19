@@ -1,5 +1,5 @@
-#ifndef PHRASE_TABLE_FILTER__
-#define PHRASE_TABLE_FILTER__
+#ifndef DECODE_FILTER__
+#define DECODE_FILTER__
 
 #include <fstream>
 #include <string>
@@ -11,7 +11,7 @@
 #include "util/murmur_hash.hh"
 #include "util/mutable_vocab.hh"
 
-namespace phrase_table {
+namespace decode {
 
   typedef util::MutableVocab::ID VocabEntry;
   typedef std::vector<VocabEntry> Phrase;

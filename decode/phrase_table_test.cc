@@ -1,12 +1,12 @@
-#include "phrase_table/phrase_table.hh"
-#include "phrase_table/scorer.hh"
+#include "decode/phrase_table.hh"
+#include "decode/scorer.hh"
 #include <iostream>
 #include <fstream>
 
 #define BOOST_TEST_MODULE VocabTest
 #include <boost/test/unit_test.hpp>
 
-namespace phrase_table {
+namespace decode {
 namespace {
 
   // Unfortunate code to determine the file locations for test inputs.
@@ -26,9 +26,9 @@ struct Locations {
         lm = argv[i];
       }
     }
-    BOOST_CHECK(phrase_table);
-    BOOST_CHECK(source_text);
-    BOOST_CHECK(lm);
+    BOOST_REQUIRE(phrase_table);
+    BOOST_REQUIRE(source_text);
+    BOOST_REQUIRE(lm);
   }
 
   const char *phrase_table;
@@ -66,4 +66,4 @@ BOOST_AUTO_TEST_CASE(phrase_table) {
 }
 
 } // namespace
-} // namespace phrase_table
+} // namespace decode

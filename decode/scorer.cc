@@ -1,4 +1,4 @@
-#include "phrase_table/scorer.hh"
+#include "decode/scorer.hh"
 
 #include "lm/left.hh"
 #include "util/double-conversion/double-conversion.h"
@@ -7,7 +7,7 @@
 
 #include <math.h>
 
-namespace phrase_table {
+namespace decode {
 namespace {
 static const double_conversion::StringToDoubleConverter kConverter(
     double_conversion::StringToDoubleConverter::NO_FLAGS,
@@ -62,4 +62,4 @@ lm::WordIndex Scorer::Convert(ID from) {
   return vocab_mapping_[from];
 }
 
-} // namespace phrase_table
+} // namespace decode

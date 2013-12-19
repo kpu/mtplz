@@ -1,8 +1,8 @@
-#ifndef PHRASE_TABLE_SCORER__
-#define PHRASE_TABLE_SCORER__
+#ifndef DECODE_SCORER__
+#define DECODE_SCORER__
 
 #include "lm/model.hh"
-#include "phrase_table/id.hh"
+#include "decode/id.hh"
 #include "util/string_piece.hh"
 
 #include <vector>
@@ -10,7 +10,7 @@
 namespace lm { namespace ngram { class ChartState; } }
 namespace util { class MutableVocab; }
 
-namespace phrase_table {
+namespace decode {
 
 // Poorly designed object that does scoring.
 class Scorer {
@@ -35,6 +35,6 @@ class Scorer {
     util::MutableVocab &vocab_;
 };
 
-} // namespace phrase_table
+} // namespace decode
 
-#endif // PHRASE_TABLE_SCORER__
+#endif // DECODE_SCORER__

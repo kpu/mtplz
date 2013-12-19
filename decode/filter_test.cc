@@ -1,5 +1,5 @@
 #include "util/mutable_vocab.hh"
-#include "phrase_table/filter.hh"
+#include "decode/filter.hh"
 
 #include <iostream>
 #include <fstream>
@@ -7,7 +7,7 @@
 #define BOOST_TEST_MODULE FilterTest
 #include <boost/test/unit_test.hpp>
 
-namespace phrase_table {
+namespace decode {
 namespace {
 
   // Unfortunate code to determine the file locations for test inputs.
@@ -55,4 +55,4 @@ namespace {
 
 
 } // namespace
-} // namespace phrase_table
+} // namespace decode

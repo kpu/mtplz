@@ -1,7 +1,7 @@
-#ifndef PHRASE_TABLE_PHRASE_TABLE__
-#define PHRASE_TABLE_PHRASE_TABLE__
+#ifndef DECODE_PHRASE_TABLE__
+#define DECODE_PHRASE_TABLE__
 
-#include "phrase_table/id.hh"
+#include "decode/id.hh"
 #include "search/vertex.hh"
 #include "util/murmur_hash.hh"
 #include "util/mutable_vocab.hh"
@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace phrase_table {
+namespace decode {
 
 typedef std::vector<ID> Phrase;
 
@@ -43,6 +43,6 @@ class PhraseTable {
     std::size_t max_source_phrase_length_;
 };
 
-} // namespace phrase_table
+} // namespace decode
 
-#endif
+#endif // DECODE_PHRASE_TABLE__

@@ -1,8 +1,8 @@
-#include "phrase_table/filter.hh"
+#include "decode/filter.hh"
 
 using namespace std;
 
-namespace phrase_table {
+namespace decode {
   Filter::Filter(const std::string & file, util::MutableVocab& vocab, const std::size_t ngram_length) :
     ngram_length_(ngram_length)
   {

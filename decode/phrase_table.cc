@@ -1,13 +1,13 @@
-#include "phrase_table/phrase_table.hh"
+#include "decode/phrase_table.hh"
 
-#include "phrase_table/scorer.hh"
+#include "decode/scorer.hh"
 #include "util/exception.hh"
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
 using namespace util;
 
-namespace phrase_table {
+namespace decode {
  
 PhraseTable::PhraseTable(const std::string &file, util::MutableVocab &vocab, Scorer &scorer) {
   max_source_phrase_length_ = 0;
