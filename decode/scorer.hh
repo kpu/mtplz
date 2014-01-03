@@ -23,6 +23,9 @@ class Scorer {
     // Includes lm weight.
     float LM(const ID *words_begin, const ID *words_end, lm::ngram::ChartState &state);
 
+    // TODO!
+    float Passthrough() const { return -100.0; }
+
   private:
     lm::WordIndex Convert(ID from);
 

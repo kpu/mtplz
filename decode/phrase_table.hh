@@ -7,6 +7,7 @@
 #include "util/mutable_vocab.hh"
 
 #include <boost/unordered_map.hpp>
+#include <boost/utility.hpp>
 
 #include <string>
 #include <vector>
@@ -17,19 +18,23 @@ typedef std::vector<ID> Phrase;
 
 class Scorer;
 
-class PhraseTable {
+struct TargetPhrases : boost::noncopyable {
+  std::vector<Phrase> content;
+  search::Vertex vertex;
+
+  void MakePassthrough(ID word, Scorer &scorer);
+};
+
+class PhraseTable : boost::noncopyable {
   public:
-    struct Entry {
-      std::vector<Phrase> content;
-      search::Vertex vertex;
-    };
+    typedef TargetPhrases Entry;
 
     PhraseTable(const std::string &file, util::MutableVocab &vocab, Scorer &scorer);
 
     // Get all target phrases matching the source phrase specified by [begin, end)
     // Returns NULL if the source phrase does not exist in the table.
-    const Entry *getPhrases(Phrase::iterator begin, Phrase::iterator end) const;
-    std::size_t getMaxSourcePhraseLength() const { return max_source_phrase_length_; }
+    const Entry *Phrases(Phrase::const_iterator begin, Phrase::const_iterator end) const;
+    std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
 
   private:
     struct Hash : public std::unary_function<uint64_t, std::size_t> {

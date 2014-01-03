@@ -8,6 +8,18 @@
 using namespace util;
 
 namespace decode {
+
+void TargetPhrases::MakePassthrough(ID word, Scorer &scorer) {
+  content.resize(1);
+  content[0].resize(1);
+  content[0][0] = word;
+  search::HypoState hypo;
+  hypo.history = this;
+  hypo.score = scorer.Passthrough() + scorer.LM(&word, &word + 1, hypo.state);
+  vertex.Root().InitRoot();
+  vertex.Root().AppendHypothesis(hypo);
+  vertex.Root().FinishRoot(search::kPolicyLeft);
+}
  
 PhraseTable::PhraseTable(const std::string &file, util::MutableVocab &vocab, Scorer &scorer) {
   max_source_phrase_length_ = 0;
@@ -49,7 +61,7 @@ PhraseTable::PhraseTable(const std::string &file, util::MutableVocab &vocab, Sco
 }
 
 
-const PhraseTable::Entry* PhraseTable::getPhrases(Phrase::iterator begin, Phrase::iterator end) const {
+const PhraseTable::Entry* PhraseTable::Phrases(Phrase::const_iterator begin, Phrase::const_iterator end) const {
   uint64_t hash_code = MurmurHashNative(&(*begin), (end-begin) * sizeof(ID));
   //std::cerr << "Querying (length " << (end-begin) << ") phrase at " << hash_code << std::endl;
   Map::const_iterator hash_iterator = map_.find(hash_code);
