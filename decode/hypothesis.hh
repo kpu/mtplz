@@ -1,4 +1,4 @@
-#ifdef DECODE_HYPOTHESIS__
+#ifndef DECODE_HYPOTHESIS__
 #define DECODE_HYPOTHESIS__
 
 #include "decode/id.hh"
@@ -20,7 +20,7 @@ class Coverage {
     Coverage() : first_zero_(0), bits_(0) {}
 
     bool operator==(const Coverage &other) const {
-      return (first_zero_ == other_.first_zero_) && (bits_ == other_.bits_);
+      return (first_zero_ == other.first_zero_) && (bits_ == other.bits_);
     }
 
     void Set(std::size_t begin, std::size_t end) {
@@ -37,7 +37,7 @@ class Coverage {
       return (begin >= first_zero_) && !(Pattern(begin, end) & bits_);
     }
 
-    std::size_t FirstZero() const { return first_zero_: }
+    std::size_t FirstZero() const { return first_zero_; }
 
   private:
     friend std::size_t hash_value(const Coverage &coverage);
@@ -70,7 +70,7 @@ class Hypothesis : boost::noncopyable {
         const Hypothesis &previous,
         std::size_t source_begin,
         std::size_t source_end,
-        const Phrase *target) :
+        const Phrase &target) :
       score_(score),
       state_(state),
       pre_(&previous),
