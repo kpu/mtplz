@@ -1,5 +1,9 @@
 #include "decode/stacks.hh"
 
+#include "decode/context.hh"
+#include "decode/chart.hh"
+#include "decode/hypothesis.hh"
+#include "decode/phrase_table.hh"
 #include "search/edge_generator.hh"
 
 namespace decode {
@@ -7,9 +11,10 @@ namespace decode {
 namespace {
 class Vertices {
   public:
-    void Add(const Hypothesis &hypothesis, const TargetPhrases &phrases, float score_delta) {
+    void Add(const Hypothesis &hypothesis, TargetPhrases &phrases /* non-const due to lazy evaluation */, float score_delta) {
       search::HypoState add;
-      add.history = &hypothesis;
+      // Sigh need a union type or something.
+      add.history = const_cast<Hypothesis*>(&hypothesis);
       add.state.right = hypothesis.State();
       add.state.left.length = 0;
       add.state.left.full = true;
@@ -17,19 +22,21 @@ class Vertices {
       map_[&phrases].Root().AppendHypothesis(add);
     }
 
-    void Apply(EdgeGenerator &out) {
+    void Apply(search::EdgeGenerator &out) {
       for (Map::iterator i = map_.begin(); i != map_.end(); ++i) {
-        search::PartialEdge edge(to.AllocateEdge(2));
+        search::PartialEdge edge(out.AllocateEdge(2));
         // Empty LM state before/between/after
-        for (unsigned int i = 0; i < 3; ++i) {
-          edge.Between()[i].left.length = 0;
-          edge.Between()[i].left.full = false;
-          edge.Between()[i].right.length = 0;
+        for (unsigned int j = 0; j < 3; ++j) {
+          edge.Between()[j].left.length = 0;
+          edge.Between()[j].left.full = false;
+          edge.Between()[j].right.length = 0;
         }
         edge.SetScore(0.0);
-        edge.SetNote(*(i->first)); // Record TargetPhrases in note.
-        i->second.Root().FinishRoot(kPolicyRight);
-        edge.NT()[0] = i->second.Root();
+        search::Note note;
+        note.vp = i->first;
+        edge.SetNote(note); // Record TargetPhrases in note.
+        i->second.Root().FinishRoot(search::kPolicyRight);
+        edge.NT()[0] = i->second.RootAlternate();
         edge.NT()[1] = i->first->vertex.RootAlternate();
         out.AddEdge(edge);
       }
@@ -37,7 +44,7 @@ class Vertices {
 
   private:
     // TODO: dense as 2D array?
-    typedef boost::unordered_map<const TargetPhrases *, search::Vertex> Map;
+    typedef boost::unordered_map<TargetPhrases *, search::Vertex> Map;
     Map map_;
 };
 
@@ -47,7 +54,7 @@ class EdgeOutput {
       : hypo_pool_(hypo_pool), stack_(stack), chart_(chart) {}
 
     void NewHypothesis(search::PartialEdge complete) {
-      const TargetPhrases *phrase = static_cast<const TargetPhrases*>(complete.GetNote());
+      const TargetPhrases *phrase = static_cast<const TargetPhrases*>(complete.GetNote().vp);
       std::pair<std::size_t, std::size_t> source_range(chart_.RangeFromPointer(phrase));
       stack_.push_back(hypo_pool_.construct(
             complete.CompletedState().right,

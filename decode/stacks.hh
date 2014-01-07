@@ -3,7 +3,7 @@
 
 #include "util/pool.hh"
 
-#include <boost/object_pool.hpp>
+#include <boost/pool/object_pool.hpp>
 
 #include <vector>
 
