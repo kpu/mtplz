@@ -14,8 +14,6 @@
 
 namespace decode {
 
-typedef std::vector<ID> Phrase;
-
 class Scorer;
 
 struct TargetPhrases : boost::noncopyable {

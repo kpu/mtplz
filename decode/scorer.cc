@@ -18,7 +18,7 @@ static const double_conversion::StringToDoubleConverter kConverter(
 
 } // namespace
 
-Scorer::Scorer(const char *model, util::MutableVocab &vocab, const StringPiece &weights) : model_(model), vocab_(vocab) {
+Scorer::Scorer(const char *model, const StringPiece &weights, util::MutableVocab &vocab) : model_(model), vocab_(vocab) {
   for (util::TokenIter<util::SingleCharacter, true> token(weights, ' '); token; ++token) {
     int length;
     phrase_weights_.push_back(kConverter.StringToFloat(token->data(), token->size(), &length));

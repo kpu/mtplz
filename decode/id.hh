@@ -5,6 +5,7 @@
 
 namespace decode {
 typedef uint32_t ID;
+typedef std::vector<ID> Phrase;
 } // namespace decode
 
 #endif // DECODE_ID__
