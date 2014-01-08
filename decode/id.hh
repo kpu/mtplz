@@ -2,6 +2,7 @@
 #define DECODE_ID__
 
 #include <stdint.h>
+#include <vector>
 
 namespace decode {
 typedef uint32_t ID;
