@@ -11,8 +11,14 @@ typedef float Score;
 
 typedef uint32_t Arity;
 
+// std::pair has a constructor, so it can't be in a union.
+struct IntPair {
+  uint32_t first, second;
+};
+
 union Note {
   const void *vp;
+  IntPair ints;
 };
 
 typedef void *History;

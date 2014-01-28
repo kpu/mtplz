@@ -18,7 +18,8 @@ class Scorer;
 
 struct TargetPhrases : boost::noncopyable {
   std::vector<Phrase> content;
-  search::Vertex vertex;
+  // Mutable for lazy evaluation.
+  mutable search::Vertex vertex;
 
   void MakePassthrough(ID word, Scorer &scorer);
 };
