@@ -5,23 +5,50 @@
 #include "search/vertex.hh"
 #include "util/murmur_hash.hh"
 #include "util/mutable_vocab.hh"
+#include "util/string_piece.hh"
 
 #include <boost/unordered_map.hpp>
 #include <boost/utility.hpp>
 
 #include <string>
-#include <vector>
+
+namespace util { class Pool; }
 
 namespace decode {
 
 class Scorer;
 
+// First ID* is the length of the array.
+class Phrase {
+  public:
+    explicit Phrase(util::Pool &pool, util::MutableVocab &vocab, const StringPiece &tokens);
+
+    // For passthroughs.
+    explicit Phrase(util::Pool &pool, ID word);
+
+    // Use to reconstruct from a void* pointer.
+    explicit Phrase(const void *already_initialized)
+      : base_(reinterpret_cast<const ID*>(already_initialized)) {}
+    
+    ID size() const { return *base_; }
+
+    typedef const ID *const_iterator;
+    const ID *begin() const { return base_ + 1; }
+    const ID *end() const { return begin() + size(); }
+
+    const void *Base() const { return base_; }
+
+  private:
+    // Points to length.
+    const ID *base_;
+};
+
 struct TargetPhrases : boost::noncopyable {
-  std::vector<Phrase> content;
   // Mutable for lazy evaluation.
+  // Each entry in this vertex has a history pointer to the phrase.
   mutable search::Vertex vertex;
 
-  void MakePassthrough(ID word, Scorer &scorer);
+  void MakePassthrough(util::Pool &pool, Scorer &scorer, ID word);
 };
 
 class PhraseTable : boost::noncopyable {
@@ -45,6 +72,8 @@ class PhraseTable : boost::noncopyable {
     typedef boost::unordered_map<uint64_t, Entry, Hash> Map;
     Map map_;
     std::size_t max_source_phrase_length_;
+
+    util::Pool phrase_pool_;
 };
 
 } // namespace decode

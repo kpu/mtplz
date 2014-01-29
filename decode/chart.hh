@@ -1,6 +1,7 @@
 #ifndef DECODE_CHART__
 #define DECODE_CHART__
 
+#include "util/pool.hh"
 #include "util/string_piece.hh"
 
 #include <boost/pool/object_pool.hpp>
@@ -35,6 +36,7 @@ class Chart {
     }
 
     // These back any oov words that are passed through.  
+    util::Pool passthrough_phrases_;
     boost::object_pool<TargetPhrases> passthrough_;
 
     // Banded array: different source lengths are next to each other.
