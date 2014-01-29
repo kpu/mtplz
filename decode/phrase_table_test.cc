@@ -47,15 +47,12 @@ BOOST_AUTO_TEST_CASE(phrase_table) {
 
   std::ifstream fs(locations.source_text);
   BOOST_REQUIRE(fs);
-  std::string line;
   util::Pool pool;
-  while(getline(fs, line)) {
-    std::stringstream ls(line);
-    std::string token;
-    bool should_find_phrase;
-
-    ls >> should_find_phrase;
-    Phrase phrase(pool, vocab, ls.str());
+  bool should_find_phrase;
+  std::string line;
+  while((fs >> should_find_phrase) && getline(fs, line)) {
+    Phrase phrase(pool, vocab, line);
+    std::cerr << line << std::endl;
     bool does_find_phrase = (phrase_table.Phrases(phrase.begin(), phrase.end()) != NULL);
     std::cerr << "does_find_phrase: " << does_find_phrase << "  should_find_phrase: " << should_find_phrase << std::endl;
     BOOST_CHECK_EQUAL(does_find_phrase, should_find_phrase);
