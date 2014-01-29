@@ -2,9 +2,9 @@
 #define DECODE_PHRASE_TABLE__
 
 #include "decode/id.hh"
+#include "decode/phrase.hh"
 #include "search/vertex.hh"
-#include "util/murmur_hash.hh"
-#include "util/mutable_vocab.hh"
+#include "util/pool.hh"
 #include "util/string_piece.hh"
 
 #include <boost/unordered_map.hpp>
@@ -12,36 +12,11 @@
 
 #include <string>
 
-namespace util { class Pool; }
+namespace util { class MutableVocab; }
 
 namespace decode {
 
 class Scorer;
-
-// First ID* is the length of the array.
-class Phrase {
-  public:
-    explicit Phrase(util::Pool &pool, util::MutableVocab &vocab, const StringPiece &tokens);
-
-    // For passthroughs.
-    explicit Phrase(util::Pool &pool, ID word);
-
-    // Use to reconstruct from a void* pointer.
-    explicit Phrase(const void *already_initialized)
-      : base_(reinterpret_cast<const ID*>(already_initialized)) {}
-    
-    ID size() const { return *base_; }
-
-    typedef const ID *const_iterator;
-    const ID *begin() const { return base_ + 1; }
-    const ID *end() const { return begin() + size(); }
-
-    const void *Base() const { return base_; }
-
-  private:
-    // Points to length.
-    const ID *base_;
-};
 
 struct TargetPhrases : boost::noncopyable {
   // Mutable for lazy evaluation.
