@@ -105,11 +105,11 @@ template <class Model> PartialEdge EdgeGenerator::Pop(const Context<Model> &cont
   return PartialEdge();
 }
 
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::RestProbingModel> &context);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::ProbingModel> &context);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::TrieModel> &context);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::QuantTrieModel> &context);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::ArrayTrieModel> &context);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::QuantArrayTrieModel> &context);
+template PartialEdge EdgeGenerator::Pop(const Context<lm::ngram::RestProbingModel> &context);
+template PartialEdge EdgeGenerator::Pop(const Context<lm::ngram::ProbingModel> &context);
+template PartialEdge EdgeGenerator::Pop(const Context<lm::ngram::TrieModel> &context);
+template PartialEdge EdgeGenerator::Pop(const Context<lm::ngram::QuantTrieModel> &context);
+template PartialEdge EdgeGenerator::Pop(const Context<lm::ngram::ArrayTrieModel> &context);
+template PartialEdge EdgeGenerator::Pop(const Context<lm::ngram::QuantArrayTrieModel> &context);
 
 } // namespace search
