@@ -1,5 +1,6 @@
 #include "decode/phrase_table.hh"
 #include "decode/scorer.hh"
+#include "util/mutable_vocab.hh"
 #include <iostream>
 #include <fstream>
 
@@ -40,26 +41,22 @@ struct Locations {
 BOOST_AUTO_TEST_CASE(phrase_table) {
   Locations locations;
   util::MutableVocab vocab;
-  Scorer scorer(locations.lm, vocab, "1 2 3 4 5 6");
+  Scorer scorer(locations.lm, "1 2 3 4 5 6", vocab);
 
   PhraseTable phrase_table(locations.phrase_table, vocab, scorer);
 
   std::ifstream fs(locations.source_text);
   BOOST_REQUIRE(fs);
   std::string line;
+  util::Pool pool;
   while(getline(fs, line)) {
     std::stringstream ls(line);
     std::string token;
     bool should_find_phrase;
-    Phrase phrase;
 
     ls >> should_find_phrase;
-    while(ls >> token) {
-      std::cerr << "   " << token;
-      phrase.push_back(vocab.FindOrInsert(token));
-    }
-    std::cerr << std::endl;
-    bool does_find_phrase = (phrase_table.getPhrases(phrase.begin(), phrase.end()) != NULL);
+    Phrase phrase(pool, vocab, ls.str());
+    bool does_find_phrase = (phrase_table.Phrases(phrase.begin(), phrase.end()) != NULL);
     std::cerr << "does_find_phrase: " << does_find_phrase << "  should_find_phrase: " << should_find_phrase << std::endl;
     BOOST_CHECK_EQUAL(does_find_phrase, should_find_phrase);
   }

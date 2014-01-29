@@ -2,6 +2,7 @@
 
 #include "decode/phrase_table.hh"
 #include "util/file_piece.hh"
+#include "util/mutable_vocab.hh"
 #include "util/tokenize_piece.hh"
 
 namespace decode {
