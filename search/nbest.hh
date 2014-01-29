@@ -21,7 +21,7 @@ class NBestList {
   private:
     class RevealedRef {
       public: 
-        explicit RevealedRef(History history) 
+        explicit RevealedRef(void *history) 
           : in_(static_cast<NBestList*>(history)), index_(0) {}
 
       private:
@@ -66,7 +66,7 @@ class NBest {
 
     NBestComplete Complete(std::vector<PartialEdge> &partials);
 
-    const std::vector<Applied> &Extract(History root);
+    const std::vector<Applied> &Extract(Note root);
 
   private:
     const NBestConfig config_;

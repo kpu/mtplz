@@ -17,17 +17,16 @@ struct IntPair {
 };
 
 union Note {
-  const void *vp;
+  void *vp;
+  const void *cvp;
   IntPair ints;
 };
 
-typedef void *History;
-
 struct NBestComplete {
-  NBestComplete(History in_history, const lm::ngram::ChartState &in_state, Score in_score) 
+  NBestComplete(Note in_history, const lm::ngram::ChartState &in_state, Score in_score) 
     : history(in_history), state(&in_state), score(in_score) {}
 
-  History history;
+  Note history;
   const lm::ngram::ChartState *state;
   Score score;
 };

@@ -17,7 +17,7 @@ namespace search {
 class ContextBase;
 
 struct HypoState {
-  History history;
+  Note history;
   lm::ngram::ChartState state;
   Score score;
 };
@@ -83,7 +83,7 @@ class VertexNode {
     }
 
     // Will be invalid unless this is a leaf.   
-    History End() const {
+    Note End() const {
       assert(hypos_.size() == 1);
       return hypos_.front().history;
     }
@@ -147,7 +147,7 @@ class PartialVertex {
       return ret;
     }
 
-    History End() const {
+    Note End() const {
       return back_->End();
     }
 
@@ -174,11 +174,11 @@ class Vertex {
       return root_.Bound();
     }
 
-    History BestChild() {
+    Note BestChild() {
       // left_ and right_ are not set at the root.
       PartialVertex top(RootAlternate());
       if (top.Empty()) {
-        return History();
+        return Note();
       } else {
         PartialVertex continuation;
         while (!top.Complete()) {

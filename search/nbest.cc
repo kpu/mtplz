@@ -93,14 +93,16 @@ void NBestList::MoveTop(util::Pool &pool) {
 NBestComplete NBest::Complete(std::vector<PartialEdge> &partials) {
   assert(!partials.empty());
   NBestList *list = list_pool_.construct(partials, entry_pool_, config_.keep);
+  Note note;
+  note.vp = list;
   return NBestComplete(
-      list,
+      note,
       partials.front().CompletedState(), // All partials have the same state
       list->TopAfterConstructor());
 }
 
-const std::vector<Applied> &NBest::Extract(History history) {
-  return static_cast<NBestList*>(history)->Extract(entry_pool_, config_.size);
+const std::vector<Applied> &NBest::Extract(Note history) {
+  return static_cast<NBestList*>(history.vp)->Extract(entry_pool_, config_.size);
 }
 
 } // namespace search

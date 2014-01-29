@@ -21,7 +21,7 @@ template <class Below> class GenericApplied : public Header {
       const PartialVertex *part = partial.NT();
       const PartialVertex *const part_end_loop = part + partial.GetArity();
       for (; part != part_end_loop; ++part, ++child_out)
-        *child_out = Below(part->End());
+        *child_out = Below(part->End().vp);
     }
     
     GenericApplied(void *location, Score score, Arity arity, Note note) : Header(location, arity) {
@@ -29,7 +29,7 @@ template <class Below> class GenericApplied : public Header {
       SetNote(note);
     }
 
-    explicit GenericApplied(History from) : Header(from) {}
+    explicit GenericApplied(void *from) : Header(from) {}
 
 
     // These are arrays of length GetArity().
@@ -53,7 +53,7 @@ class Applied : public GenericApplied<Applied> {
   public:
     Applied() {}
     Applied(void *location, PartialEdge partial) : P(location, partial) {}
-    Applied(History from) : P(from) {}
+    explicit Applied(void *from) : P(from) {}
 };
 
 // How to build single-best hypotheses.  
@@ -67,12 +67,15 @@ class SingleBest {
     }
 
     NBestComplete Complete(PartialEdge partial) {
-      if (!partial.Valid()) 
-        return NBestComplete(NULL, lm::ngram::ChartState(), -INFINITY);
-      void *place_final = pool_.Allocate(Applied::Size(partial.GetArity()));
-      Applied(place_final, partial);
+      Note note;
+      if (!partial.Valid()) {
+        note.cvp = NULL;
+        return NBestComplete(note, lm::ngram::ChartState(), -INFINITY);
+      }
+      note.vp = pool_.Allocate(Applied::Size(partial.GetArity()));
+      Applied(note.vp, partial);
       return NBestComplete(
-          place_final,
+          note,
           partial.CompletedState(),
           partial.GetScore());
     }
