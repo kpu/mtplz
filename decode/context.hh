@@ -2,7 +2,7 @@
 #define DECODE_CONTEXT__
 
 #include "decode/scorer.hh"
-
+#include "search/context.hh"
 #include "util/mutable_vocab.hh"
 #include "util/string_piece.hh"
 
@@ -10,12 +10,16 @@ namespace decode {
 
 struct Config {
   std::size_t reordering_limit;
+  unsigned int pop_limit;
 };
 
 class Context {
   public:
     Context(const char *lm, const StringPiece &weights, const Config &config)
-      : vocab_(), scorer_(lm, weights, vocab_), config_(config) {}
+      : vocab_(),
+        scorer_(lm, weights, vocab_),
+        config_(config),
+        search_context_(search::Config(scorer_.LMWeight(), config.pop_limit, search::NBestConfig(1)), scorer_.LanguageModel()) {}
 
     util::MutableVocab &GetVocab() { return vocab_; }
 
@@ -23,10 +27,14 @@ class Context {
 
     const Config &GetConfig() const { return config_; }
 
+    const search::Context<Scorer::Model> &SearchContext() { return search_context_; }
+
   private:
     util::MutableVocab vocab_;
     Scorer scorer_;
     Config config_;
+
+    search::Context<Scorer::Model> search_context_;
 };
 
 } // namespace decode

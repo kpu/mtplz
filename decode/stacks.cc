@@ -5,24 +5,34 @@
 #include "decode/hypothesis.hh"
 #include "decode/phrase_table.hh"
 #include "search/edge_generator.hh"
+#include "util/murmur_hash.hh"
 
 namespace decode {
 
 namespace {
+
+struct IntPairHash : public std::unary_function<const search::IntPair &, std::size_t> {
+  std::size_t operator()(const search::IntPair &p) const {
+    return util::MurmurHashNative(&p, sizeof(search::IntPair));
+  }
+};
+
 class Vertices {
   public:
-    void Add(const Hypothesis &hypothesis, TargetPhrases &phrases /* non-const due to lazy evaluation */, float score_delta) {
+    void Add(const Hypothesis &hypothesis, uint32_t source_begin, uint32_t source_end, float score_delta) {
       search::HypoState add;
-      // Sigh need a union type or something.
-      add.history = const_cast<Hypothesis*>(&hypothesis);
+      add.history.cvp = &hypothesis;
       add.state.right = hypothesis.State();
       add.state.left.length = 0;
       add.state.left.full = true;
       add.score = hypothesis.Score() + score_delta;
-      map_[&phrases].Root().AppendHypothesis(add);
+      search::IntPair key;
+      key.first = source_begin;
+      key.second = source_end;
+      map_[key].Root().AppendHypothesis(add);
     }
 
-    void Apply(search::EdgeGenerator &out) {
+    void Apply(Chart &chart, search::EdgeGenerator &out) {
       for (Map::iterator i = map_.begin(); i != map_.end(); ++i) {
         search::PartialEdge edge(out.AllocateEdge(2));
         // Empty LM state before/between/after
@@ -33,50 +43,54 @@ class Vertices {
         }
         edge.SetScore(0.0);
         search::Note note;
-        note.vp = i->first;
-        edge.SetNote(note); // Record TargetPhrases in note.
+
+        note.ints = i->first;
+        edge.SetNote(note); // Record source range in the note for the edge.
         i->second.Root().FinishRoot(search::kPolicyRight);
         edge.NT()[0] = i->second.RootAlternate();
-        edge.NT()[1] = i->first->vertex.RootAlternate();
+        edge.NT()[1] = chart.Range(i->first.first, i->first.second)->vertex.RootAlternate();
         out.AddEdge(edge);
       }
     }
 
   private:
     // TODO: dense as 2D array?
-    typedef boost::unordered_map<TargetPhrases *, search::Vertex> Map;
+    // Key is start and end
+    typedef boost::unordered_map<search::IntPair, search::Vertex, IntPairHash> Map;
     Map map_;
 };
 
+// TODO deduplicate hypotheses.  Drop the lowest one for now?
 class EdgeOutput {
   public:
-    EdgeOutput(boost::object_pool<Hypothesis> &hypo_pool, Stack &stack, const Chart &chart)
-      : hypo_pool_(hypo_pool), stack_(stack), chart_(chart) {}
+    explicit EdgeOutput(Stack &stack)
+      : stack_(stack) {}
 
     void NewHypothesis(search::PartialEdge complete) {
-      const TargetPhrases *phrase = static_cast<const TargetPhrases*>(complete.GetNote().vp);
-      std::pair<std::size_t, std::size_t> source_range(chart_.RangeFromPointer(phrase));
-      stack_.push_back(hypo_pool_.construct(
-            complete.CompletedState().right,
-            complete.Score(), // TODO: call scorer to adjust for last of lexro?
-            *static_cast<const Hypothesis*>(complete.NT()[0].End()),
-            source_range.first,
-            source_range.second,
-            phrase));
+      const search::IntPair &source_range = complete.GetNote().ints;
+      // The note for the first NT is the hypothesis.  The note for the second
+      // NT is the target phrase.
+      stack_.push_back(Hypothesis(complete.CompletedState().right,
+            complete.GetScore(), // TODO: call scorer to adjust for last of lexro?
+            *static_cast<const Hypothesis*>(complete.NT()[0].End().cvp),
+            (std::size_t)source_range.first,
+            (std::size_t)source_range.second,
+            Phrase(complete.NT()[1].End().cvp)));
     }
 
-  private:
-    boost::object_pool<Hypothesis> &hypo_pool_;
-    Stack &stack_;
+    void FinishedSearch() {}
 
-    const Chart &chart_;
+  private:
+    Stack &stack_;
 };
 
 } // namespace
 
-Stacks::Stacks(const Context &context, const Chart &chart) {
+Stacks::Stacks(Context &context, Chart &chart) {
+  // Reservation is critical because pointers to Hypothesis objects are retained as history.
   stacks_.reserve(chart.SentenceLength() + 2 /* begin/end of sentence */);
-  stacks_.push_back(pool_.construct(context.GetScorer().BeginSentence()));
+  stacks_.resize(1);
+  stacks_[0].push_back(Hypothesis(context.GetScorer().LanguageModel().BeginSentenceState()));
   // Decode with increasing numbers of source words.
   for (std::size_t source_words = 1; source_words <= chart.SentenceLength(); ++source_words) {
     Vertices vertices;
@@ -86,23 +100,24 @@ Stacks::Stacks(const Context &context, const Chart &chart) {
          ++from) {
       const std::size_t phrase_length = source_words - from;
       // Iterate over antecedents in this stack.
-      for (Stack::const_iterator ant = from.begin(); ant != from.end(); ++ant) {
-        const Coverage &coverage = (*ant)->GetCoverage();
+      for (Stack::const_iterator ant = stacks_[from].begin(); ant != stacks_[from].end(); ++ant) {
+        const Coverage &coverage = ant->GetCoverage();
         const std::size_t first_zero = coverage.FirstZero();
         std::size_t begin = first_zero;
         // We can always go from first_zero because it doesn't create a reordering gap.
         do {
           const TargetPhrases *phrases = chart.Range(begin, begin + phrase_length);
           if (!phrases || !coverage.Compatible(begin, begin + phrase_length)) continue;
-          vertices.Add(**ant, *phrases, context.GetScorer().Transition(**ant, *phrases, begin, begin + phrase_length));
+          vertices.Add(*ant, begin, begin + phrase_length, context.GetScorer().Transition(*ant, *phrases, begin, begin + phrase_length));
         // Enforce the reordering limit on later iterations.
         } while (++begin + phrase_length <= first_zero + context.GetConfig().reordering_limit);
       }
     }
     search::EdgeGenerator gen;
-    vertices.Apply(gen);
-    stacks_.ressize(stacks_.size() + 1);
-    EdgeOutput out(pool_, stacks_.back(), chart);
+    vertices.Apply(chart, gen);
+    stacks_.resize(stacks_.size() + 1);
+    stacks_.back().reserve(context.SearchContext().PopLimit());
+    EdgeOutput output(stacks_.back());
     gen.Search(context.SearchContext(), output);
   }
 }

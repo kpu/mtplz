@@ -44,7 +44,7 @@ template <class Model> void FastScore(const Context<Model> &context, Arity victi
 
 } // namespace
 
-template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
+template <class Model> PartialEdge EdgeGenerator::Pop(const Context<Model> &context) {
   assert(!generate_.empty());
   PartialEdge top = generate_.top();
   generate_.pop();

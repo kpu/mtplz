@@ -14,6 +14,9 @@ typedef uint32_t Arity;
 // std::pair has a constructor, so it can't be in a union.
 struct IntPair {
   uint32_t first, second;
+  bool operator==(const IntPair &other) const {
+    return (first == other.first) && (second == other.second);
+  }
 };
 
 union Note {

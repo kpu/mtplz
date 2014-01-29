@@ -18,6 +18,8 @@ class TargetPhrases;
 // Poorly designed object that does scoring.
 class Scorer {
   public:
+    typedef lm::ngram::Model Model;
+
     Scorer(const char *model, const StringPiece &weights, util::MutableVocab &vocab);
 
     // Parse feature values on a phrase into a score.
@@ -26,6 +28,8 @@ class Scorer {
     float LMWeight() const {
       return lm_weight_;
     }
+
+    const Model &LanguageModel() const { return model_; }
 
     // Includes lm weight.
     float LM(const ID *words_begin, const ID *words_end, lm::ngram::ChartState &state);

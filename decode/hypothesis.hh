@@ -2,6 +2,7 @@
 #define DECODE_HYPOTHESIS__
 
 #include "decode/id.hh"
+#include "decode/phrase.hh"
 #include "lm/state.hh"
 #include "util/murmur_hash.hh"
 
@@ -61,8 +62,11 @@ uint64_t hash_value(const Coverage &coverage) {
 }
 
 // TODO properly factored feature state.
-class Hypothesis : boost::noncopyable {
+class Hypothesis {
   public:
+    // STL default constructor.
+    Hypothesis() : target_(NULL) {}
+
     // Extend a previous hypothesis.
     Hypothesis(
         const lm::ngram::Right &state,
@@ -70,12 +74,12 @@ class Hypothesis : boost::noncopyable {
         const Hypothesis &previous,
         std::size_t source_begin,
         std::size_t source_end,
-        const Phrase &target) :
+        Phrase target) :
       score_(score),
       state_(state),
       pre_(&previous),
       last_source_index_(source_end),
-      target_(&target),
+      target_(target),
       coverage_(previous.coverage_) {
       coverage_.Set(source_begin, source_end);
     }
@@ -103,7 +107,7 @@ class Hypothesis : boost::noncopyable {
     const Hypothesis *pre_;
     std::size_t last_source_index_;
     // Null for base hypothesis.
-    const Phrase *target_;
+    Phrase target_;
 
     Coverage coverage_;
 };

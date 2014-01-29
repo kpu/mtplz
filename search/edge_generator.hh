@@ -31,9 +31,9 @@ class EdgeGenerator {
     bool Empty() const { return generate_.empty(); }
 
     // Pop.  If there's a complete hypothesis, return it.  Otherwise return an invalid PartialEdge.
-    template <class Model> PartialEdge Pop(Context<Model> &context);
+    template <class Model> PartialEdge Pop(const Context<Model> &context);
 
-    template <class Model, class Output> void Search(Context<Model> &context, Output &output) {
+    template <class Model, class Output> void Search(const Context<Model> &context, Output &output) {
       unsigned to_pop = context.PopLimit();
       while (to_pop > 0 && !generate_.empty()) {
         PartialEdge got(Pop(context));
