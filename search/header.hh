@@ -56,7 +56,7 @@ class Header {
     const uint8_t *After() const { return base_ + kHeaderSize; }
 
   private:
-  // Data elements occur in the following order: Score, Arity, Note
+    // Data elements occur in the following order: Score, Arity, Note
     uint8_t *base_;
 };
 
