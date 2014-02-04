@@ -30,7 +30,7 @@ class PhraseTable : boost::noncopyable {
   public:
     typedef TargetPhrases Entry;
 
-    PhraseTable(const std::string &file, util::MutableVocab &vocab, Scorer &scorer);
+    PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &scorer);
 
     // Get all target phrases matching the source phrase specified by [begin, end)
     // Returns NULL if the source phrase does not exist in the table.

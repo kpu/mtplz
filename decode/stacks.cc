@@ -219,6 +219,8 @@ void Stacks::PopulateLastStack(Context &context, Chart &chart) {
   stacks_.resize(stacks_.size() + 1);
   PickBest output(stacks_.back());
   gen.Search(context.SearchContext(), output);
+
+  end_ = stacks_.back().empty() ? NULL : &stacks_.back()[0];
 }
 
 } // namespace decode

@@ -21,9 +21,9 @@ void TargetPhrases::MakePassthrough(util::Pool &pool, Scorer &scorer, ID word) {
   vertex.Root().FinishRoot(search::kPolicyLeft);
 }
 
-PhraseTable::PhraseTable(const std::string &file, util::MutableVocab &vocab, Scorer &scorer) {
+PhraseTable::PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &scorer) {
   max_source_phrase_length_ = 0;
-  FilePiece in(file.c_str(), &std::cerr);
+  FilePiece in(file, &std::cerr);
 
   uint64_t previous_text_hash = 0;
   Entry *entry = NULL;
