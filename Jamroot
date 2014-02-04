@@ -62,7 +62,7 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
 project : requirements $(requirements) <threading>multi:<define>WITH_THREADS <library>boost_system <define>HAVE_BOOST ;
 project : default-build <threading>multi <warnings>on <variant>release ;
 
-build-projects search lm util phrase_table ;
+build-projects search lm util decode ;
 
 lib kenlm : lm//kenlm ;
 install-bin-libs lm//programs kenlm ;

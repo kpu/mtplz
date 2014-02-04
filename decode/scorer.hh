@@ -3,6 +3,7 @@
 
 #include "lm/model.hh"
 #include "decode/id.hh"
+#include "decode/weights.hh"
 #include "util/string_piece.hh"
 
 #include <vector>

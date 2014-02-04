@@ -6,10 +6,24 @@
 #include "decode/phrase_table.hh"
 #include "search/edge_generator.hh"
 #include "util/murmur_hash.hh"
+#include "util/mutable_vocab.hh"
 
 namespace decode {
 
 namespace {
+
+// Specialized way of populating a HypoState struct, which is what we insert into a Vertex.
+// The input is an antecedent hypothesis, and a score delta for any non-LM, non-phrase-internal features.
+// The final parameter is an output param which will get populated.
+// This function is highly specific to this particular phrasal search strategy -- e.g., it assumes
+// that we are always appending to a hypothesis on the right side.
+void PopulateHypoStateFromHypothesis(const Hypothesis &hypothesis, float score_delta, search::HypoState &output) {
+  output.history.cvp = &hypothesis;
+  output.state.right = hypothesis.State();
+  output.state.left.length = 0;
+  output.state.left.full = true;
+  output.score = hypothesis.Score() + score_delta;
+}
 
 struct IntPairHash : public std::unary_function<const search::IntPair &, std::size_t> {
   std::size_t operator()(const search::IntPair &p) const {
@@ -21,11 +35,7 @@ class Vertices {
   public:
     void Add(const Hypothesis &hypothesis, uint32_t source_begin, uint32_t source_end, float score_delta) {
       search::HypoState add;
-      add.history.cvp = &hypothesis;
-      add.state.right = hypothesis.State();
-      add.state.left.length = 0;
-      add.state.left.full = true;
-      add.score = hypothesis.Score() + score_delta;
+      PopulateHypoStateFromHypothesis(hypothesis, score_delta, add);
       search::IntPair key;
       key.first = source_begin;
       key.second = source_end;
@@ -120,6 +130,58 @@ Stacks::Stacks(Context &context, Chart &chart) {
     EdgeOutput output(stacks_.back());
     gen.Search(context.SearchContext(), output);
   }
+
+  PopulateLastStack(context, chart);
+}
+
+void Stacks::PopulateLastStack(Context &context, Chart &chart) {
+  Scorer &scorer = context.GetScorer();
+  util::MutableVocab &vocab = context.GetVocab();
+
+  // First, make Vertex of all hypotheses
+  search::Vertex all_hyps;
+  for (Stack::const_iterator ant = stacks_[chart.SentenceLength()].begin(); ant != stacks_[chart.SentenceLength()].end(); ++ant) {
+    search::HypoState add;
+    // TODO: the zero in the following line assumes that EOS is not scored for distortion. 
+    // This assumption might need to be revisited.
+    PopulateHypoStateFromHypothesis(*ant, 0, add);
+    all_hyps.Root().AppendHypothesis(add);
+  }
+  
+  // Next, make Vertex which consists of a single EOS phrase.
+  // The seach algorithm will attempt to find the best hypotheses in the "cross product" of these two sets.
+  search::Vertex eos_vertex;
+  search::HypoState eos_hypo;
+
+  char* eos_string = (char*) eos_phrase_pool_.Allocate(sizeof(char)*strlen("</s>"));
+  StringPiece eos_string_piece(eos_string);
+  Phrase eos_phrase(eos_phrase_pool_, vocab, eos_string_piece);
+
+  eos_hypo.history.cvp = eos_phrase.Base();
+  eos_hypo.score = scorer.LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state);
+  eos_vertex.Root().AppendHypothesis(eos_hypo);
+
+  // Generate edge
+  search::EdgeGenerator gen;
+
+  search::PartialEdge edge(gen.AllocateEdge(2));
+  // Empty LM state before/between/after
+  for (unsigned int j = 0; j < 3; ++j) {
+    edge.Between()[j].left.length = 0;
+    edge.Between()[j].left.full = false;
+    edge.Between()[j].right.length = 0;
+  }
+  edge.SetScore(0.0);
+  all_hyps.Root().FinishRoot(search::kPolicyRight);
+  edge.NT()[0] = all_hyps.RootAlternate();
+  edge.NT()[1] = eos_vertex.RootAlternate();
+  gen.AddEdge(edge);
+
+  stacks_.resize(stacks_.size() + 1);
+  stacks_.back().reserve(context.SearchContext().PopLimit());
+  EdgeOutput output(stacks_.back());
+  gen.Search(context.SearchContext(), output);
+
 }
 
 } // namespace decode
