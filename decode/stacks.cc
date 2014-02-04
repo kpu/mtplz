@@ -12,17 +12,35 @@ namespace decode {
 
 namespace {
 
-// Specialized way of populating a HypoState struct, which is what we insert into a Vertex.
+// Add a hypothesis from this decoder to the search algorithm's vertex.
 // The input is an antecedent hypothesis, and a score delta for any non-LM, non-phrase-internal features.
 // The final parameter is an output param which will get populated.
 // This function is highly specific to this particular phrasal search strategy -- e.g., it assumes
 // that we are always appending to a hypothesis on the right side.
-void PopulateHypoStateFromHypothesis(const Hypothesis &hypothesis, float score_delta, search::HypoState &output) {
-  output.history.cvp = &hypothesis;
-  output.state.right = hypothesis.State();
-  output.state.left.length = 0;
-  output.state.left.full = true;
-  output.score = hypothesis.Score() + score_delta;
+void AddHypothesisToVertex(const Hypothesis &hypothesis, float score_delta, search::Vertex &vertex) {
+  search::HypoState add;
+  add.history.cvp = &hypothesis;
+  add.state.right = hypothesis.State();
+  add.state.left.length = 0;
+  add.state.left.full = true;
+  add.score = hypothesis.Score() + score_delta;
+  vertex.Root().AppendHypothesis(add);
+}
+
+void AddEdge(search::Vertex &hypos, search::Vertex &extensions, search::Note note, search::EdgeGenerator &out) {
+  search::PartialEdge edge(out.AllocateEdge(2));
+  // Empty LM state before/between/after
+  for (unsigned int j = 0; j < 3; ++j) {
+    edge.Between()[j].left.length = 0;
+    edge.Between()[j].left.full = false;
+    edge.Between()[j].right.length = 0;
+  }
+  edge.SetScore(0.0);
+  edge.SetNote(note); 
+  hypos.Root().FinishRoot(search::kPolicyRight);
+  edge.NT()[0] = hypos.RootAlternate();
+  edge.NT()[1] = extensions.RootAlternate();
+  out.AddEdge(edge);
 }
 
 struct IntPairHash : public std::unary_function<const search::IntPair &, std::size_t> {
@@ -34,32 +52,18 @@ struct IntPairHash : public std::unary_function<const search::IntPair &, std::si
 class Vertices {
   public:
     void Add(const Hypothesis &hypothesis, uint32_t source_begin, uint32_t source_end, float score_delta) {
-      search::HypoState add;
-      PopulateHypoStateFromHypothesis(hypothesis, score_delta, add);
       search::IntPair key;
       key.first = source_begin;
       key.second = source_end;
-      map_[key].Root().AppendHypothesis(add);
+      AddHypothesisToVertex(hypothesis, score_delta, map_[key]);
     }
 
     void Apply(Chart &chart, search::EdgeGenerator &out) {
       for (Map::iterator i = map_.begin(); i != map_.end(); ++i) {
-        search::PartialEdge edge(out.AllocateEdge(2));
-        // Empty LM state before/between/after
-        for (unsigned int j = 0; j < 3; ++j) {
-          edge.Between()[j].left.length = 0;
-          edge.Between()[j].left.full = false;
-          edge.Between()[j].right.length = 0;
-        }
-        edge.SetScore(0.0);
+        // Record source range in the note for the edge.
         search::Note note;
-
         note.ints = i->first;
-        edge.SetNote(note); // Record source range in the note for the edge.
-        i->second.Root().FinishRoot(search::kPolicyRight);
-        edge.NT()[0] = i->second.RootAlternate();
-        edge.NT()[1] = chart.Range(i->first.first, i->first.second)->vertex.RootAlternate();
-        out.AddEdge(edge);
+        AddEdge(i->second, chart.Range(i->first.first, i->first.second)->vertex, note, out);
       }
     }
 
@@ -70,6 +74,18 @@ class Vertices {
     Map map_;
 };
 
+void AppendToStack(search::PartialEdge complete, Stack &out) {
+  const search::IntPair &source_range = complete.GetNote().ints;
+  // The note for the first NT is the hypothesis.  The note for the second
+  // NT is the target phrase.
+  out.push_back(Hypothesis(complete.CompletedState().right,
+        complete.GetScore(), // TODO: call scorer to adjust for last of lexro?
+        *static_cast<const Hypothesis*>(complete.NT()[0].End().cvp),
+        (std::size_t)source_range.first,
+        (std::size_t)source_range.second,
+        Phrase(complete.NT()[1].End().cvp)));
+}
+
 // TODO n-best lists.
 class EdgeOutput {
   public:
@@ -77,15 +93,7 @@ class EdgeOutput {
       : stack_(stack) {}
 
     void NewHypothesis(search::PartialEdge complete) {
-      const search::IntPair &source_range = complete.GetNote().ints;
-      // The note for the first NT is the hypothesis.  The note for the second
-      // NT is the target phrase.
-      stack_.push_back(Hypothesis(complete.CompletedState().right,
-            complete.GetScore(), // TODO: call scorer to adjust for last of lexro?
-            *static_cast<const Hypothesis*>(complete.NT()[0].End().cvp),
-            (std::size_t)source_range.first,
-            (std::size_t)source_range.second,
-            Phrase(complete.NT()[1].End().cvp)));
+      AppendToStack(complete, stack_);
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(&stack_.back()));
       if (!res.second) {
@@ -116,6 +124,29 @@ class EdgeOutput {
     Dedupe deduper_;
 
     Stack &stack_;
+};
+
+// Pick only the best hypothesis for end of sentence.
+class PickBest {
+  public:
+    explicit PickBest(Stack &stack) : stack_(stack) {
+      stack_.clear();
+      stack_.reserve(1);
+    }
+
+    void NewHypothesis(search::PartialEdge complete) {
+      if (!best_.Valid() || complete > best_) {
+        best_ = complete;
+      }
+    }
+
+    void FinishedSearch() {
+      AppendToStack(best_, stack_);
+    }
+
+  private:
+    Stack &stack_;
+    search::PartialEdge best_;
 };
 
 } // namespace
@@ -159,51 +190,34 @@ Stacks::Stacks(Context &context, Chart &chart) {
 }
 
 void Stacks::PopulateLastStack(Context &context, Chart &chart) {
-  Scorer &scorer = context.GetScorer();
-  util::MutableVocab &vocab = context.GetVocab();
-
   // First, make Vertex of all hypotheses
   search::Vertex all_hyps;
   for (Stack::const_iterator ant = stacks_[chart.SentenceLength()].begin(); ant != stacks_[chart.SentenceLength()].end(); ++ant) {
-    search::HypoState add;
     // TODO: the zero in the following line assumes that EOS is not scored for distortion. 
     // This assumption might need to be revisited.
-    PopulateHypoStateFromHypothesis(*ant, 0, add);
-    all_hyps.Root().AppendHypothesis(add);
+    AddHypothesisToVertex(*ant, 0, all_hyps);
   }
   
   // Next, make Vertex which consists of a single EOS phrase.
   // The seach algorithm will attempt to find the best hypotheses in the "cross product" of these two sets.
+  // TODO: Maybe this should belong to the phrase table.  It's constant.
   search::Vertex eos_vertex;
   search::HypoState eos_hypo;
-
-  char* eos_string = (char*) eos_phrase_pool_.Allocate(sizeof(char)*strlen("</s>"));
-  StringPiece eos_string_piece(eos_string);
-  Phrase eos_phrase(eos_phrase_pool_, vocab, eos_string_piece);
+  Phrase eos_phrase(eos_phrase_pool_, context.GetVocab(), "</s>");
 
   eos_hypo.history.cvp = eos_phrase.Base();
-  eos_hypo.score = scorer.LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state);
+  eos_hypo.score = context.GetScorer().LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state);
   eos_vertex.Root().AppendHypothesis(eos_hypo);
 
-  // Generate edge
+  // Add edge that tacks </s> on
   search::EdgeGenerator gen;
-
-  search::PartialEdge edge(gen.AllocateEdge(2));
-  // Empty LM state before/between/after
-  for (unsigned int j = 0; j < 3; ++j) {
-    edge.Between()[j].left.length = 0;
-    edge.Between()[j].left.full = false;
-    edge.Between()[j].right.length = 0;
-  }
-  edge.SetScore(0.0);
-  all_hyps.Root().FinishRoot(search::kPolicyRight);
-  edge.NT()[0] = all_hyps.RootAlternate();
-  edge.NT()[1] = eos_vertex.RootAlternate();
-  gen.AddEdge(edge);
+  search::Note note;
+  note.ints.first = chart.SentenceLength();
+  note.ints.second = chart.SentenceLength();
+  AddEdge(all_hyps, eos_vertex, note, gen);
 
   stacks_.resize(stacks_.size() + 1);
-  stacks_.back().reserve(context.SearchContext().PopLimit());
-  EdgeOutput output(stacks_.back());
+  PickBest output(stacks_.back());
   gen.Search(context.SearchContext(), output);
 }
 

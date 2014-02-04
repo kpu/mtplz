@@ -57,7 +57,7 @@ class Coverage {
     uint64_t bits_;
 };
 
-uint64_t hash_value(const Coverage &coverage) {
+inline uint64_t hash_value(const Coverage &coverage) {
   return util::MurmurHashNative(&coverage.first_zero_, sizeof(coverage.first_zero_), coverage.bits_);
 }
 
