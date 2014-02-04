@@ -173,7 +173,7 @@ void VertexNode::BuildExtend() {
   } else if (policy_ == kPolicyRight) {
     Split(DivideRight(state_.right.length), hypos_, extend_);
   } else {
-    assert(policy == kPolicyAll);
+    assert(policy_ == kPolicyAll);
     extend_.clear();
     extend_.resize(hypos_.size());
     for (std::size_t i = 0; i < hypos_.size(); ++i) {
