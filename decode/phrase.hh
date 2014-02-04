@@ -29,6 +29,8 @@ class Phrase {
 
     const void *Base() const { return base_; }
 
+    bool Valid() const { return base_ != NULL; }
+
   private:
     // Points to length.
     const ID *base_;

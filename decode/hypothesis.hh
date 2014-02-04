@@ -101,6 +101,10 @@ class Hypothesis {
 
     std::size_t LastSourceIndex() const { return last_source_index_; }
 
+    const Hypothesis *Previous() const { return pre_; }
+
+    const Phrase &Target() const { return target_; }
+
   private:
     float score_;
 
