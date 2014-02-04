@@ -60,7 +60,7 @@ class Vertices {
     Map map_;
 };
 
-// TODO deduplicate hypotheses.  Drop the lowest one for now?
+// TODO n-best lists.
 class EdgeOutput {
   public:
     explicit EdgeOutput(Stack &stack)
@@ -76,11 +76,35 @@ class EdgeOutput {
             (std::size_t)source_range.first,
             (std::size_t)source_range.second,
             Phrase(complete.NT()[1].End().cvp)));
+      // Note: stack_ has reserved for pop limit so pointers should survive.
+      std::pair<Dedupe::iterator, bool> res(deduper_.insert(&stack_.back()));
+      if (!res.second) {
+        // Already present.  Keep the top-scoring one.
+        Hypothesis &already = **res.first;
+        if (already.Score() < stack_.back().Score()) {
+          already = stack_.back();
+        }
+        stack_.resize(stack_.size() - 1);
+      }
     }
 
     void FinishedSearch() {}
 
   private:
+    struct RecombineHashPtr : public std::unary_function<const Hypothesis *, uint64_t> {
+      uint64_t operator()(const Hypothesis *hyp) const {
+        return RecombineHash()(*hyp);
+      }
+    };
+    struct RecombineEqualPtr : public std::binary_function<const Hypothesis *, const Hypothesis *, bool> {
+      bool operator()(const Hypothesis *first, const Hypothesis *second) const {
+        return RecombineEqual()(*first, *second);
+      }
+    };
+
+    typedef boost::unordered_set<Hypothesis *, RecombineHashPtr, RecombineEqualPtr> Dedupe;
+    Dedupe deduper_;
+
     Stack &stack_;
 };
 
@@ -120,6 +144,7 @@ Stacks::Stacks(Context &context, Chart &chart) {
     EdgeOutput output(stacks_.back());
     gen.Search(context.SearchContext(), output);
   }
+  // TODO EOS
 }
 
 } // namespace decode

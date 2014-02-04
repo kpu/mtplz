@@ -99,6 +99,8 @@ class Hypothesis {
 
     const lm::ngram::Right &State() const { return state_; }
 
+    std::size_t LastSourceIndex() const { return last_source_index_; }
+
   private:
     float score_;
 
@@ -112,7 +114,20 @@ class Hypothesis {
     Coverage coverage_;
 };
 
+struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> {
+  uint64_t operator()(const Hypothesis &hypothesis) const {
+    std::size_t source_index = hypothesis.LastSourceIndex();
+    return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.State(), hash_value(hypothesis.GetCoverage())));
+  }
+};
 
+struct RecombineEqual : public std::binary_function<const Hypothesis &, const Hypothesis &, bool> {
+  bool operator()(const Hypothesis &first, const Hypothesis &second) const {
+    if (!(first.State() == second.State())) return false;
+    if (!(first.GetCoverage() == second.GetCoverage())) return false;
+    return (first.LastSourceIndex() == second.LastSourceIndex());
+  }
+};
 
 } // namespace decode
 
