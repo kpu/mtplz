@@ -65,7 +65,7 @@ project : default-build <threading>multi <warnings>on <variant>release ;
 build-projects search lm util decode ;
 
 lib kenlm : lm//kenlm ;
-install-bin-libs lm//programs kenlm ;
+install-bin-libs lm//programs kenlm decode//decode ;
 
 install-headers headers : [ glob-tree *.hh : dist include ] : . ;
 alias install : prefix-bin prefix-lib prefix-include ; 
