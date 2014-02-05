@@ -14,6 +14,7 @@ void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, std::string
     if (!h->Target().Valid()) continue;
     hypos.push_back(h);
   }
+  to.clear();
   for (std::vector<const Hypothesis*>::const_reverse_iterator i = hypos.rbegin(); i != hypos.rend(); ++i) {
     for (const ID *id = (*i)->Target().begin(); id != (*i)->Target().end(); ++id) {
       StringPiece str(vocab.String(*id));
