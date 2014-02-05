@@ -167,15 +167,15 @@ Stacks::Stacks(Context &context, Chart &chart) {
       // Iterate over antecedents in this stack.
       for (Stack::const_iterator ant = stacks_[from].begin(); ant != stacks_[from].end(); ++ant) {
         const Coverage &coverage = ant->GetCoverage();
-        const std::size_t first_zero = coverage.FirstZero();
-        std::size_t begin = first_zero;
+        std::size_t begin = coverage.FirstZero();
+        const std::size_t last_begin = std::min(coverage.FirstZero() + context.GetConfig().reordering_limit, chart.SentenceLength()) - phrase_length;
         // We can always go from first_zero because it doesn't create a reordering gap.
         do {
           const TargetPhrases *phrases = chart.Range(begin, begin + phrase_length);
           if (!phrases || !coverage.Compatible(begin, begin + phrase_length)) continue;
           vertices.Add(*ant, begin, begin + phrase_length, context.GetScorer().Transition(*ant, *phrases, begin, begin + phrase_length));
         // Enforce the reordering limit on later iterations.
-        } while (++begin + phrase_length <= first_zero + context.GetConfig().reordering_limit);
+        } while (++begin <= last_begin);
       }
     }
     search::EdgeGenerator gen;

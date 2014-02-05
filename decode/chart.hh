@@ -27,6 +27,8 @@ class Chart {
     std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
 
     const TargetPhrases *Range(std::size_t begin, std::size_t end) const {
+      assert(end - begin <= max_source_phrase_length_);
+      assert(end <= SentenceLength());
       return entries_[begin * max_source_phrase_length_ + end - begin - 1];
     }
 
