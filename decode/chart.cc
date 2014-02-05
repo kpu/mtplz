@@ -17,15 +17,15 @@ Chart::Chart(const PhraseTable &table, StringPiece input, util::MutableVocab &vo
   sentence_length_ = words.size();
   // There's some unreachable ranges off the edge.  Meh.
   entries_.resize(sentence_length_ * max_source_phrase_length_);
-  for (std::vector<ID>::const_iterator begin = words.begin(); begin != words.end(); ++begin) {
-    for (std::vector<ID>::const_iterator end = begin + 1; (end != words.end()) && (end <= begin + max_source_phrase_length_); ++end) {
-      SetRange(begin - words.begin(), end - begin, table.Phrases(&*begin, &*end));
+  for (std::size_t begin = 0; begin != words.size(); ++begin) {
+    for (std::size_t end = begin + 1; (end != words.size() + 1) && (end <= begin + max_source_phrase_length_); ++end) {
+      SetRange(begin, end, table.Phrases(&words[begin], &*words.begin() + end));
     }
-    if (!Range(begin - words.begin(), 1)) {
+    if (!Range(begin, begin + 1)) {
       // Add passthrough for words not known to the phrase table.
       TargetPhrases *pass = passthrough_.construct();
-      pass->MakePassthrough(passthrough_phrases_, scorer, *begin);
-      SetRange(begin - words.begin(), 1, pass);
+      pass->MakePassthrough(passthrough_phrases_, scorer, words[begin]);
+      SetRange(begin, begin + 1, pass);
     }
   }
 }

@@ -57,8 +57,8 @@ PhraseTable::PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &sc
 }
 
 
-const PhraseTable::Entry* PhraseTable::Phrases(Phrase::const_iterator begin, Phrase::const_iterator end) const {
-  uint64_t hash_code = MurmurHashNative(&(*begin), (end-begin) * sizeof(ID));
+const PhraseTable::Entry* PhraseTable::Phrases(const ID *begin, const ID *end) const {
+  uint64_t hash_code = MurmurHashNative(begin, (end-begin) * sizeof(ID));
   //std::cerr << "Querying (length " << (end-begin) << ") phrase at " << hash_code << std::endl;
   Map::const_iterator hash_iterator = map_.find(hash_code);
   return hash_iterator == map_.end() ? NULL : &(hash_iterator->second);

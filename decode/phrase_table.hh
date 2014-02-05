@@ -34,7 +34,7 @@ class PhraseTable : boost::noncopyable {
 
     // Get all target phrases matching the source phrase specified by [begin, end)
     // Returns NULL if the source phrase does not exist in the table.
-    const Entry *Phrases(Phrase::const_iterator begin, Phrase::const_iterator end) const;
+    const Entry *Phrases(const ID *begin, const ID *end) const;
     std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
 
   private:
