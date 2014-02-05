@@ -1,15 +1,16 @@
 #ifndef DECODE_OUTPUT__
 #define DECODE_OUTPUT__
 
-#include <string>
-
-namespace util { class MutableVocab; }
+namespace util {
+class MutableVocab;
+class FakeOFStream;
+}
 
 namespace decode {
 
 class Hypothesis;
 
-void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, std::string &to);
+void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FakeOFStream &out);
 
 } // namespace decode
 
