@@ -25,37 +25,53 @@ static const double_conversion::StringToDoubleConverter kConverter(
 
 } // namespace
 
-  void Weights::ReadFromFile(const StringPiece file_name) {
-    FilePiece in(file_name.as_string().c_str(), &std::cerr);
-    StringPiece line;
-    
-    try { while (true) {
-	line = in.ReadLine();
-	TokenIter<SingleCharacter> tok(line, ' ');
-	
-	UTIL_THROW_IF(!tok, Exception, "No tokens found in weight file line.");
-	StringPiece name = *tok;
-	tok++;
-	  
-	UTIL_THROW_IF(!tok, Exception, "Only one token found in weight file line: " << line);
-	int length;
-	float value = kConverter.StringToFloat(tok->data(), tok->size(), &length);
-	UTIL_THROW_IF(isnan(value), util::Exception, "Bad score " << *tok);
-	tok++;
-	  
-	UTIL_THROW_IF(tok, Exception, "More than two tokens found in weight file line: " << line);
-	weights_map_[name.as_string()] = value;	  
+void Weights::ReadFromFile(const StringPiece file_name) {
+	FilePiece in(file_name.as_string().c_str(), &std::cerr);
+	StringPiece line;
+  
+	try { while (true) {
+			line = in.ReadLine();
+			util::TokenIter<util::SingleCharacter, true> token(line, ' ');
 
-      } } catch (const util::EndOfFileException &e) {}
-  }
-      
-  void Weights::SetWeight(const StringPiece name, float weight) {
-    weights_map_[name.as_string()] = weight;
-  }
+			// Get weight name
+			UTIL_THROW_IF(!token, Exception, "No tokens found in weight file line.");
+			StringPiece name = *token;
+			token++;
 
-  float Weights::GetWeight(const StringPiece name) const {
-    WeightsMap::const_iterator it = FindStringPiece(weights_map_, name);
-    UTIL_THROW_IF(it == weights_map_.end(), Exception, "Weight not found for name: " << name);
-    return it->second;
-  }
+			std::vector<float> weights;
+			// Get weight vector			
+			for (; token; ++token) {
+				int length;
+				weights.push_back(kConverter.StringToFloat(token->data(), token->size(), &length));
+				UTIL_THROW_IF(isnan(weights.back()), util::Exception, "Bad feature weight " << *token);
+			}
+			UTIL_THROW_IF(weights.empty(), util::Exception, "No weights found for weight type: " << name);
+			weights_map_[name.as_string()] = weights;
+			
+		} } catch (const util::EndOfFileException &e) {}
+
+	PopulateWeights();
+}
+
+void Weights::PopulateWeights() {
+	phrase_table_weights_ = GetWeights("phrase_table");
+	lm_weight_ = GetSingleWeight("lm");
+	distortion_weight_ = GetSingleWeight("distortion");
+	target_word_insertion_weight_ = GetSingleWeight("target_word_insertion");
+}
+
+std::vector<float> Weights::GetWeights(const StringPiece name) const {
+	WeightsMap::const_iterator it = FindStringPiece(weights_map_, name);
+	UTIL_THROW_IF(it == weights_map_.end(), Exception, "Weights not found for name: " << name);
+	UTIL_THROW_IF((it->second).size() == 0, Exception, "Found empty weight vector for name: " << name);
+	return it->second;
+}
+
+
+float Weights::GetSingleWeight(const StringPiece name) const {
+	WeightsMap::const_iterator it = FindStringPiece(weights_map_, name);
+	UTIL_THROW_IF(it == weights_map_.end(), Exception, "Weight not found for name: " << name);
+	UTIL_THROW_IF((it->second).size() != 1, Exception, "Expected single weight but found " << (it->second).size() << " for name: " << name);
+	return it->second.at(0);
+}
 }

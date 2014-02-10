@@ -18,29 +18,22 @@ static const double_conversion::StringToDoubleConverter kConverter(
 
 } // namespace
 
-Scorer::Scorer(const char *model, const StringPiece &weights, util::MutableVocab &vocab) : model_(model), vocab_(vocab) {
-  for (util::TokenIter<util::SingleCharacter, true> token(weights, ' '); token; ++token) {
-    int length;
-    phrase_weights_.push_back(kConverter.StringToFloat(token->data(), token->size(), &length));
-    UTIL_THROW_IF(isnan(phrase_weights_.back()), util::Exception, "Bad feature weight " << *token);
-  }
-  UTIL_THROW_IF(phrase_weights_.empty(), util::Exception, "Expected LM weight");
-  // TODO hack
-  lm_weight_ = phrase_weights_.back();
-  phrase_weights_.pop_back();
+Scorer::Scorer(const char *model, const StringPiece &weights_file, util::MutableVocab &vocab) : model_(model), vocab_(vocab) {
+	weights_.ReadFromFile(weights_file);
 }
 
 float Scorer::Parse(const StringPiece &features) const {
-  std::vector<float>::const_iterator w = phrase_weights_.begin();
+	const std::vector<float> &phrase_weights = weights_.PhraseTableWeights();
+  std::vector<float>::const_iterator w = phrase_weights.begin();
   float ret = 0.0;
   for (util::TokenIter<util::SingleCharacter, true> token(features, ' '); token; ++token, ++w) {
     int length;
     float val = kConverter.StringToFloat(token->data(), token->size(), &length);
     UTIL_THROW_IF(isnan(val), util::Exception, "Bad score " << *token);
-    UTIL_THROW_IF(w == phrase_weights_.end(), util::Exception, "Have " << phrase_weights_.size() << " weights but was given feature vector " << features);
+    UTIL_THROW_IF(w == phrase_weights.end(), util::Exception, "Have " << phrase_weights.size() << " weights but was given feature vector " << features);
     ret += *w * val;
   }
-  UTIL_THROW_IF(w != phrase_weights_.end(), util::Exception, "Expected " << phrase_weights_.size() << " features, but got " << features);
+  UTIL_THROW_IF(w != phrase_weights.end(), util::Exception, "Expected " << phrase_weights.size() << " features, but got " << features);
   return ret;
 }
 
@@ -49,7 +42,12 @@ float Scorer::LM(const ID *words_begin, const ID *words_end, lm::ngram::ChartSta
   for (const ID *i = words_begin; i != words_end; ++i) {
     scorer.Terminal(Convert(*i));
   }
-  return lm_weight_ * scorer.Finish();
+  return weights_.LMWeight() * scorer.Finish();
+}
+
+float Scorer::Transition(const Hypothesis &hypothesis, const TargetPhrases &phrases, std::size_t source_begin, std::size_t source_end) {
+	std::size_t jump_size = hypothesis.LastSourceIndex() + 1 - source_begin;
+	return (jump_size * weights_.DistortionWeight());
 }
 
 lm::WordIndex Scorer::Convert(ID from) {

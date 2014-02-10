@@ -15,7 +15,10 @@ void TargetPhrases::MakePassthrough(util::Pool &pool, Scorer &scorer, ID word) {
   Phrase target(pool, word);
   search::HypoState hypo;
   hypo.history.cvp = target.Base();
-  hypo.score = scorer.Passthrough() + scorer.LM(&word, &word + 1, hypo.state);
+  hypo.score = 
+		 scorer.Passthrough() 
+		 + scorer.LM(&word, &word + 1, hypo.state)
+		 + scorer.TargetWordCount(1);
   vertex.Root().InitRoot();
   vertex.Root().AppendHypothesis(hypo);
   vertex.Root().FinishRoot(search::kPolicyLeft);
@@ -49,7 +52,11 @@ PhraseTable::PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &sc
     Phrase target(phrase_pool_, vocab, *++pipes);
     search::HypoState hypo;
     hypo.history.cvp = target.Base();
-    hypo.score = scorer.Parse(*++pipes) + scorer.LM(target.begin(), target.end(), hypo.state);
+    hypo.score = 
+			 scorer.Parse(*++pipes)
+			 + scorer.LM(target.begin(), target.end(), hypo.state)
+			 + scorer.TargetWordCount(target.size());
+
     entry->vertex.Root().AppendHypothesis(hypo);
     UTIL_THROW_IF(++pipes, Exception, "Extra fields in phrase table: " << *pipes);
   } } catch (const util::EndOfFileException &e) {}

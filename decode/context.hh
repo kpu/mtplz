@@ -15,11 +15,11 @@ struct Config {
 
 class Context {
   public:
-    Context(const char *lm, const StringPiece &weights, const Config &config)
+    Context(const char *lm, const StringPiece &weights_file, const Config &config)
       : vocab_(),
-        scorer_(lm, weights, vocab_),
+        scorer_(lm, weights_file, vocab_),
         config_(config),
-        search_context_(search::Config(scorer_.LMWeight(), config.pop_limit, search::NBestConfig(1)), scorer_.LanguageModel()) {}
+        search_context_(search::Config(scorer_.GetWeights().LMWeight(), config.pop_limit, search::NBestConfig(1)), scorer_.LanguageModel()) {}
 
     util::MutableVocab &GetVocab() { return vocab_; }
 

@@ -27,12 +27,12 @@ int main(int argc, char *argv[]) {
     namespace po = boost::program_options;
     po::options_description options("Decoder options");
     std::string lm, phrase;
-    std::string weights;
+    std::string weights_file;
     decode::Config config;
     options.add_options()
       ("lm,l", po::value<std::string>(&lm)->required(), "Language model file")
       ("phrase,p", po::value<std::string>(&phrase)->required(), "Phrase table")
-      ("weights,W", po::value<std::string>(&weights), "Weights")
+      ("weights_file,W", po::value<std::string>(&weights_file), "Weights file")
       ("beam,K", po::value<unsigned int>(&config.pop_limit)->required(), "Beam size")
       ("reordering,R", po::value<std::size_t>(&config.reordering_limit)->required(), "Reordering limit");
     if (argc == 1) {
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     po::store(po::parse_command_line(argc, argv, options), vm);
     po::notify(vm);
 
-    decode::Context context(lm.c_str(), weights, config);
+    decode::Context context(lm.c_str(), weights_file, config);
     decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
     util::FilePiece f(0);
     std::string out;

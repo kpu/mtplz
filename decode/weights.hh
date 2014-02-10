@@ -13,19 +13,37 @@
 
 namespace decode {
   
-  class Weights {
-  public:
-    Weights() {
-    }
+class Weights {
+public:
+	 Weights() {
+	 }
+	 
+	 void ReadFromFile(const StringPiece file_name);
+	 
+	 const std::vector<float>& PhraseTableWeights() const { return phrase_table_weights_; }
+	 float LMWeight() const { return lm_weight_; }
+	 float DistortionWeight() const { return distortion_weight_; }
+	 float TargetWordInsertionWeight() const { return target_word_insertion_weight_; }
+	 
+private:
 
-    void ReadFromFile(const StringPiece file_name);
-    void SetWeight(const StringPiece name, float weight);
-    float GetWeight(const StringPiece name) const;
+	 // MRK: TODO: this class is a bit confused right now.
+	 // Perhaps we can eliminate the map structure altogether, and 
+	 // allow everything to be hard coded.
+	 // Another possibility would be to use hardcoded names for weights while allowing a "sentinel" value
+	 // e.g. NULL.
+	 void PopulateWeights();
+	 std::vector<float> GetWeights(const StringPiece name) const;
+	 float GetSingleWeight(const StringPiece name) const;
 
-  private:
-    typedef boost::unordered_map<std::string, float> WeightsMap;
-    WeightsMap weights_map_;
-  };
+	 typedef boost::unordered_map<std::string, std::vector<float> > WeightsMap;
+	 WeightsMap weights_map_;
+
+	 std::vector<float> phrase_table_weights_;
+	 float lm_weight_;
+	 float distortion_weight_;
+	 float target_word_insertion_weight_;
+};
 
 } // namespace decode
 
