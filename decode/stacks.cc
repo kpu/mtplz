@@ -35,9 +35,10 @@ void AddEdge(search::Vertex &hypos, search::Vertex &extensions, search::Note not
     edge.Between()[j].left.full = false;
     edge.Between()[j].right.length = 0;
   }
-  edge.SetScore(0.0);
-  edge.SetNote(note); 
+  edge.SetNote(note);
   hypos.Root().FinishRoot(search::kPolicyRight);
+  // Include top scores.
+  edge.SetScore(hypos.Bound() + extensions.Bound());
   edge.NT()[0] = hypos.RootAlternate();
   edge.NT()[1] = extensions.RootAlternate();
   out.AddEdge(edge);

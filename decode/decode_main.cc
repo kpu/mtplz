@@ -3,6 +3,7 @@
 #include "decode/output.hh"
 #include "decode/phrase_table.hh"
 #include "decode/stacks.hh"
+#include "util/fake_ofstream.hh"
 
 #include <boost/program_options.hpp>
 
@@ -10,14 +11,15 @@
 #include <vector>
 
 namespace decode {
-void Decode(Context &context, const PhraseTable &table, const StringPiece in, std::string &out) {
+void Decode(Context &context, const PhraseTable &table, const StringPiece in, util::FakeOFStream &out) {
   Chart chart(table, in, context.GetVocab(), context.GetScorer());
   Stacks stacks(context, chart);
   const Hypothesis *hyp = stacks.End();
   if (!hyp) {
-    out.clear();
+    out << '\n';
   } else {
     Output(*hyp, context.GetVocab(), out);
+    out << '\n';
   }
 }
 } // namespace decode
@@ -46,14 +48,13 @@ int main(int argc, char *argv[]) {
     decode::Context context(lm.c_str(), weights_file, config);
     decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
     util::FilePiece f(0);
-    std::string out;
+    util::FakeOFStream out(1);
     while (true) {
       StringPiece line;
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
       decode::Decode(context, table, line, out);
-      std::cout << out << '\n';
     }
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
