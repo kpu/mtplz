@@ -79,6 +79,7 @@ class Vertices {
 };
 
 void AppendToStack(search::PartialEdge complete, Stack &out) {
+  assert(complete.Valid());
   const search::IntPair &source_range = complete.GetNote().ints;
   // The note for the first NT is the hypothesis.  The note for the second
   // NT is the target phrase.
@@ -145,7 +146,8 @@ class PickBest {
     }
 
     void FinishedSearch() {
-      AppendToStack(best_, stack_);
+      if (best_.Valid())
+        AppendToStack(best_, stack_);
     }
 
   private:
