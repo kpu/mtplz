@@ -18,13 +18,14 @@ void Decode(Context &context, const PhraseTable &table, const StringPiece in, Sc
 	
 	history_map.clear();
 	
-  if (!hyp) {
-    out << '\n';
-  } else if(verbose) {
-    OutputVerbose(*hyp, context.GetVocab(), history_map, out);
-  } else {
-		Output(*hyp, context.GetVocab(), out);
-	}
+  if (hyp) {
+    if(verbose) {
+      OutputVerbose(*hyp, context.GetVocab(), history_map, out);
+    } else {
+	  	Output(*hyp, context.GetVocab(), out);
+	  }
+  }
+  out << '\n';
 }
 } // namespace decode
 
