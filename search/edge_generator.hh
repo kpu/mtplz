@@ -25,6 +25,11 @@ class EdgeGenerator {
     }
 
     void AddEdge(PartialEdge edge) {
+#ifndef NDEBUG
+      for (const PartialVertex *i = edge.NT(); i != edge.NT() + edge.GetArity(); ++i) {
+        assert(!i->Empty());
+      }
+#endif
       generate_.push(edge);
     }
 

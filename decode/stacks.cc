@@ -30,6 +30,8 @@ void AddHypothesisToVertex(const Hypothesis &hypothesis, float score_delta, sear
 }
 
 void AddEdge(search::Vertex &hypos, search::Vertex &extensions, search::Note note, search::EdgeGenerator &out) {
+  hypos.Root().FinishRoot(search::kPolicyRight);
+  if (hypos.Empty()) return;
   search::PartialEdge edge(out.AllocateEdge(2));
   // Empty LM state before/between/after
   for (unsigned int j = 0; j < 3; ++j) {
@@ -38,7 +40,6 @@ void AddEdge(search::Vertex &hypos, search::Vertex &extensions, search::Note not
     edge.Between()[j].right.length = 0;
   }
   edge.SetNote(note);
-  hypos.Root().FinishRoot(search::kPolicyRight);
   // Include top scores.
   edge.SetScore(hypos.Bound() + extensions.Bound());
   edge.NT()[0] = hypos.RootAlternate();

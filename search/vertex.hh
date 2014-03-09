@@ -140,7 +140,7 @@ class PartialVertex {
 
     // Split into continuation and alternative, rendering this the continuation.
     bool Split(PartialVertex &alternative) {
-      assert(!Complete());
+      assert(!Empty() && !Complete());
       back_->BuildExtend();
       bool ret;
       if (index_ + 1 < back_->Size()) {
