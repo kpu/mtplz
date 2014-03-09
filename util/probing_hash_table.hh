@@ -11,6 +11,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <iostream>
 
 namespace util {
 
@@ -68,7 +69,8 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 #ifdef DEBUG
         , initialized_(true)
 #endif
-    {}
+    {
+		}
 
     template <class T> MutableIterator Insert(const T &t) {
 #ifdef DEBUG
@@ -83,16 +85,26 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 #ifdef DEBUG
       assert(initialized_);
 #endif
+			//std::cout << "pht:foi:1" << std::endl;
+			
       for (MutableIterator i = Ideal(t);;) {
+				//std::cout << "pht:foi:2 " << i-Ideal(t) << std::endl;
         Key got(i->GetKey());
         if (equal_(got, t.GetKey())) { out = i; return true; }
-        if (equal_(got, invalid_)) {
+				//std::cout << "pht:foi:3  [" << got << "]   [" << invalid_ << "]" << std::endl;
+				if (equal_(got, invalid_)) {
+					//std::cout << "pht:foi:4" << std::endl;
           UTIL_THROW_IF(++entries_ >= buckets_, ProbingSizeException, "Hash table with " << buckets_ << " buckets is full.");
           *i = t;
           out = i;
           return false;
         }
-        if (++i == end_) i = begin_;
+				//std::cout << "pht:foi:4.1" << std::endl;
+				if (++i == end_) {
+					i = begin_;
+					//std::cout << "pht:foi:5" << std::endl;
+					
+				}
       }   
     }
 
@@ -263,7 +275,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
     typedef EqualT Equal;
 
     AutoProbing(std::size_t initial_size = 10, const Key &invalid = Key(), const Hash &hash_func = Hash(), const Equal &equal_func = Equal()) :
-      allocated_(Backend::Size(initial_size, 1.5)), mem_(util::MallocOrThrow(allocated_)), backend_(mem_.get(), allocated_, invalid, hash_func, equal_func) {
+      allocated_(Backend::Size(initial_size, 1.5)), mem_(util::CallocOrThrow(allocated_)), backend_(mem_.get(), allocated_, invalid, hash_func, equal_func) {
       threshold_ = initial_size * 1.2;
       Clear();
     }
@@ -276,6 +288,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 
     template <class T> bool FindOrInsert(const T &t, MutableIterator &out) {
       DoubleIfNeeded();
+			//std::cout << "ap:foi:1" << std::endl;
       return backend_.FindOrInsert(t, out);
     }
 
@@ -305,6 +318,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
 
   private:
     void DoubleIfNeeded() {
+			//std::cout << "DIN:Size=" << Size() << ", thr=" << threshold_ << std::endl;
       if (Size() < threshold_)
         return;
       mem_.call_realloc(backend_.DoubleTo());

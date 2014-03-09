@@ -11,16 +11,20 @@
 #include <vector>
 
 namespace decode {
-void Decode(Context &context, const PhraseTable &table, const StringPiece in, util::FakeOFStream &out) {
+void Decode(Context &context, const PhraseTable &table, const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FakeOFStream &out) {
   Chart chart(table, in, context.GetVocab(), context.GetScorer());
   Stacks stacks(context, chart);
   const Hypothesis *hyp = stacks.End();
+	
+	history_map.clear();
+	
   if (!hyp) {
     out << '\n';
+  } else if(verbose) {
+    OutputVerbose(*hyp, context.GetVocab(), history_map, out);
   } else {
-    Output(*hyp, context.GetVocab(), out);
-    out << '\n';
-  }
+		Output(*hyp, context.GetVocab(), out);
+	}
 }
 } // namespace decode
 
@@ -31,7 +35,10 @@ int main(int argc, char *argv[]) {
     std::string lm, phrase;
     std::string weights_file;
     decode::Config config;
+		bool verbose = false;
+
     options.add_options()
+      ("verbose,v", "Produce verbose output")
       ("lm,l", po::value<std::string>(&lm)->required(), "Language model file")
       ("phrase,p", po::value<std::string>(&phrase)->required(), "Phrase table")
       ("weights_file,W", po::value<std::string>(&weights_file), "Weights file")
@@ -45,17 +52,21 @@ int main(int argc, char *argv[]) {
     po::store(po::parse_command_line(argc, argv, options), vm);
     po::notify(vm);
 
+		if(vm.count("verbose")) {
+			verbose = true;
+		}
     decode::Context context(lm.c_str(), weights_file, config);
     decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
     util::FilePiece f(0);
     util::FakeOFStream out(1);
+		decode::ScoreHistoryMap map;
     while (true) {
       StringPiece line;
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
-      decode::Decode(context, table, line, out);
-    }
+			decode::Decode(context, table, line, map, verbose, out);
+		}
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 1;

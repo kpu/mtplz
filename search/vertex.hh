@@ -11,6 +11,7 @@
 
 #include <math.h>
 #include <stdint.h>
+#include <iostream>
 
 namespace search {
 
@@ -97,6 +98,11 @@ class VertexNode {
       return extend_.size();
     }
 
+	  
+	std::vector<HypoState>& Hypos() {
+		return hypos_;
+	}
+
   private:
     // Hypotheses to be split.
     std::vector<HypoState> hypos_;
@@ -126,7 +132,9 @@ class PartialVertex {
     const lm::ngram::ChartState &State() const { return back_->State(); }
     bool RightFull() const { return back_->RightFull(); }
 
-    Score Bound() const { return index_ ? (*back_)[index_].Bound() : back_->Bound(); }
+    Score Bound() const { 
+			return index_ ? (*back_)[index_].Bound() : back_->Bound(); 
+		}
 
     unsigned char Niceness() const { return back_->Niceness(); }
 
@@ -142,7 +150,7 @@ class PartialVertex {
       } else {
         ret = false;
       }
-      back_ = &((*back_)[index_]);
+			back_ = &((*back_)[index_]);
       index_ = 0;
       return ret;
     }

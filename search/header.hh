@@ -6,6 +6,7 @@
 #include "search/types.hh"
 
 #include <stdint.h>
+#include <iostream>
 
 namespace search {
 

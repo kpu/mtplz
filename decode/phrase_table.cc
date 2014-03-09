@@ -7,6 +7,8 @@
 #include "util/mutable_vocab.hh"
 #include "util/tokenize_piece.hh"
 
+#include <iostream>
+
 using namespace util;
 
 namespace decode {
@@ -52,8 +54,10 @@ PhraseTable::PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &sc
     Phrase target(phrase_pool_, vocab, *++pipes);
     search::HypoState hypo;
     hypo.history.cvp = target.Base();
+		float parsed_score = scorer.Parse(*++pipes);
+
     hypo.score = 
-			 scorer.Parse(*++pipes)
+			 parsed_score
 			 + scorer.LM(target.begin(), target.end(), hypo.state)
 			 + scorer.TargetWordCount(target.size());
 
@@ -66,7 +70,6 @@ PhraseTable::PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &sc
 
 const PhraseTable::Entry* PhraseTable::Phrases(const ID *begin, const ID *end) const {
   uint64_t hash_code = MurmurHashNative(begin, (end-begin) * sizeof(ID));
-  //std::cerr << "Querying (length " << (end-begin) << ") phrase at " << hash_code << std::endl;
   Map::const_iterator hash_iterator = map_.find(hash_code);
   return hash_iterator == map_.end() ? NULL : &(hash_iterator->second);
 }

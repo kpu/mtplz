@@ -8,6 +8,8 @@
 #include "util/murmur_hash.hh"
 #include "util/mutable_vocab.hh"
 
+#include <iostream>
+
 namespace decode {
 
 namespace {

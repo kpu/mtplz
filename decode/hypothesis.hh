@@ -111,6 +111,7 @@ class Hypothesis {
     lm::ngram::Right state_;
     // Null for base hypothesis.
     const Hypothesis *pre_;
+	// TODO: this is really "one past the last source index." We have to clean this up.
     std::size_t last_source_index_;
     // Null for base hypothesis.
     Phrase target_;
