@@ -1,0 +1,46 @@
+%
+% File acl2014.tex
+%
+% Contact: koller@ling.uni-potsdam.de, yusuke@nii.ac.jp
+%%
+%% Based on the style files for ACL-2013, which were, in turn,
+%% Based on the style files for ACL-2012, which were, in turn,
+%% based on the style files for ACL-2011, which were, in turn, 
+%% based on the style files for ACL-2010, which were, in turn, 
+%% based on the style files for ACL-IJCNLP-2009, which were, in turn,
+%% based on the style files for EACL-2009 and IJCNLP-2008...
+
+%% Based on the style files for EACL 2006 by 
+%%e.agirre@ehu.es or Sergi.Balari@uab.es
+%% and that of ACL 08 by Joakim Nivre and Noah Smith
+
+\documentclass[11pt]{article}
+\usepackage{acl2014}
+\usepackage{times}
+\usepackage{url}
+\usepackage{latexsym}
+
+%\setlength\titlebox{5cm}
+
+% You can expand the titlebox if you need extra space
+% to show all the authors. Please do not make the titlebox
+% smaller than 5cm (the original size); we will check this
+% in the camera-ready version and ask you to change it back.
+
+
+\title{Faster Phrase-Based Decoding by Refining Feature State}
+
+\author{}
+
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+We contribute a faster decoding algorithm for phrase-based machine translation.  Translation hypotheses keep track of states, such as context for the language model and coverage of words in the source sentence.  Most features depend upon only part of the state, but algorithms, including cube pruning, handle state atomically.  For example, cube pruning will repeatedly query the language model with hypotheses that differ only in source coverage, despite the fact that source coverage is irrelevant to the language model.  Our algorithm places hypotheses in equivalence classes so that it can focus on the most important aspects of state first.   Since our algorithm and cube pruning are both approximate, the improvement can be used to increase speed or accuracy.  
+%TODO
+Our decoder attains the same level of accuracy OVER 9000\% times as fast as the Moses decoder with cube pruning.  
+\end{abstract}
+
+
+\end{document}

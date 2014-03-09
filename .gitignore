@@ -21,3 +21,6 @@ previous.sh
 jam-files/bjam
 jam-files/engine/bin.linuxx86/
 jam-files/engine/bootstrap/
+paper/acl2014.log
+paper/acl2014.aux
+paper/acl2014.pdf
