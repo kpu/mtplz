@@ -37,10 +37,13 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-We contribute a faster decoding algorithm for phrase-based machine translation.  Translation hypotheses keep track of states, such as context for the language model and coverage of words in the source sentence.  Most features depend upon only part of the state, but algorithms, including cube pruning, handle state atomically.  For example, cube pruning will repeatedly query the language model with hypotheses that differ only in source coverage, despite the fact that source coverage is irrelevant to the language model.  Our algorithm places hypotheses in equivalence classes so that it can focus on the most important aspects of state first.   Since our algorithm and cube pruning are both approximate, the improvement can be used to increase speed or accuracy.  
-%TODO
-Our decoder attains the same level of accuracy OVER 9000\% times as fast as the Moses decoder with cube pruning.  
+We contribute a faster decoding algorithm for phrase-based machine translation.  To support features and search, hypotheses keep track of state, such as context for the language model and coverage of words in the source sentence.  Most features depend upon only part of the state, but traditional algorithms, including cube pruning, handle state atomically.  For example, cube pruning will repeatedly query the language model with hypotheses that differ only in source coverage, despite the fact that source coverage is irrelevant to the language model.  
+Our algorithm avoids this behavior by placing hypotheses into equivalence classes, masking the parts of state that matter least to the score.  
+Since our algorithm and cube pruning are both approximate, the improvement can be used to increase speed or accuracy.  
+%TODO result
+When tuned to attain the same accuracy, our algorithm is OVER 9000 times as fast as the Moses decoder with cube pruning.  
 \end{abstract}
+
 
 
 \end{document}
