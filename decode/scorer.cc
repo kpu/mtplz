@@ -47,8 +47,7 @@ float Scorer::LM(const ID *words_begin, const ID *words_end, lm::ngram::ChartSta
 
 float Scorer::Transition(const Hypothesis &hypothesis, const TargetPhrases &phrases, std::size_t source_begin, std::size_t source_end) {
 	std::size_t jump_size = abs((int) hypothesis.LastSourceIndex() - source_begin);
-  // Match Moses definition with negation
-	return -(jump_size * weights_.DistortionWeight());
+	return (jump_size * weights_.DistortionWeight());
 }
 
 lm::WordIndex Scorer::Convert(ID from) {
