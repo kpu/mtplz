@@ -174,7 +174,8 @@ Stacks::Stacks(Context &context, Chart &chart) {
       for (Stack::const_iterator ant = stacks_[from].begin(); ant != stacks_[from].end(); ++ant) {
         const Coverage &coverage = ant->GetCoverage();
         std::size_t begin = coverage.FirstZero();
-        const std::size_t last_begin = std::min(coverage.FirstZero() + context.GetConfig().reordering_limit, chart.SentenceLength()) - phrase_length;
+        const std::size_t last_end = std::min(coverage.FirstZero() + context.GetConfig().reordering_limit, chart.SentenceLength());
+        const std::size_t last_begin = (last_end > phrase_length) ? (last_end - phrase_length) : 0;
         // We can always go from first_zero because it doesn't create a reordering gap.
         do {
           const TargetPhrases *phrases = chart.Range(begin, begin + phrase_length);
@@ -191,7 +192,6 @@ Stacks::Stacks(Context &context, Chart &chart) {
     EdgeOutput output(stacks_.back());
     gen.Search(context.SearchContext(), output);
   }
-
   PopulateLastStack(context, chart);
 }
 
