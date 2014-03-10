@@ -215,6 +215,7 @@ void Stacks::PopulateLastStack(Context &context, Chart &chart) {
   eos_hypo.history.cvp = eos_phrase.Base();
   eos_hypo.score = context.GetScorer().LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state);
   eos_vertex.Root().AppendHypothesis(eos_hypo);
+  eos_vertex.Root().FinishRoot(search::kPolicyLeft);
 
   // Add edge that tacks </s> on
   search::EdgeGenerator gen;
