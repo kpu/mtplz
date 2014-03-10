@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 		}
     decode::Context context(lm.c_str(), weights_file, config);
     decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
-    util::FilePiece f(0);
+    util::FilePiece f(0, NULL, &std::cerr);
     util::FakeOFStream out(1);
 		decode::ScoreHistoryMap map;
     while (true) {
@@ -67,6 +67,8 @@ int main(int argc, char *argv[]) {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
 			decode::Decode(context, table, line, map, verbose, out);
+      out.Flush();
+      f.UpdateProgress();
 		}
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;

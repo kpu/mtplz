@@ -85,6 +85,8 @@ class FilePiece {
 
     const std::string &FileName() const { return file_name_; }
 
+    void UpdateProgress();
+
   private:
     void InitializeNoRead(const char *name, std::size_t min_buffer);
     // Calls InitializeNoRead, so don't call both.
