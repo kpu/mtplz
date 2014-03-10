@@ -30,7 +30,7 @@ class Chart {
       assert(end > begin);
       assert(end - begin <= max_source_phrase_length_);
       assert(end <= SentenceLength());
-      assert(begin * max_source_phrase_length_ + end - begin - 1 < entries.size());
+      assert(begin * max_source_phrase_length_ + end - begin - 1 < entries_.size());
       return entries_[begin * max_source_phrase_length_ + end - begin - 1];
     }
 
