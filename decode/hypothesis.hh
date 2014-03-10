@@ -8,6 +8,8 @@
 
 #include <boost/utility.hpp>
 
+#include <iosfwd>
+
 #include <assert.h>
 #include <stdint.h>
 
@@ -29,6 +31,10 @@ class Coverage {
       if (begin == first_zero_) {
         first_zero_ = end;
         bits_ >>= (end - begin);
+        while (bits_ & 1) {
+          ++first_zero_;
+          bits_ >>= 1;
+        }
       } else {
         bits_ |= Pattern(begin, end);
       }
@@ -41,7 +47,11 @@ class Coverage {
     std::size_t FirstZero() const { return first_zero_; }
 
   private:
-    friend std::size_t hash_value(const Coverage &coverage);
+    friend inline uint64_t hash_value(const Coverage &coverage) {
+      return util::MurmurHashNative(&coverage.first_zero_, sizeof(coverage.first_zero_), coverage.bits_);
+    }
+
+    friend std::ostream &operator<<(std::ostream &stream, const Coverage &coverage);
 
     inline uint64_t Pattern(std::size_t begin, std::size_t end) const {
       assert(begin >= first_zero_);
@@ -56,10 +66,6 @@ class Coverage {
     // Lowest bits correspond to next word.
     uint64_t bits_;
 };
-
-inline uint64_t hash_value(const Coverage &coverage) {
-  return util::MurmurHashNative(&coverage.first_zero_, sizeof(coverage.first_zero_), coverage.bits_);
-}
 
 // TODO properly factored feature state.
 class Hypothesis {
