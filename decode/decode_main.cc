@@ -4,6 +4,7 @@
 #include "decode/phrase_table.hh"
 #include "decode/stacks.hh"
 #include "util/fake_ofstream.hh"
+#include "util/usage.hh"
 
 #include <boost/program_options.hpp>
 
@@ -70,6 +71,7 @@ int main(int argc, char *argv[]) {
       out.Flush();
       f.UpdateProgress();
 		}
+    util::PrintUsage(std::cerr);
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 1;
