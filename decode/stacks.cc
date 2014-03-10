@@ -199,6 +199,7 @@ void Stacks::PopulateLastStack(Context &context, Chart &chart) {
   // First, make Vertex of all hypotheses
   search::Vertex all_hyps;
   for (Stack::const_iterator ant = stacks_[chart.SentenceLength()].begin(); ant != stacks_[chart.SentenceLength()].end(); ++ant) {
+    assert(chart.SentenceLength() == ant->GetCoverage().FirstZero());
     // TODO: the zero in the following line assumes that EOS is not scored for distortion. 
     // This assumption might need to be revisited.
     AddHypothesisToVertex(*ant, 0, all_hyps);
