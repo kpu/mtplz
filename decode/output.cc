@@ -15,12 +15,12 @@ void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FakeO
     if (!h->Target().Valid()) continue;
     hypos.push_back(h);
   }
+  to << hypo.Score();
   for (std::vector<const Hypothesis*>::const_reverse_iterator i = hypos.rbegin(); i != hypos.rend() - 1 /* skip EOS */; ++i) {
     for (const ID *id = (*i)->Target().begin(); id != (*i)->Target().end(); ++id) {
-      to << vocab.String(*id) << ' ';
+      to << ' ' << vocab.String(*id);
     }
   }
-  to << "||| " << hypo.Score();
 }
 
 
