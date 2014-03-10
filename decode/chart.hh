@@ -30,11 +30,13 @@ class Chart {
       assert(end > begin);
       assert(end - begin <= max_source_phrase_length_);
       assert(end <= SentenceLength());
+      assert(begin * max_source_phrase_length_ + end - begin - 1 < entries.size());
       return entries_[begin * max_source_phrase_length_ + end - begin - 1];
     }
 
   private:
     void SetRange(std::size_t begin, std::size_t end, const TargetPhrases *to) {
+      assert(end - begin <= max_source_phrase_length_);
       entries_[begin * max_source_phrase_length_ + end - begin - 1] = to;
     }
 
