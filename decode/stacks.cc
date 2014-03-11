@@ -2,6 +2,7 @@
 
 #include "decode/context.hh"
 #include "decode/chart.hh"
+#include "decode/future.hh"
 #include "decode/hypothesis.hh"
 #include "decode/phrase_table.hh"
 #include "search/edge_generator.hh"
@@ -158,10 +159,12 @@ class PickBest {
 } // namespace
 
 Stacks::Stacks(Context &context, Chart &chart) {
+  Future future(chart);
   // Reservation is critical because pointers to Hypothesis objects are retained as history.
   stacks_.reserve(chart.SentenceLength() + 2 /* begin/end of sentence */);
   stacks_.resize(1);
-  stacks_[0].push_back(Hypothesis(context.GetScorer().LanguageModel().BeginSentenceState()));
+  // Initialize root hypothesis with <s> context and future cost for everything.
+  stacks_[0].push_back(Hypothesis(context.GetScorer().LanguageModel().BeginSentenceState(), future.Full()));
   // Decode with increasing numbers of source words.
   for (std::size_t source_words = 1; source_words <= chart.SentenceLength(); ++source_words) {
     Vertices vertices;
@@ -180,7 +183,11 @@ Stacks::Stacks(Context &context, Chart &chart) {
         do {
           const TargetPhrases *phrases = chart.Range(begin, begin + phrase_length);
           if (!phrases || !coverage.Compatible(begin, begin + phrase_length)) continue;
-          vertices.Add(*ant, begin, begin + phrase_length, context.GetScorer().Transition(*ant, *phrases, begin, begin + phrase_length));
+          // distortion etc.
+          float score_delta = context.GetScorer().Transition(*ant, *phrases, begin, begin + phrase_length);
+          // Future costs: remove span to be filled.
+          score_delta += future.Change(coverage, begin, begin + phrase_length);
+          vertices.Add(*ant, begin, begin + phrase_length, score_delta);
         // Enforce the reordering limit on later iterations.
         } while (++begin <= last_begin);
       }

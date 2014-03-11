@@ -3,6 +3,8 @@
 #include "decode/chart.hh"
 #include "decode/phrase_table.hh"
 
+#include <cstddef>
+
 #include <math.h>
 
 namespace decode {
