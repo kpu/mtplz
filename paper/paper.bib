@@ -1,0 +1,2456 @@
+@InProceedings{bleu,
+  author =    {Kishore Papineni and Salim Roukos and Todd Ward and Wei-Jing Zhu},
+  title =     {{BLEU}: A method for automatic evalution of machine translation},
+  booktitle = {Proceedings 40th Annual Meeting of the Association for Computational Linguistics},
+  pages =     {311--318},
+  year =      {2002},
+  address =   {Philadelphia, PA},
+  month =     {July},
+}
+
+@TECHREPORT{msrlm,
+  author={Patrick Nguyen and Jianfeng Gao and Milind Mahajan},
+  year = {2007},
+  title = {{MSRLM}: a scalable language modeling toolkit},
+  institution = {Microsoft Research},
+  number = {MSR-TR-2007-144},
+}
+
+@TECHREPORT{clusters,
+  author={Raja Appuswamy and Christos Gkantsidis and Dushyanth Narayanan and Orion Hodson and Antony Rowstron},
+  year = {2013},
+  title = {Nobody ever got fired for buying a cluster},
+  institution = {Microsoft Research},
+  number = {MSR-TR-2013-2},
+}
+
+@INPROCEEDINGS{sri,
+  author={Andreas Stolcke},
+  year = {2002},
+  title = {{SRILM} - an Extensible Language Modeling Toolkit},
+  booktitle = {Proceedings of the Seventh International Conference on Spoken Language Processing},
+  pages = {901--904},
+}
+
+@inproceedings{irst,
+  author={Marcello Federico and Nicola Bertoldi and Mauro Cettolo},
+  title={{IRSTLM}: an Open Source Toolkit for Handling Large Scale Language Models},
+  booktitle={Proceedings of Interspeech},
+  year={2008},
+  address={Brisbane, Australia},
+}
+
+@inproceedings{mit,
+  author={Bo-June Hsu and James Glass},
+  title={Iterative Language Model Estimation: Efficient Data Structure \& Algorithms},
+  booktitle={Proceedings of Interspeech},
+  year={2008},
+  address={Brisbane, Australia},
+}
+
+@inproceedings{rand,
+  author={David Talbot and Miles Osborne},
+  title={Randomised Language Modelling for Statistical Machine Translation},
+  booktitle={Proceedings of ACL},
+  pages={512--519},
+  year={2007},
+  address={Prague, Czech Republic}
+}
+
+@inproceedings{berkeley,
+  author={Adam Pauls and Dan Klein},
+  title={Faster and Smaller $N$-Gram Language Models},
+  booktitle={Proceedings of ACL},
+  year={2011},
+  address={Portland, Oregon}
+}
+@misc{berkeleyfakesmoothing,
+  author={Adam Pauls},
+  title={{Class MakeKneserNeyArpaFromText}},
+  note={\url{https://berkeleylm.googlecode.com/svn-history/r529/trunk/doc/edu/berkeley/nlp/lm/io/MakeKneserNeyArpaFromText.html}},
+  year={2013},
+  month={June},
+}
+
+@Misc{en-gigaword5,
+  title={English Gigaword Fifth Edition},
+  author={Robert Parker and David Graff and Junbo Kong and Ke Chen and Kazuaki Maeda},
+  year={2011},
+  month={June},
+  organization = {Linguistic Data Consortium (LDC)},
+  address = {Philadelphia},
+  note={LDC2011T07},
+}
+@misc{google-ngrams,
+  author={Thorsten Brants and Alex Franz},
+  title={The {Google} Web {1T} 5-gram Corpus Version 1.1},
+  note={LDC2006T13},
+  year={2006},
+}
+
+@Misc{en-gigaword4,
+  author= {Robert Parker and David Graff and Junbo Kong and Ke Chen and Kazuaki Maeda},
+  year = {2009},
+  title = {English Gigaword Fourth Edition},
+  organization = {Linguistic Data Consortium (LDC)},
+  address = {Philadelphia},
+  note = {LDC2009T13},
+}
+
+@InProceedings{moses,
+  author = {Philipp Koehn and Hieu Hoang and Alexandra Birch and Chris Callison-Burch and Marcello Federico and Nicola Bertoldi and Brooke Cowan and Wade Shen and Christine Moran and Richard Zens and Chris Dyer and Ond\v{r}ej Bojar and Alexandra Constantin and Evan Herbst},
+  title = {Moses: Open Source Toolkit for Statistical Machine Translation},
+  year = {2007},
+  month = {June},
+  booktitle = {Annual Meeting of the Association for Computational Linguistics (ACL)},
+  address = {Prague, Czech Republic},
+}
+
+@inproceedings{moses-chart,
+  Address = {Tokyo, Japan},
+  Author = {Hieu Hoang and Philipp Koehn and Adam Lopez},
+  Booktitle = {Proceedings of the International Workshop on Spoken Language Translation},
+  Pages = {152-159},
+  Title = {A Unified Framework for Phrase-Based, Hierarchical, and Syntax-Based Statistical Machine Translation},
+  Year = {2009}},
+}
+@inproceedings{tpt,
+  author={Ulrich Germann and Eric Joanis and Samuel Larkin},
+  title={Tightly Packed Tries: How to Fit Large Models into Memory, and Make them Load Fast, Too},
+  year={2009},
+  address={Boulder, Colorado},
+  booktitle={Proceedings of the NAACL HLT Workshop on Software Engineering, Testing, and Quality Assurance for Natural Language Processing},
+  pages={31--39},
+}
+
+@inproceedings{mert,
+ author = {Och, Franz Josef},
+ title = {Minimum error rate training in statistical machine translation},
+ booktitle = {ACL '03: Proceedings of the 41st Annual Meeting on Association for Computational Linguistics},
+ year = {2003},
+ pages = {160--167},
+ location = {Sapporo, Japan},
+ doi = {http://dx.doi.org/10.3115/1075096.1075117},
+ publisher = {Association for Computational Linguistics},
+ address = {Morristown, NJ, USA},
+ }
+@inproceedings{europarl,
+  author={Philipp Koehn},
+  title={Europarl: A Parallel Corpus for Statistical Machine Translation},
+  booktitle={Proceedings of {MT} Summit},
+  year={2005},
+}
+
+@inproceedings{cdec,
+  author={Chris Dyer and Adam Lopez
+         and Juri Ganitkevitch and Johnathan Weese and Ferhan Ture
+         and Phil Blunsom and Hendra Setiawan and Vladimir Eidelman and Philip Resnik},
+  title={cdec: A Decoder, Alignment, and Learning framework for finite-state and context-free translation models},
+  booktitle = {Proceedings of the ACL 2010 System Demonstrations},
+  series = {ACLDemos '10},
+  year={2010},
+  pages = {7--12},
+}
+@article{interpolation,
+ author = {Perl, Yehoshua and Itai, Alon and Avni, Haim},
+ title = {Interpolation search---a log log {N} search},
+ journal = {Commun. ACM},
+ volume = {21},
+ issue = {7},
+ month = {July},
+ year = {1978},
+ issn = {0001-0782},
+ pages = {550--553},
+ numpages = {4},
+ doi = {http://doi.acm.org/10.1145/359545.359557},
+ acmid = {359557},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {average number of accesses, binary search, database, interpolation search, retrieval, searching, uniform distribution},
+} 
+@inproceedings{sheffield,
+  author={David Guthrie and Mark Hepple},
+  title={Storing the Web in Memory: Space Efficient Language Models with Constant Time Retrieval},
+  year={2010},
+  address={Los Angeles, CA},
+  booktitle={Proceedings of {EMNLP} 2010},
+}
+
+@InProceedings{joshua,
+  author    = {Zhifei Li and Chris Callison-Burch and Chris Dyer  and Sanjeev Khudanpur
+              and Lane Schwartz  and Wren Thornton and Jonathan Weese and Omar Zaidan},
+  title     = {Joshua: An Open Source Toolkit for Parsing-Based Machine Translation},
+  booktitle = {Proceedings of the Fourth Workshop on Statistical Machine Translation},
+  month     = {March},
+  year      = {2009},
+  address   = {Athens, Greece},
+  publisher = {Association for Computational Linguistics},
+  pages     = {135--139},
+  url       = {http://www.aclweb.org/anthology/W/W09/W09-0x24}
+}
+@inproceedings{bhikshacompression,
+  author={Bhiksha Raj and Ed Whittaker},
+  year={2003},
+  title={Lossless Compression of Language Model Structure and Word Identifiers},
+  booktitle={Proceedings of IEEE International Conference on Acoustics, Speech and Signal Processing},
+  pages={388--391},
+}
+@inproceedings{cmucambridge,
+  author={Philip Clarkson and Ronald Rosenfeld},
+  title={Statistical Language Modeling Using the {CMU}-{C}ambridge Toolkit},
+  year={1997},
+  booktitle={Proceedings of Eurospeech},
+}
+@inproceedings{amta10,
+  booktitle = {Ninth Conference of the Association for Machine Translation in the Americas},
+  title = {Voting on $N$-grams for Machine Translation System Combination},
+  year={2010},
+  author={Kenneth Heafield and Alon Lavie},
+}
+}
+@inproceedings{denero-hypsel,
+ author = {DeNero, John and Kumar, Shankar and Chelba, Ciprian and Och, Franz},
+ title = {Model combination for machine translation},
+ booktitle = {Human Language Technologies: The 2010 Annual Conference of the North American Chapter of the Association for Computational Linguistics},
+ series = {HLT '10},
+ year = {2010},
+ isbn = {1-932432-65-5},
+ location = {Los Angeles, California},
+ pages = {975--983},
+ numpages = {9},
+ publisher = {Association for Computational Linguistics},
+} 
+
+@article{cubepruning,
+  author={David Chiang},
+  title={Hierarchical Phrase-Based Translation},
+  journal = {Computational Linguistics},
+  year = {2007},
+  month = {June},
+  pages={201--228},
+  publisher={{MIT} Press},
+  issue_date = {June 2007},
+  volume = {33},
+  issue = {2},
+  issn = {0891-2017},
+}
+@inproceedings{cubegrowing,
+  author={Liang Huang and David Chiang},
+  title = {Forest Rescoring: Faster Decoding with Integrated Language Models},
+  year = {2007},
+  booktitle={Proceedings of the 45th Annual Meeting of the Association for Computational Linguistics},
+  address={Prague, Czech Republic},
+}
+@article{cubegrowingbad,
+  author={Wenduan Xu and Philipp Koehn},
+  title={Extending Hiero Decoding in {M}oses with Cube Growing},
+  year={2012},
+  journal={The Prague Bulletin of Mathematical Linguistics},
+  volume={98},
+  pages={133--142},
+}
+
+
+@InProceedings{samt,
+  author    = {Zollmann, Andreas  and  Venugopal, Ashish},
+  title     = {Syntax Augmented Machine Translation via Chart Parsing},
+  booktitle = {Proceedings on the Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2006},
+  address   = {New York City},
+  publisher = {Association for Computational Linguistics},
+  pages     = {138--141}
+}
+@InProceedings{reordering,
+  author    = {Birch, Alexandra  and  Blunsom, Phil  and  Osborne, Miles},
+  title     = {A Quantitative Analysis of Reordering Phenomena},
+  booktitle = {Proceedings of the Fourth Workshop on Statistical Machine Translation},
+  month     = {March},
+  year      = {2009},
+  address   = {Athens, Greece},
+  publisher = {Association for Computational Linguistics},
+  pages     = {197--205},
+  url       = {http://www.aclweb.org/anthology/W/W09/W09-0434}
+}
+@inproceedings{wfst,
+  author = {Gonzalo Iglesias and Cyril Allauzen and William Byrne and Adri\`{a} de Gispert and Michael Riley},
+  title = {Hierarchical Phrase-Based Translation Representations},
+  booktitle = {Proceedings of the 2011 Conference on Empirical Methods in Natural Language Processing},
+  pages={1373--1383},
+  address={Edinburgh, Scotland, UK},
+  month={July},
+  year={2011},
+  publisher = {Association for Computational Linguistics},
+}
+@phdthesis{rescoremt,
+  author={Graeme Blackwood},
+  title={Lattice Rescoring Methods for Statistical Machine Translation},
+  school={Cambridge University Engineering Department and Clare College},
+  year={2010},
+}
+
+@inproceedings{lagrangian,
+  title={Exact Decoding of Syntactic Translation Models through {Lagrangian} Relaxation},
+  author={Alexander Rush and Michael Collins},
+  booktitle={Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics},
+  pages={72--82},
+  address={Portland, Oregon, USA},
+  month={June},
+  year={2011},
+}
+
+@inproceedings{xerox,
+  title={Investigations in Exact Inference for Hierarchical Translation},
+  author={Wilker Aziz and Marc Dymetman and Sriram Venkatapathy},
+  year={2013},
+  booktitle={Proceedings of the ACL 2013 Eighth Workshop on Statistical Machine Translation},
+  month = {August},
+  address = {Sofia, Bulgaria},
+}
+
+@inproceedings{iwslt,
+  author={Kenneth Heafield and Hieu Hoang and Philipp Koehn and Tetsuo Kiso and Marcello Federico},
+  title={Left Language Model State for Syntactic Machine Translation},
+  booktitle={Proceedings of the International Workshop on Spoken Language Translation},
+  year={2011},
+  month={December},
+  address={San Francisco, CA, USA},
+}
+
+@inproceedings{leftright,
+  author={Taro Watanabe and Hajime Tsukada and Hideki Isozaki},
+  title={Left-to-Right Target Generation for Hierarchical Phrase-based Translation},
+  booktitle={Proceedings of the 21st International Conference on Computational Linguistics and 44th Annual Meeting of the ACL},
+  pages={777–-784},
+  address={Sydney, Australia},
+  year={2006},
+  month={July},
+}
+@inproceedings{leftright2,
+  author={Liang Huang and Haitao Mi},
+  title={Efficient incremental decoding for tree-to-string translation},
+  booktitle={Proceedings of the 2010 Conference on Empirical Methods in Natural Language Processing},
+  pages={273--283},
+  address={Cambridge, MA},
+  month={October},
+  year={2010},
+}
+@inproceedings{entropybad,
+  author={Ciprian Chelba and Thorsten Brants and Will Neveitt and Peng Xu},
+  year={2010},
+  pages={2242--2245},
+  booktitle={Proceedings of Interspeech},
+  title={Study on Interaction between Entropy Pruning and {K}neser-{N}ey Smoothing},
+}
+@inproceedings{entropybad2,
+  author={Robert C. Moore and Chris Quirk},
+  title={Less is More: Significance-Based N-gram Selection for Smaller, Better Language Models},
+  booktitle={Proceedings of the 2009 Conference on Empirical Methods in Natural Language Processing},
+  pages={746--755},
+  year={2009},
+  month={August},
+}
+@article{astar,
+author={Hart, Peter and Nilsson, Nils and Raphael, Bertram},
+journal={IEEE Transactions on Systems Science and Cybernetics},
+title={A Formal Basis for the Heuristic Determination of Minimum Cost Paths},
+year={1968},
+month={July},
+volume={4},
+number={2},
+pages={100--107},
+keywords={},
+doi={10.1109/TSSC.1968.300136},
+ISSN={0536-1567},
+}
+@inproceedings{largelm,
+  author={Thorsten Brants and Ashok C. Popat and Peng Xu and Franz J. Och and Jeffrey Dean},
+  title={Large Language Models in Machine Translation},
+  year={2007},
+  month={June},
+  booktitle={Proceedings of the 2007 Joint Conference on Empirical Methods in Natural Language Processing and Computational Language Learning},
+  pages={858--867},
+}
+@inproceedings{googleasr,
+title = {Query Language Modeling for Voice Search},
+author  = {Ciprian Chelba and Johan Schalkwyk and Thorsten Brants and Vida Ha and Boulos Harb and Will Neveitt and Carolina Parada and Peng Xu},
+year  = 2010,
+booktitle = {Proceedings of the 2010 IEEE Workshop on Spoken Language Technology},
+pages = {127--132}
+}
+
+@InProceedings{kenlm,
+  author    = {Kenneth Heafield},
+  title     = {{KenLM}: Faster and Smaller Language Model Queries},
+  booktitle = {Proceedings of the Sixth Workshop on Statistical Machine Translation},
+  month     = {July},
+  year      = {2011},
+  address   = {Edinburgh, UK},
+  publisher = {Association for Computational Linguistics},
+}
+@book{straightforward,
+  author={Yehoshua Bar-Hillel and Micha Perles and Eli Shamir},
+  year={1964},
+  title={On Formal Properties of Simple Phrase Structure Grammars},
+  booktitle={Language and Information: Selected Essays on their Theory and Application},
+  pages={116--150},
+  publisher={Hebrew University Students' Press},
+}
+@article{ibm,
+  author={Peter Brown and Stephen Della Pietra and Vincent Della Pietra and Robert Mercer},
+  year={1993},
+  title={The Mathematics of Statistical Machine Translations: Parameter Estimation},
+  journal={Computational Linguistics},
+  volume={19},
+  pages={263--311},
+}
+@article{scfg-paper,
+ author = {Alfred V. Aho and Jeffrey D. Ullman},
+ title = {Syntax directed translations and the pushdown assembler},
+ journal = {Journal of Computer and System Sciences},
+ volume = {3},
+ issue = {1},
+ month = {February},
+ year = {1969},
+ issn = {0022-0000},
+ pages = {37--56},
+ numpages = {20},
+ doi = {http://dx.doi.org/10.1016/S0022-0000(69)80006-1},
+ publisher = {Academic Press, Inc.},
+ address = {Orlando, FL, USA},
+}
+
+@techreport{kn-modified,
+  author={Stanley Chen and Joshua Goodman},
+  title={An Empirical Study of Smoothing Techniques for Language Modeling},
+  year={1998},
+  month={August},
+  institution={Harvard University},
+  number={TR-10-98},
+}
+@inproceedings{kn,
+  author={Reinhard Kneser and Hermann Ney},
+  year={1995},
+  title={Improved Backing-off for M-Gram Language Modeling},
+  booktitle={Proceedings of the IEEE International Conference on Acoustics, Speech and Signal Processing},
+  pages={181--184},
+}
+
+%Also introduced rest cost heuristic for phrases
+@inproceedings{phrase,
+  author={Philipp Koehn and Franz Josef Och and Daniel Marcu},
+  title={Statistical Phrase-Based Translation},
+  booktitle={Proceedings of HLT-NAACL 2003},
+  year={2003},
+  pages={48--54},
+  address={Edmonton, Canada},
+}
+
+@article{witten-bell,
+  author={Ian Witten and Timothy Bell},
+  title={The Zero-Frequency Problem: Estimating the Probabilities of Novel Events in Adaptive Text Compression},
+  year={1991},
+  journal={IEEE Transactions on Information Theory},
+  pages={1085--1094},
+  volume={37},
+  number={4},
+}
+@inproceedings{jelinek-mercer,
+  title={Interpolated estimation of markov sourceparameters from sparse data},
+  author = {Jelinek, Frederick and Mercer, Robert L.},
+  booktitle = {In Proceedings of the Workshop on Pattern Recognition in Practice},
+  month={May},
+  pages={381--397},
+  year={1980},
+}
+@article{good-turing,
+  author={Irving Good},
+  title={The Population Frequencies of Species and the Estimation of Population Parameters},
+  year={1953},
+  month={December},
+  volume={40},
+  page={237--264},
+  journal={Biometrika},
+}
+@article{backoff,
+  author={Slava Katz},
+  title={Estimation of Probabilities from Sparse Data for the Language Model Component of a Speech Recognizer},
+  year={1987},
+  month={March},
+  number={3},
+  journal={IEEE Transactions on Acoustics, Speech, and Signal Processing},
+  volume={ASSP-35},
+  pages={400--401},
+}
+@mastersthesis{remotelm,
+  author={Christian Federmann},
+  title={Very large language models for machine translation},
+  school={Saarland University},
+  year={2007},
+}
+
+@InProceedings{zeman:2012:WMT,
+  author    = {Zeman, Daniel},
+  title     = {Data Issues of the Multilingual Translation Matrix},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {395--400},
+  url       = {http://www.aclweb.org/anthology/W12-3151}
+}
+@InProceedings{phibig,
+  author    = {Koehn, Philipp  and  Haddow, Barry},
+  title     = {Towards Effective Use of Training Data in Statistical Machine Translation},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {317--321},
+  url       = {http://www.aclweb.org/anthology/W12-3139}
+}
+
+@InProceedings{hanneman-lavie:2011:WMT,
+  author    = {Hanneman, Greg  and  Lavie, Alon},
+  title     = {CMU Syntax-Based Machine Translation at WMT 2011},
+  booktitle = {Proceedings of the Sixth Workshop on Statistical Machine Translation},
+  month     = {July},
+  year      = {2011},
+  address   = {Edinburgh, Scotland},
+  publisher = {Association for Computational Linguistics},
+  pages     = {365--371},
+  url       = {http://www.aclweb.org/anthology/W11-2143}
+}
+
+@InProceedings{holmqvist-stymne-ahrenberg:2011:WMT,
+  author    = {Holmqvist, Maria  and  Stymne, Sara  and  Ahrenberg, Lars},
+  title     = {Experiments with word alignment, normalization and clause reordering for SMT between English and German},
+  booktitle = {Proceedings of the Sixth Workshop on Statistical Machine Translation},
+  month     = {July},
+  year      = {2011},
+  address   = {Edinburgh, Scotland},
+  publisher = {Association for Computational Linguistics},
+  pages     = {393--398},
+  url       = {http://www.aclweb.org/anthology/W11-2147}
+}
+
+@InProceedings{huck-EtAl:2011:WMT,
+  author    = {Huck, Matthias  and  Wuebker, Joern  and  Schmidt, Christoph  and  Freitag, Markus  and  Peitz, Stephan  and  Stein, Daniel  and  Dagnelies, Arnaud  and  Mansour, Saab  and  Leusch, Gregor  and  Ney, Hermann},
+  title     = {The {RWTH} {Aachen} Machine Translation System for {WMT} 2011},
+  booktitle = {Proceedings of the Sixth Workshop on Statistical Machine Translation},
+  month     = {July},
+  year      = {2011},
+  address   = {Edinburgh, Scotland},
+  publisher = {Association for Computational Linguistics},
+  pages     = {405--412},
+  url       = {http://www.aclweb.org/anthology/W11-2149}
+}
+
+@InProceedings{chung-galley:2012:WMT,
+  author    = {Chung, Tagyoung  and  Galley, Michel},
+  title     = {Direct Error Rate Minimization for Statistical Machine Translation},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {468--479},
+  url       = {http://www.aclweb.org/anthology/W12-3159}
+}
+
+@InProceedings{wmt12,
+  author    = {Callison-Burch, Chris  and  Koehn, Philipp  and  Monz, Christof  and  Post, Matt  and  Soricut, Radu  and  Specia, Lucia},
+  title     = {Findings of the 2012 Workshop on Statistical Machine Translation},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {10--51},
+  url       = {http://www.aclweb.org/anthology/W12-3102}
+}
+
+@InProceedings{wmt11,
+  author    = {Callison-Burch, Chris  and  Koehn, Philipp  and  Monz, Christof  and  Zaidan, Omar},
+  title     = {Findings of the 2011 Workshop on Statistical Machine Translation},
+  booktitle = {Proceedings of the Sixth Workshop on Statistical Machine Translation},
+  month     = {July},
+  year      = {2011},
+  address   = {Edinburgh, Scotland},
+  publisher = {Association for Computational Linguistics},
+  pages     = {22--64},
+  url       = {http://www.aclweb.org/anthology/W11-2103}
+}
+
+@misc{MT09,
+  author={Kay Peterson and Mark Przybocki and S\'{e}bastien Bronsart},
+  title = {{NIST} 2009 Open Machine Translation Evaluation ({MT}09)
+    Official Release of Results},
+  month={September},
+  year={2009},
+  address={Ottawa, Canada},
+  note = {http://www.itl.nist.gov/iad/mig/tests/mt/2009/},
+}
+
+@inproceedings{MT09-dcu,
+  author={Jinhua Du and Yifan He and Ankit K. Srivastava and Rejwanul Haque and Sandipan Dandapat and Andy Way},
+  title={{DCU} {MT} System and Recent Research Improvements},
+  booktitle={{NIST} Open Machine Translation Evaluation Workshop},
+  month={September},
+  year={2009},
+  address={Ottawa, Canada},
+}
+@InProceedings{meteor,
+  author    = {Michael Denkowski and Alon Lavie},
+  title     = {Meteor 1.3: Automatic Metric for Reliable Optimization and Evaluation of Machine Translation Systems},
+  booktitle = {Proceedings of the Sixth Workshop on Statistical Machine Translation},
+  month     = {July},
+  year      = {2011},
+  address   = {Edinburgh, Scotland},
+  publisher = {Association for Computational Linguistics},
+  pages={85--91},
+  url       = {http://www.aclweb.org/anthology/W11-2107},
+}
+@InProceedings{ter,
+  author =   {Matthew Snover and Bonnie Dorr and Richard Schwartz and Linnea Micciulla and John Makhoul},
+  title =    {A Study of Translation Edit Rate with Targeted Human Annotation},
+  booktitle = {{Proceedings of the 7th Conference of the Association for Machine Translation in the Americas (AMTA-2006)}},
+  pages =    {223--231},
+  year =   {2006},
+  address =    {Cambridge, MA},
+  month =    {August}
+}
+@InProceedings{vilar:2012:WMT,
+  author    = {Vilar, David},
+  title     = {DFKI's SMT System for WMT 2012},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {382--387},
+  url       = {http://www.aclweb.org/anthology/W12-3149}
+}
+
+@InProceedings{niehues-EtAl:2012:WMT,
+  author    = {Niehues, Jan  and  Zhang, Yuqi  and  Mediani, Mohammed  and  Herrmann, Teresa  and  Cho, Eunah  and  Waibel, Alex},
+  title     = {The Karlsruhe Institute of Technology Translation Systems for the WMT 2012},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {349--355},
+  url       = {http://www.aclweb.org/anthology/W12-3144}
+}
+@inproceedings{dataselect,
+  author={Robert Moore and William Lewis},
+  title={Intelligent Selection of Language Model Training Data},
+  year={2010},
+  address={Uppsala, Sweden},
+  publisher={Association for Computational Linguistics},
+  month={July},
+  pages={220--224},
+  booktitle={Proceedings of the ACL 2010 Conference Short Papers},
+}
+@inproceedings{irst-quant,
+  author={Marcello Federico and Nicola Bertoldi},
+  year={2006},
+  title={How many bits are needed to store probabilities for phrase-based translation?},
+  booktitle={Proceedings of the Workshop on Statistical Machine Translation},
+  pages={94--101},
+  address={New York City},
+  month={June},
+}
+@inproceedings{quant,
+  author={Edward Whittaker and Bhiksha Raj},
+  year={2001},
+  month={December},
+  title={Quantization-based language model compression},
+  booktitle={Proceedings of Eurospeech},
+  pages={33--36},
+  address={Aalborg, Denmark},
+}
+
+@article{memtmara10,
+  author =    {Kenneth Heafield and Alon Lavie},
+  title  =    {Combining Machine Translation Output with Open Source: The {C}arnegie {M}ellon Multi-Engine Machine Translation Scheme},
+  journal = {The Prague Bulletin of Mathematical Linguistics},
+  volume = {93},
+  year = {2010},
+  address = {Dublin},
+  pages = {27--36},
+}
+
+@inproceedings{chd,
+  author={Djamal Belazzougui and Fabiano C. Botelho and Martin Dietzfelbinger},
+  title={Hash, displace, and compress},
+  year={2008},
+  booktitle={Proceedings of the 35th international colloquium on Automata, Languages and Programming (ICALP '08)},
+  pages={385--396},
+}
+@inproceedings{perfecthash,
+  author={David Talbot and Thorsten Brants},
+  title={Randomized Language Models via Perfect Hash Functions},
+  year={2008},
+  pages={505--513},
+  booktitle={Proceedings of ACL-08: HLT},
+}
+@article{bloom,
+  author={Burton Bloom},
+  title={Space/time trade-offs in hash coding with allowable errors},
+  year={1970},
+  journal={Communications of the ACM},
+  volume={13},
+  number={7},
+  month={July},
+  pages={422--426},
+  issn = {0001-0782},
+}
+@inproceedings{beam-mt,
+  author={David Chiang},
+  title={A Hierarchical Phrase-Based Model for Statistical Machine Translation},
+  booktitle = {Proceedings of the 43rd Annual Meeting on Association for Computational Linguistics},
+  year={2005},
+  address={Ann Arbor, Michigan},
+  pages={263--270},
+  month={June},
+}
+@article{beamnevermind,
+  author={Christoph Tillmann and Hermann Ney},
+  journal={Computational Linguistics},
+  year={2003},
+  title={Word Reordering and a Dynamic Programming Beam Search Algorithm for Statistical Machine Translation},
+  month={March},
+  volume = {29},
+  number = {1},
+  publisher = {MIT Press},
+  address = {Cambridge, MA, USA},
+  issn = {0891-2017},
+  pages = {97--133},
+}
+@inproceedings{zhifei,
+  author= {Zhifei Li and Sanjeev Khudanpur},
+  title={A Scalable Decoder for Parsing-based Machine Translation with Equivalent Language Model State Maintenance},
+  year={2008},
+  booktitle={Proceedings of the Second ACL Workshop on Syntax and Structure in Statistical Translation {(SSST-2)}},
+  pages={10--18},
+  month={June},
+  address={Columbus, Ohio},
+}
+
+@phdthesis{beam-speech,
+  author = {Lowerre, Bruce T.},
+  title = {The Harpy speech recognition system},
+  year = {1976},
+  school = {Carnegie Mellon University},
+  address = {Pittsburgh, PA, USA},
+}
+@inproceedings{coarsetofine,
+  author={Slav Petrov and Aria Haghighi and Dan Klein},
+  title={Coarse-to-Fine Syntactic Machine Translation using Language Projections},
+  year={2008},
+  booktitle={Proceedings of the 2008 Conference on Empirical Methods in Natural Language Processing},
+  pages={108--116},
+  month={October},
+  address={Honolulu, HI, USA},
+}
+@inproceedings{coarsetofineorig,
+  title={Efficient Multi-Pass Decoding for Synchronous Context Free Grammars},
+  author={Zhang, Hao and Gildea, Daniel},
+  year={2008},
+  pages={209--217},
+  booktitle={Proceedings of ACL-08: HLT},
+  address={Columbus, Ohio},
+}
+
+@inproceedings{xrce,
+  author={Simon Carter and Marc Dymetman and Guillaume Bouchard},
+  title={Exact Sampling and Decoding in High-Order Hidden {M}arkov Models},
+  year={2012},
+  booktitle={Proceedings of the 2012 Joint Conference on Empirical Methods in Natural Language Processing and Computational Natural Language Learning},
+  pages={1125--1134},
+  address={Jeju Island, Korea},
+  month={July},
+}
+@inproceedings{incrhmm,
+  author={Zhiheng Huang and Yi Chang and Bo Long and Jean-Francois Crespo and Anlei Dong and Sathiya Keerthi and Su-Lin Wu},
+  title={Iterative {V}iterbi {A}* Algorithm for K-best Sequential Decoding},
+  year={2012},
+  booktitle={Proceedings of the 2012 Joint Conference on Empirical Methods in Natural Language Processing and Computational Natural Language Learning},
+  pages={1125--1134},
+  address={Jeju Island, Korea},
+  month={July},
+}
+@ARTICLE{ocr,
+    author = {Anthony C. Kam and Gary E. Kopec},
+    title = {Document image decoding by heuristic search},
+    journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+    year = {1996},
+    volume = {18},
+    pages = {945--950}
+}
+@ARTICLE{viterbi,
+author={Viterbi, Andrew},
+journal={Information Theory, IEEE Transactions on},
+title={Error bounds for convolutional codes and an asymptotically optimum decoding algorithm},
+year={1967},
+month={April},
+volume={13},
+number={2},
+pages={260 -269},
+keywords={Convolutional codes;},
+doi={10.1109/TIT.1967.1054010},
+ISSN={0018-9448},}
+
+@inproceedings{cubestar,
+  title={Cube Pruning as Heuristic Search},
+  author={Mark Hopkins and Greg Langmead},
+  year={2009},
+  address={Singapore},
+  month={August},
+  booktitle={Proceedings of the 2009 Conference on Empirical Methods in Natural Language Processing},
+  pages={62--71},
+}
+@inproceedings{pro,
+  author={Mark Hopkins and Jonathan May},
+  title={Tuning as Ranking},
+  year={2011},
+  booktitle={Proceedings of the 2011 Conference on Empirical Methods in Natural Language Processing},
+  pages={1352–-1362},
+  month={July},
+  address={Edinburgh, Scotland},
+}
+@article{binarize,
+  author={Liang Huang and Hao Zhang and Daniel Gildea and Kevin Knight},
+  title={Binarization of Synchronous Context-Free Grammars},
+  journal={Computational Linguistics},
+  volume={35},
+  number={4},
+  year={2009},
+  month={December},
+}
+@inproceedings{rest,
+  author={Kenneth Heafield and Philipp Koehn and Alon Lavie},
+  title={Language Model Rest Costs and Space-Efficient Storage},
+  year={2012},
+  booktitle={Proceedings of the 2012 Joint Conference on Empirical Methods in Natural Language Processing and Computational Natural Language Learning},
+  address={Jeju Island, Korea},
+}
+
+@phdthesis{collins,
+  author={Michael Collins},
+  year={1999},
+  title={Head-Driven Statistical Models for Natural Language Parsing},
+  school={University of Pennsylvania},
+}
+@Article{rwthheur,
+  author = {Vilar, David and Ney, Hermann},
+  title = {Cardinality pruning and language model heuristics for hierarchical phrase-based translation},
+  journal = {Machine Translation},
+  publisher = {Springer Netherlands},
+  issn = {0922-6567},
+  pages = {1--38},
+  url = {http://dx.doi.org/10.1007/s10590-011-9119-4},
+  note = {DOI 10.1007/s10590-011-9119-4},
+  month = {November},
+  year = {2011},
+}
+
+@inproceedings{zens08,
+  author={Richard Zens and Hermann Ney},
+  title={Improvements in Dynamic Programming Beam Search for Phrase-based Statistical Machine Translation},
+  year={2008},
+  booktitle={Proceedings of the International Workshop on Spoken Language Translation (IWSLT)},
+  month={October},
+  address={Honolulu, Hawaii},
+}
+@misc{openmt12,
+  author={Kay Peterson},
+  title={{NIST} Open Machine Translation 2012 Evaluation Plan {(OpenMT12)}},
+  howpublished={\url{http://www.nist.gov/itl/iad/mig/upload/OpenMT12_EvalPlan-2.pdf}},
+  year= 2012,
+  month={July},
+  note = {Accessed: 6 August 2012},
+}
+@inproceedings{forest,
+  author={Haitao Mi and Liang Huang and Qun Liu},
+  title={Forest-Based Translation},
+  year={2008},
+  month={June},
+  pages={192--199},
+  booktitle={Proceedings of ACL-08: HLT},
+  address={Columbus, Ohio},
+}
+@article{spelllm,
+  author={Eric Mays and Fred Damerau and Robert Mercer},
+  title={Context Based Spelling Correction},
+  year={1991},
+  volume={27},
+  number={5},
+  pages={517--522},
+  publisher={Pergamon Press plc},
+  journal={Information Processing \& Management},
+}
+@inproceedings{ocrlm,
+  author={Xiang Tong and David A. Evans},
+  year={1996},
+  title={A Statistical Approach to Automatic {OCR} Error Correction in Context},
+  booktitle={Proceedings of the Fourth Workshop on Very Large Corpora},
+  address={Copenhagen, Denmark},
+  month={April},
+  pages={88--100},
+}
+@inproceedings{ocrpost,
+  title={Efficient Automatic {OCR} Word Validation Using
+    Word Partial Format Derivation and Language Model},
+  author={Siyuan Chen and Dharitri Misra and George R. Thoma},
+  booktitle={Document Recognition and Retrieval XVII: Proceedings of the SPIE},
+  year={2010},
+  volume={7534},
+}
+@inproceedings{ocrkolak,
+  title={A Generative Probabilistic {OCR} Model for {NLP} Applications},
+  author={Okan Kolak and William Byrne and Philip Resnik},
+  booktitle={Proceedings of HLT-NAACL 2003},
+  address={Edmonton, Canada},
+  year={2003},
+}
+@inproceedings{hyper,
+  author={Dan Klein and Christopher D. Manning},
+  year={2001},
+  title={Parsing and Hypergraphs},
+  booktitle={Proceedings of the Seventh International Workshop on Parsing Technologies},
+  month={October},
+  address={Beijing, China},
+}
+@inproceedings{cubededupe,
+  author={Andrea Gesmundo and James Henderson},
+  title={Faster Cube Pruning},
+  booktitle={Proceedings of the International Workshop on Spoken Language Translation (IWSLT)},
+  year={2010},
+  pages = {267--274},
+}
+@article{dryad,
+  title={Dryad: distributed data-parallel programs from sequential building blocks},
+  author={Isard, Michael and Budiu, Mihai and Yu, Yuan and Birrell, Andrew and Fetterly, Dennis},
+  journal={ACM SIGOPS Operating Systems Review},
+  volume={41},
+  number={3},
+  pages={59--72},
+  year={2007},
+  publisher={ACM}
+}
+@inbook{googlerecent,
+title = {Empirical Exploration of Language Modeling for the google.com Query Stream as Applied to Mobile Voice Search},
+author  = {Ciprian Chelba and Johan Schalkwyk},
+year  = 2013,
+booktitle = {Mobile Speech and Advanced Natural Language Solutions},
+publisher={Springer},
+pages = {197--229},
+address = {New York}
+}
+@inproceedings{mapreduce,
+  author={Jeffrey Dean and Sanjay Ghemawat},
+  title={{MapReduce}: Simplified Data Processing on Large Clusters},
+  booktitle={{OSDI'04:} Sixth Symposium on Operating System Design and Implementation},
+  address={San Francisco, CA, USA},
+  year={2004},
+  month=12
+}
+
+@inproceedings{tpie,
+  title={A transparent parallel {I/O} environment},
+  author={Vengroff, Darren Erik},
+  booktitle={{DAGS} Symposium on Parallel Computation},
+  year={1994},
+  pages={117--134},
+}
+@article{stxxl,
+  title={{STXXL}: standard template library for {XXL} data sets},
+  author={Dementiev, Roman and Kettner, Lutz and Sanders, Peter},
+  journal={Software: Practice and Experience},
+  pages={589--637},
+  year={2008},
+  volume={38},
+  number={6},
+}
+@article{elimduplicate,
+  title={Duplicate record elimination in large data files},
+  author={Bitton, Dina and DeWitt, David J},
+  journal={ACM Transactions on database systems (TODS)},
+  volume={8},
+  number={2},
+  pages={255--265},
+  year={1983},
+  publisher={ACM}
+}
+@article{despam,
+  title={Efficient and effective spam filtering and re-ranking for large web datasets},
+  author={Cormack, Gordon V and Smucker, Mark D and Clarke, Charles LA},
+  journal={Information retrieval},
+  volume={14},
+  number={5},
+  pages={441--465},
+  year={2011},
+  publisher={Springer}
+}
+
+@inproceedings{batchmira,
+  title={Batch tuning strategies for statistical machine translation},
+  author={Cherry, Colin and Foster, George},
+  booktitle={Proceedings of the 2012 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+  pages={427--436},
+  year={2012},
+  organization={Association for Computational Linguistics}
+}
+@book{mergesort,
+ editor = {Abello, James M. and Vitter, Jeffrey Scott},
+ title = {External memory algorithms},
+ year = {1999},
+ isbn = {0-8218-1184-3},
+ publisher = {American Mathematical Society},
+ address = {Boston, MA, USA},
+}
+@inproceedings{lmplz,
+  author = {Kenneth Heafield and Ivan Pouzyrevsky and Jonathan H. Clark and Philipp Koehn},
+  title = {Scalable Modified {Kneser-Ney} Language Model Estimation},
+  year = {2013},
+  month = {August},
+  booktitle = {Proceedings of the 51st Annual Meeting of the Association for Computational Linguistics},
+  address = {Sofia, Bulgaria},
+  url = {http://kheafield.com/professional/edinburgh/estimate\_paper.pdf},
+}
+@InProceedings{wordgrammar,
+  author    = {Church, Kenneth  and  Hart, Ted  and  Gao, Jianfeng},
+  title     = {Compressing Trigram Language Models With {Golomb} Coding},
+  booktitle = {Proceedings of the 2007 Joint Conference on Empirical Methods in Natural Language Processing and Computational Natural Language Learning (EMNLP-CoNLL)},
+  month     = {June},
+  year      = {2007},
+  address   = {Prague, Czech Republic},
+  publisher = {Association for Computational Linguistics},
+  pages     = {199--207},
+  url       = {http://www.aclweb.org/anthology/D/D07/D07-1021}
+}
+@inproceedings{irlm,
+  author={Jay M. Ponte and W. Bruce Croft},
+  title={A Language Modeling Approach to Information Retrieval},
+  year={1998},
+  booktitle={Proceedings of the 21st annual international {ACM} {SIGIR} conference on Research and development in information retrieval},
+  pages={275--281},
+  publisher={ACM},
+  address={New York, NY, USA},
+  location={Melbourne, Australia},
+}
+@inproceedings{speechkenlm,
+  title={Efficient On-The-Fly Hypothesis Rescoring in a Hybrid {GPU}/{CPU}-based Large Vocabulary Continuous Speech Recognition Engine},
+  author={Jungsuk Kim and Jike Chong and Ian Lane},
+  address={Portland, Oregon},
+  month={September},
+  year={2012},
+  booktitle={Proceedings of the 13th Annual Conference of the International Speech Communication Association},
+}
+@inproceedings{speechkenlm2,
+  title={Discriminative Language Model With Part-of-speech for Mandarin Large
+    Vocabulary Continuous Speech Recognition System},
+  author={Yujing Si and Zhen Zhang and Qingqing Zhang and Jielin Pan and Yonghong Yan},
+  pages={970--973},
+  address={Paris, France},
+  publisher={Atlantis Press},
+  booktitle={Proceedings of the 2nd International Conference on Computer Science and Electronics Engineering ({ICCSEE} 2013)},
+  year={2013},
+  month={March},
+}
+@inproceedings{plagiarism,
+  title={Linguistic and Statistical Traits Characterising Plagiarism},
+  author={Miranda Chong and Lucia Specia},
+  year={2012},
+  pages={195--204},
+  booktitle={Proceedings of the 24th International Conference on Computational Linguistics},
+  address={Mumbai, India},
+}
+%TODO: actual citation?
+@misc{fabien,
+  author={Fabien Cromi\`{e}res},
+  howpublished={Personal communication},
+  year={2013},
+  month={March},
+}
+@misc{limsi-personal,
+  author={Allauzen, Alexander},
+  howpublished={Personal communication},
+  year={2013},
+  month={August},
+}
+@misc{desrt-personal,
+  author={Miceli Barone, Antonio Valerio},
+  howpublished={Personal communication},
+  year={2013},
+  month={August},
+}
+@misc{lane-lattice,
+  author={Lane Schwartz},
+  howpublished={Personal communication},
+  year={2013},
+  month={February},
+}
+@misc{jan-personal,
+  author={Niehues, Jan},
+  howpublished={Personal communication},
+  year={2013},
+  month={August},
+}
+@misc{nadir-personal,
+  author={Nadir Durrani},
+  howpublished={Personal communication},
+  year={2013},
+  month={July},
+}
+@misc{msrlm-personal,
+  author={Jianfeng Gao and Jonathan H. Clark},
+  howpublished={Personal communication},
+  year={2013},
+  month={April},
+}
+@misc{nicola-personal,
+  author={Nicola Bertoldi},
+  howpublished={Personal communication},
+  year={2013},
+}
+%ClueWeb09 via RandLM showed no improvment
+@misc{miles-personal,
+  author={Miles Osborne},
+  howpublished={Personal communication},
+  month={July},
+  year={2013},
+}
+@misc{ondrej-personal,
+  author={Ond\v{r}ej Bojar},
+  howpublished={Personal communication},
+  month={July},
+  year={2013},
+}
+@misc{uli-personal,
+  author={Ulrich Germann},
+  title={Speed of tightly packed tries},
+  howpublished={Personal communication},
+  year={2011},
+  month={May},
+}
+@misc{adam-personal,
+  author={Adam Pauls},
+  year={2011},
+  month={May},
+  howpublished={Personal communication},
+}
+@misc{shef-personal,
+  author={Jonathan Chow},
+  year={2012},
+  month={May},
+  howpublished={Personal communication},
+}
+@misc{hieu-personal,
+  author={Hieu Hoang},
+  year={2013},
+  month={July},
+  howpublished={Personal communication},
+}
+@misc{matt-personal,
+  author={Matt Post},
+  year={2013},
+  month={July},
+  howpublished={Personal communication},
+}
+@misc{jane-personal,
+  author={Stephan Peitz and J\"{o}rn W\"{u}bker and Matthias Huck},
+  year={2013},
+  howpublished={Personal communication},
+}
+@misc{chris-personal,
+  author={Chris Dyer},
+  year={2013},
+  month={June},
+  howpublished={Personal communication},
+}
+@misc{phi-systems,
+  author={Philipp Koehn},
+  year={2011},
+  month={September},
+  howpublished={Personal communication},
+}
+
+@book{lmreview,
+  author={Frederick Jelinek},
+  title={Statistical Methods for Speech Recognition},
+  publisher={{MIT} Press},
+  address={Cambridge, Massachusetts},
+  year={1997},
+}
+@inproceedings{nnlm,
+  author={Holger Schwenk and Jean-Luc Gauvain},
+  title={Connectionist Language Modeling For Large Vocabulary Continuous Speech Recognition},
+  year={2002},
+  booktitle = {Proceedings of the International Conference on Acoustics, Speech and Signal Processing},
+  volume={1},
+  pages={765--768},
+}
+@inproceedings{cslm,
+  author={Holger Schwenk and Anthony Rousseau and Mohammed Attik},
+  title={Large, pruned or continuous space language models on a GPU for statistical machine translation},
+  booktitle={Proceedings of the {NAACL-HLT} workshop on the Future of Language Modeling for {HLT}},
+  pages={11--19},
+  year={2012},
+}
+@inproceedings{rnn,
+  title={Recurrent neural network based language model},
+  author={Mikolov, Tomas and Karafi{\'a}t, Martin and Burget, Luk{\'a}{\v{s}} and Cernocky, Jan and Khudanpur, Sanjeev},
+  booktitle={Proceedings of Interspeech},
+  pages={1045--1048},
+  year={2010}
+}
+@inproceedings{origparsinglm,
+  title={Combining Linguistic and Statistical Knowledge Sources in Natural-Language Processing for {ATIS}},
+  author={Robert Moore and Douglas Appelt and John Dowding and J. Mark Gawron and Douglas Moran},
+  year={1995},
+  booktitle={Procedings of the {ARPA} Spoken Language Technology Workshop},
+}
+@phdthesis{synlm,
+        Author = {Lane Schwartz},
+        Title = {An Incremental Syntactic Language Model for Statistical Phrase-based Machine Translation},
+        School = {University of Minnesota},
+        Year = {2012},
+        Address = {Minneapolis, Minnesota},
+        Month = {February},
+}
+@phdthesis{synlm2,
+  author={Matthew John Post},
+  title={Syntax-based Language Models for Statistical Machine Translation},
+  year={2010},
+  school={University of Rochester},
+}
+@book{decisiontrees,
+  author={Leo Breiman and Jerome Friedman and Charles J. Stone and Richard A. Olshen},
+  title={Classification and Regression Trees},
+  year={1984},
+  publisher={Chapman and Hall/{CRC}},
+}
+@article{decisiontreelm,
+  title={A tree-based statistical language model for natural language speech recognition},
+  author={Bahl, Lalit R. and Brown, Peter F. and de Souza, Peter V. and Mercer, Robert L.},
+  journal={IEEE Transactions on Acoustics, Speech and Signal Processing},
+  volume={37},
+  number={7},
+  pages={1001--1008},
+  year={1989},
+  publisher={IEEE}
+}
+@article{decisiontreefail,
+  title={Two decades of statistical language modeling: Where do we go from here?},
+  author={Rosenfeld, Ronald},
+  journal={Proceedings of the IEEE},
+  volume={88},
+  number={8},
+  pages={1270--1278},
+  year={2000},
+  publisher={IEEE}
+}
+@article{ngram,
+  title={Prediction and entropy of printed English},
+  author={Shannon, Claude E},
+  journal={Bell system technical journal},
+  volume={30},
+  number={1},
+  pages={50--64},
+  year={1951},
+}
+@article{perplexity,
+  title={Perplexity--a measure of the difficult7 of speech recognition tasks.},
+  author={Frederick Jelinek and Mercer, Robert L. and Bahl, L.R. and Baker, J.K.},
+  year={1977},
+  journal={The Journal of the Acoustical Society of America},
+  volume={62},
+}
+@inproceedings{reverselm,
+  title={Enhancing Language Models in Statistical Machine Translation with Backward N-grams and Mutual Information Triggers},
+  author={Deyi Xiong and Min Zhang and Haizhou Li},
+  pages={1288--1297},
+  booktitle={Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics},
+  address={Portland, Oregon},
+  month={June},
+  year={2011},
+}
+@inproceedings{powerlawlm,
+  author={Songfang Huang and Steve Renals},
+  title={Power Law Discounting for N-Gram Language Models},
+  booktitle={Proceedings of the IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP'10)},
+  pages={5178--5181},
+  address={Dallas, Texas, USA},
+  month={March},
+  year={2010},
+}
+@article{pitmanyor,
+  title={The two-parameter Poisson-Dirichlet distribution derived from a stable subordinator},
+  author={Pitman, Jim and Yor, Marc},
+  journal={The Annals of Probability},
+  volume={25},
+  number={2},
+  pages={855--900},
+  year={1997},
+  publisher={Institute of Mathematical Statistics},
+}
+@inproceedings{edinwmt13,
+  title={Edinburgh's Machine Translation Systems for {European} Language Pairs},
+  author={Nadir Durrani and Barry Haddow and Kenneth Heafield and Philipp Koehn},
+  year={2013},
+  booktitle={Proceedings of the ACL 2013 Eighth Workshop on Statistical Machine Translation},
+  address={Sofia, Bulgaria},
+  month={August},
+}
+@misc{voicetra,
+  title={VoiceTra+},
+  howpublished={\url{http://voicetra-plus.jp/voicetra.html}},
+  author={{FEAT Limited}},
+  year={2012},
+  month={December},
+}
+@misc{numen,
+  title={Project to improve text capture},
+  author={Numen},
+  howpublished={\url{http://www.numen.fr/en/innovation-rd/project-improve-text-capture}},
+  year={2012},
+}
+@inproceedings{rightstate,
+  title={An Efficient A* Search Algorithm for Statistical Machine Translation},
+  author={Franz Josef Och and Nicola Ueffing and Hermann Ney},
+  booktitle={Proceedings of the workshop on Data-driven methods in machine translation},
+  volume={14},
+  year={2001},
+}
+@inproceedings{phraseboundary,
+  title={Using Variable Decoding Weight for Language Model in Statistical Machine Translation},
+  author={Behrang Mohit and Rebecca Hwa and Alon Lavie},
+  booktitle={Proceedings of the Ninth Conference of the Association for Machine Translation in the Americas (AMTA-10)},
+  year={2010},
+}
+@inproceedings{reorderingmodel,
+  author={Christoph Tillmann},
+  title={A Unigram Orientation Model for Statistical Machine Translation},
+  booktitle = {Proceedings of HLT-NAACL 2004: Short Papers},
+  pages={101--104},
+  address = {Boston, Massachusetts},
+  year={2004},
+}
+@inproceedings{oldfeatures,
+  title={Feature-Based Language Understanding},
+  author={Kishore A. Papineni and Salim Roukos and R. T. Ward},
+  pages={1435--1438},
+  month={September},
+  address={Rhodes, Greece},
+  year={1997},
+  booktitle={Proceedings of the European Conference on Speech Communication and Technology},
+}
+@InProceedings{mtfeatures,
+  author    = {Franz Josef Och  and  Hermann  Ney},
+  title     = {Discriminative Training and Maximum Entropy Models for Statistical Machine Translation},
+  booktitle = {Proceedings of 40th Annual Meeting of the Association for Computational Linguistics},
+  month     = {July},
+  year      = {2002},
+  address   = {Philadelphia, Pennsylvania, USA},
+  publisher = {Association for Computational Linguistics},
+  pages     = {295--302},
+  url       = {http://www.aclweb.org/anthology/P02-1038},
+  doi       = {10.3115/1073083.1073133}
+}
+@book{decision,
+  title={Pattern Classification and Scene Analysis},
+  author={Richard O. Duda and Peter E. Hart},
+  publisher={Wiley},
+  year={1973},
+  address={New York, NY},
+}
+@inproceedings{mbr,
+  title={Minimum {Bayes}-Risk Decoding for Statistical Machine Translation},
+  author={Shankar Kumar and William Byrne},
+  year={2004},
+  address={Boston, MA},
+  booktitle={Proceedings of the Human Language Technology conference / North American chapter of the Association for Computational Linguistics annual meeting},
+}
+@inproceedings{maxstringnp,
+  title={Computational Complexity of Probabilistic Disambiguation by means of Tree-Grammars},
+  author={Khalil Sima'an},
+  booktitle={Proceedings of the 16th conference on Computational Linguistics},
+  volume={2},
+  pages={1175--1180},
+  year={1996},
+}
+@article{wbnp,
+  author={Kevin Knight},
+  title={Decoding complexity in word-replacement translation models},
+  year={1999},
+  volume={25},
+  pages={607--615},
+  journal={Computational Linguistics},
+}
+@inproceedings{pbnp,
+  author={Mikhail Zaslavskiy and Marc Dymetman and Nicola Cancedda},
+  title={Phrase-Based Statistical Machine Translation as a Traveling Salesman Problem},
+  pages={333--341},
+  booktitle={Proceedings of the 47th Annual Meeting of the ACL and the 4th IJCNLP of the AFNLP},
+  address={Suntec, Sinagapore},
+  year={2009},
+  month={August},
+}
+@inproceedings{noviterbi,
+  title={Doing away with the {Viterbi} approximation},
+  author={Demuynck, Kris and Van Compernolle, Dirk and Wambacq, Patrick},
+  booktitle={Proceedings of the 2002 IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP)},
+  volume={1},
+  year={2002},
+  organization={IEEE},
+}
+@inproceedings{uedin-iwslt12,
+  title={The {UEDIN} Systems for the {IWSLT} 2012 Evaluation},
+  author={Eva Hasler and Peter Bell and Arnab Ghoshal and Barry Haddow and Philipp Koehn and Fergus McInnes and Steve Renals and Pawel Swietojanski},
+  booktitle={Proceedings of IWSLT 2012},
+  year={2012},
+  address={Hong Kong},
+  month={December},
+}
+@inproceedings{osm,
+  title={Model With Minimal Translation Units, But Decode With Phrases},
+  author={Durrani, Nadir and Fraser, Alexander and Schmid, Helmut},
+  booktitle={Proceedings of NAACL-HLT},
+  pages={1--11},
+  year={2013}
+}
+@inproceedings{reordering-manning,
+ author = {Galley, Michel and Manning, Christopher D.},
+ title = {A simple and effective hierarchical phrase reordering model},
+ booktitle = {Proceedings of the Conference on Empirical Methods in Natural Language Processing},
+ series = {EMNLP '08},
+ year = {2008},
+ address = {Honolulu, Hawaii},
+ pages = {848--856},
+ publisher = {Association for Computational Linguistics},
+}
+@inproceedings{gregcoarsen,
+  title={Improving Syntax-Augmented Machine Translation by Coarsening the Label Set},
+  author={Greg Hanneman and Alon Lavie},
+  year={2013},
+  booktitle={Proceedings of NAACL-HLT 2013},
+  publisher = {Association for Computational Linguistics},
+  address={Atlanta, Georgia},
+}
+@inproceedings{cmu-wmt13,
+  title={The {CMU} Machine Translation Systems at {WMT} 2013: Syntax, Synthetic Translation Options, and Pseudo-References},
+  author={Waleed Ammar and Victor Chahuneau and Michael Denkowski and Greg Hanneman and Wang Ling and Austin Matthews and Kenton Murray and Nicola Segall and Yulia Tsvetkov and Alon Lavie and Chris Dyer},
+  year={2013},
+  booktitle={Proceedings of the ACL 2013 Eighth Workshop on Statistical Machine Translation},
+  address={Sofia, Bulgaria},
+  month={August},
+  pages     = {70--77},
+}
+@inproceedings{origsyntax,
+  title={A syntax-based statistical translation model},
+  author={Yamada, Kenji and Knight, Kevin},
+  booktitle={Proceedings of the 39th Annual Meeting on Association for Computational Linguistics},
+  pages={523--530},
+  year={2001},
+  organization={Association for Computational Linguistics}
+}
+@misc{michael-nist,
+    author       = {Michael Denkowski},
+    title        = {Machine Translation for Human Translators},
+    year         = {2013},
+    month        = {May},
+    day          = {30},
+    howpublished = {{Ph.D.} Thesis Proposal, Carnegie Mellon University}
+}
+@inproceedings{unigramspell,
+  title={A spelling correction program based on a noisy channel model},
+  author={Mark D. Kernighan and Kenneth W. Church and William A. Gale},
+  booktitle={Proceedings of the 13th conference on computational linguistics},
+  pages={205--210},
+  month={August},
+  address={Helsinki, Finland},
+  year={1990},
+}
+@inproceedings{cykp,
+  title={Lattice parsing for speech recognition},
+  author={Chappelier, Jean-C{\'e}dric and Rajman, Martin and Arag{\"u}{\'e}s, Ram{\'o}n and Rozenknop, Antoine and others},
+  booktitle={Proc. of 6{\`e}me conf{\'e}rence sur le Traitement Automatique du Langage Naturel (TALN 99)},
+  pages={95--104},
+  year={1999}
+}
+@inproceedings{naacl-reject,
+author= {Huck, Matthias and Vilar, David and Freitag, Markus and Ney, Hermann},
+title= {A Performance Study of Cube Pruning for Large-Scale Hierarchical Machine Translation},
+booktitle= {Proceedings of the NAACL 7th Workshop on Syntax, Semantics and Structure in Statistical Translation},
+year= 2013,
+pages= {29--38},
+address= {Atlanta, Georgia, USA},
+month= jun,
+booktitlelink= {http://www.cs.ust.hk/~dekai/ssst/},
+url = {http://aclweb.org/anthology-new/W/W13/W13-0804.pdf}
+}
+
+@InProceedings{jehl-hieber-riezler:2012:WMT,
+  author    = {Jehl, Laura  and  Hieber, Felix  and  Riezler, Stefan},
+  title     = {Twitter Translation using Translation-Based Cross-Lingual Retrieval},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {410--421},
+  url       = {http://www.aclweb.org/anthology/W12-3153}
+}
+@unpublished{probing,
+  author={Donald E. Knuth},
+  title={Notes on ``Open'' Addressing},
+  year={1963},
+  month={July},
+  note={Unpublished memorandum},
+}
+@Book{wmt13-book,
+  editor    = {Ond\v{r}ej Bojar  and  Christian Buck  and  Chris Callison-Burch  and  Barry Haddow  and  Philipp Koehn  and  Christof Monz  and  Matt Post  and  Herve Saint-Amand  and  Radu Soricut  and  Lucia Specia},
+  title     = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  url       = {http://www.aclweb.org/anthology/W13-22}
+}
+
+@InProceedings{wmt13,
+  author    = {Bojar, Ond\v{r}ej  and  Buck, Christian  and  Callison-Burch, Chris  and  Federmann, Christian  and  Haddow, Barry  and  Koehn, Philipp  and  Monz, Christof  and  Post, Matt  and  Soricut, Radu  and  Specia, Lucia},
+  title     = {Findings of the 2013 {Workshop on Statistical Machine Translation}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {1--44},
+  url       = {http://www.aclweb.org/anthology/W13-2201}
+}
+
+@InProceedings{machavcek-bojar:2013:WMT,
+  author    = {Mach\'{a}\v{c}ek, Matou\v{s}  and  Bojar, Ond\v{r}ej},
+  title     = {Results of the {WMT13} Metrics Shared Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {45--51},
+  url       = {http://www.aclweb.org/anthology/W13-2202}
+}
+
+@InProceedings{birch-EtAl:2013:WMT,
+  author    = {Birch, Alexandra  and  Haddow, Barry  and  Germann, Ulrich  and  Nadejde, Maria  and  Buck, Christian  and  Koehn, Philipp},
+  title     = {The Feasibility of {HMEANT} as a Human {MT} Evaluation Metric},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {52--61},
+  url       = {http://www.aclweb.org/anthology/W13-2203}
+}
+
+@InProceedings{limsi-wmt13,
+  author    = {Allauzen, Alexander  and  P\'{e}cheux, Nicolas  and  Do, Quoc Khanh  and  Dinarelli, Marco  and  Lavergne, Thomas  and  Max, Aur\'{e}lien  and  Le, Hai-Son  and  Yvon, Fran\c{c}ois},
+  title     = {{LIMSI} $@$ {WMT13}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {62--69},
+  url       = {http://www.aclweb.org/anthology/W13-2204}
+}
+
+@InProceedings{dcu-fda-wmt13,
+  author    = {Bici\c{c}i, Ergun},
+  title     = {Feature Decay Algorithms for Fast Deployment of Accurate Statistical Machine Translation Systems},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {78--84},
+  url       = {http://www.aclweb.org/anthology/W13-2206}
+}
+
+@InProceedings{cu-karel-wmt13,
+  author    = {B\'{i}lek, Karel  and  Zeman, Daniel},
+  title     = {{CUni} Multilingual Matrix in the {WMT} 2013 Shared Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {85--91},
+  url       = {http://www.aclweb.org/anthology/W13-2207}
+}
+
+@InProceedings{cu-bojar-wmt13,
+  author    = {Bojar, Ond\v{r}ej  and  Rosa, Rudolf  and  Tamchyna, Ale\v{s}},
+  title     = {Chimera -- Three Heads for {English-to-Czech} Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {92--98},
+  url       = {http://www.aclweb.org/anthology/W13-2208}
+}
+
+@InProceedings{balagur-wmt13,
+  author    = {Borisov, Alexey  and  Dlougach, Jacob  and  Galinskaya, Irina},
+  title     = {Yandex School of Data Analysis Machine Translation Systems for {WMT}13},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {99--103},
+  url       = {http://www.aclweb.org/anthology/W13-2209}
+}
+
+@InProceedings{kit-wmt13,
+  author    = {Cho, Eunah  and  Ha, Thanh-Le  and  Mediani, Mohammed  and  Niehues, Jan  and  Herrmann, Teresa  and  Slawik, Isabel  and  Waibel, Alex},
+  title     = {The {Karlsruhe} {Institute} of {Technology} Translation Systems for the {WMT} 2013},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {104--108},
+  url       = {http://www.aclweb.org/anthology/W13-2210}
+}
+
+@InProceedings{tubitak-wmt13,
+  author    = {Durgar El-Kahlout, Ilknur  and  Mermer, Co\c{s}kun},
+  title     = {T\"{U}BİTAK-BİLGEM German-English Machine Translation Systems for W13},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {109--113},
+  url       = {http://www.aclweb.org/anthology/W13-2211}
+}
+
+@InProceedings{uedin-wmt13,
+  author    = {Durrani, Nadir  and  Haddow, Barry  and  Heafield, Kenneth  and  Koehn, Philipp},
+  title     = {Edinburgh's Machine Translation Systems for {European} Language Pairs},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {114--121},
+  url       = {http://www.aclweb.org/anthology/W13-2212}
+}
+
+@InProceedings{mes-wmt13,
+  author    = {Durrani, Nadir  and  Fraser, Alexander  and  Schmid, Helmut  and  Sajjad, Hassan  and  Farkas, Rich\'{a}rd},
+  title     = {{Munich-Edinburgh-Stuttgart} Submissions of {OSM} Systems at {WMT}13},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {122--127},
+  url       = {http://www.aclweb.org/anthology/W13-2213}
+}
+
+@InProceedings{umd-wmt13,
+  author    = {Eidelman, Vladimir  and  Wu, Ke  and  Ture, Ferhan  and  Resnik, Philip  and  Lin, Jimmy},
+  title     = {Towards Efficient Large-Scale Feature-Rich Statistical Machine Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {128--133},
+  url       = {http://www.aclweb.org/anthology/W13-2214}
+}
+
+@InProceedings{talp-upc-wmt13,
+  author    = {Formiga, Llu\'{i}s  and  Costa-juss\`{a}, Marta R.  and  Mari\~{n}o, Jos\'{e} B.  and  Fonollosa, Jos\'{e} A. R.  and  Barr\'{o}n-Cede\~{n}o, Alberto  and  Marquez, Lluis},
+  title     = {The {TALP-UPC} Phrase-Based Translation Systems for {WMT}13: System Combination with Morphology Generation, Domain Adaptation and Corpus Filtering},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {134--140},
+  url       = {http://www.aclweb.org/anthology/W13-2215}
+}
+
+@InProceedings{cu-phrasefix-wmt13,
+  author    = {Galu\v{s}\v{c}\'{a}kov\'{a}, Petra  and  Popel, Martin  and  Bojar, Ond\v{r}ej},
+  title     = {{PhraseFix}: Statistical Post-Editing of {TectoMT}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {141--147},
+  url       = {http://www.aclweb.org/anthology/W13-2216}
+}
+
+@InProceedings{stanford-wmt13,
+  author    = {Green, Spence  and  Cer, Daniel  and  Reschke, Kevin  and  Voigt, Rob  and  Bauer, John  and  Wang, Sida  and  Silveira, Natalia  and  Neidert, Julia  and  Manning, Christopher D.},
+  title     = {Feature-Rich Phrase-based Translation: {Stanford} {University's} Submission to the {WMT} 2013 Translation Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {148--153},
+  url       = {http://www.aclweb.org/anthology/W13-2217}
+}
+
+@InProceedings{lia-wmt13,
+  author    = {Huet, St\'{e}phane  and  Manishina, Elena  and  Lef\`{e}vre, Fabrice},
+  title     = {Factored Machine Translation Systems for {Russian-English}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {154--157},
+  url       = {http://www.aclweb.org/anthology/W13-2218}
+}
+
+@InProceedings{omnifluent-wmt13,
+  author    = {Matusov, Evgeny  and  Leusch, Gregor},
+  title     = {Omnifluent {English-to-French} and {Russian-to-English} Systems for the 2013 {Workshop on Statistical Machine Translation}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {158--163},
+  url       = {http://www.aclweb.org/anthology/W13-2219}
+}
+
+@InProceedings{desrt-wmt13,
+  author    = {Miceli Barone, Antonio Valerio  and  Attardi, Giuseppe},
+  title     = {Pre-Reordering for Machine Translation Using Transition-Based Walks on Dependency Parse Trees},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {164--169},
+  url       = {http://www.aclweb.org/anthology/W13-2220}
+}
+
+@InProceedings{uedin-syntax-wmt13,
+  author    = {Nadejde, Maria  and  Williams, Philip  and  Koehn, Philipp},
+  title     = {Edinburgh's Syntax-Based Machine Translation Systems},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {170--176},
+  url       = {http://www.aclweb.org/anthology/W13-2221}
+}
+
+@InProceedings{dcu-okita-wmt13,
+  author    = {Okita, Tsuyoshi  and  Liu, Qun  and  van Genabith, Josef},
+  title     = {Shallow Semantically-Informed {PBSMT} and {HPBSMT}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {177--184},
+  url       = {http://www.aclweb.org/anthology/W13-2222}
+}
+
+@InProceedings{quaero-wmt13,
+  author    = {Peitz, Stephan  and  Mansour, Saab  and  Huck, Matthias  and  Freitag, Markus  and  Ney, Hermann  and  Cho, Eunah  and  Herrmann, Teresa  and  Mediani, Mohammed  and  Niehues, Jan  and  Waibel, Alex  and  Allauzen, Alexander  and  Khanh Do, Quoc  and  Buschbeck, Bianka  and  Wandmacher, Tonio},
+  title     = {Joint {WMT} 2013 Submission of the {QUAERO} Project},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {185--192},
+  url       = {http://www.aclweb.org/anthology/W13-2223}
+}
+
+@InProceedings{rwth-wmt13,
+  author    = {Peitz, Stephan  and  Mansour, Saab  and  Peter, Jan-Thorsten  and  Schmidt, Christoph  and  Wuebker, Joern  and  Huck, Matthias  and  Freitag, Markus  and  Ney, Hermann},
+  title     = {The {RWTH} {Aachen} Machine Translation System for {WMT} 2013},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {193--199},
+  url       = {http://www.aclweb.org/anthology/W13-2224}
+}
+
+@InProceedings{ucam-wmt13,
+  author    = {Pino, Juan  and  Waite, Aurelien  and  Xiao, Tong  and  de Gispert, Adri\`{a}  and  Flego, Federico  and  Byrne, William},
+  title     = {The {University} of {Cambridge} {Russian-English} System at {WMT}13},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {200--205},
+  url       = {http://www.aclweb.org/anthology/W13-2225}
+}
+
+@InProceedings{jhu-wmt13,
+  author    = {Post, Matt  and  Ganitkevitch, Juri  and  Orland, Luke  and  Weese, Jonathan  and  Cao, Yuan  and  Callison-Burch, Chris},
+  title     = {Joshua 5.0: Sparser, Better, Faster, Server},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {206--212},
+  url       = {http://www.aclweb.org/anthology/W13-2226}
+}
+
+@InProceedings{dcu-wmt13,
+  author    = {Rubino, Raphael  and  Toral, Antonio  and  Cort\'{e}s Va\'{i}llo, Santiago  and  Xie, Jun  and  Wu, Xiaofeng  and  Doherty, Stephen  and  Liu, Qun},
+  title     = {The {CNGL-DCU-Prompsit} Translation Systems for {WMT}13},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {213--218},
+  url       = {http://www.aclweb.org/anthology/W13-2227}
+}
+
+@InProceedings{qcri-mes-wmt13,
+  author    = {Sajjad, Hassan  and  Smekalova, Svetlana  and  Durrani, Nadir  and  Fraser, Alexander  and  Schmid, Helmut},
+  title     = {{QCRI-MES} Submission at {WMT}13: Using Transliteration Mining to Improve Statistical Machine Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {219--224},
+  url       = {http://www.aclweb.org/anthology/W13-2228}
+}
+
+@InProceedings{uu-wmt13,
+  author    = {Stymne, Sara  and  Hardmeier, Christian  and  Tiedemann, J\"{o}rg  and  Nivre, Joakim},
+  title     = {Tunable Distortion Limits and Corpus Cleaning for {SMT}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {225--231},
+  url       = {http://www.aclweb.org/anthology/W13-2229}
+}
+
+@InProceedings{mes-wmt13-2,
+  author    = {Weller, Marion  and  Kisselew, Max  and  Smekalova, Svetlana  and  Fraser, Alexander  and  Schmid, Helmut  and  Durrani, Nadir  and  Sajjad, Hassan  and  Farkas, Rich\'{a}rd},
+  title     = {{Munich-Edinburgh-Stuttgart} Submissions at {WMT}13: Morphological and Syntactic Processing for {SMT}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {232--239},
+  url       = {http://www.aclweb.org/anthology/W13-2230}
+}
+
+@InProceedings{turchi-negri-federico:2013:WMT,
+  author    = {Turchi, Marco  and  Negri, Matteo  and  Federico, Marcello},
+  title     = {Coping with the Subjectivity of Human Judgements in {MT} Quality Estimation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {240--251},
+  url       = {http://www.aclweb.org/anthology/W13-2231}
+}
+
+@InProceedings{krstovski-smith:2013:WMT,
+  author    = {Krstovski, Kriste  and  Smith, David A.},
+  title     = {Online Polylingual Topic Models for Fast Document Translation Detection},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {252--261},
+  url       = {http://www.aclweb.org/anthology/W13-2232}
+}
+
+@InProceedings{irvine-callisonburch:2013:WMT,
+  author    = {Irvine, Ann  and  Callison-Burch, Chris},
+  title     = {Combining Bilingual and Comparable Corpora for Low Resource Machine Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {262--270},
+  url       = {http://www.aclweb.org/anthology/W13-2233}
+}
+
+@InProceedings{tsvetkov-EtAl:2013:WMT,
+  author    = {Tsvetkov, Yulia  and  Dyer, Chris  and  Levin, Lori  and  Bhatia, Archna},
+  title     = {Generating {English} Determiners in Phrase-Based Translation with Synthetic Translation Options},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {271--280},
+  url       = {http://www.aclweb.org/anthology/W13-2234}
+}
+
+@InProceedings{lewis-eetemadi:2013:WMT,
+  author    = {Lewis, William  and  Eetemadi, Sauleh},
+  title     = {Dramatically Reducing Training Data Size Through Vocabulary Saturation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {281--291},
+  url       = {http://www.aclweb.org/anthology/W13-2235}
+}
+
+@InProceedings{simianer-riezler:2013:WMT,
+  author    = {Simianer, Patrick  and  Riezler, Stefan},
+  title     = {Multi-Task Learning for Improved Discriminative Training in {SMT}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {292--300},
+  url       = {http://www.aclweb.org/anthology/W13-2236}
+}
+
+@InProceedings{mathur-mauro-federico:2013:WMT,
+  author    = {Mathur, Prashant  and  Mauro, Cettolo  and  Federico, Marcello},
+  title     = {Online Learning Approaches in Computer Assisted Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {301--308},
+  url       = {http://www.aclweb.org/anthology/W13-2237}
+}
+
+@InProceedings{wuebker-ney:2013:WMT,
+  author    = {Wuebker, Joern  and  Ney, Hermann},
+  title     = {Length-Incremental Phrase Training for {SMT}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {309--319},
+  url       = {http://www.aclweb.org/anthology/W13-2238}
+}
+
+@InProceedings{cer-manning-jurafsky:2013:WMT,
+  author    = {Cer, Daniel  and  Manning, Christopher D.  and  Jurafsky, Dan},
+  title     = {Positive Diversity Tuning for Machine Translation System Combination},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {320--328},
+  url       = {http://www.aclweb.org/anthology/W13-2239}
+}
+
+@InProceedings{avramidis-popovic:2013:WMT,
+  author    = {Avramidis, Eleftherios  and  Popovic, Maja},
+  title     = {Selecting Feature Sets for Comparative and Time-Oriented Quality Estimation of Machine Translation Output},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {329--336},
+  url       = {http://www.aclweb.org/anthology/W13-2240}
+}
+
+@InProceedings{beck-EtAl:2013:WMT,
+  author    = {Beck, Daniel  and  Shah, Kashif  and  Cohn, Trevor  and  Specia, Lucia},
+  title     = {{SHEF-Lite}: When Less is More for Translation Quality Estimation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {337--342},
+  url       = {http://www.aclweb.org/anthology/W13-2241}
+}
+
+@InProceedings{bicici:2013:WMT2,
+  author    = {Bici\c{c}i, Ergun},
+  title     = {Referential Translation Machines for Quality Estimation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {343--351},
+  url       = {http://www.aclweb.org/anthology/W13-2242}
+}
+
+@InProceedings{camargodesouza-EtAl:2013:WMT,
+  author    = {Camargo de Souza, Jos\'{e} Guilherme  and  Buck, Christian  and  Turchi, Marco  and  Negri, Matteo},
+  title     = {{FBK-UEdin} Participation to the {WMT}13 Quality Estimation Shared Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {352--358},
+  url       = {http://www.aclweb.org/anthology/W13-2243}
+}
+
+@InProceedings{formiga-EtAl:2013:WMT2,
+  author    = {Formiga, Llu\'{i}s  and  Gonz\`{a}lez, Meritxell  and  Barr\'{o}n-Cede\~{n}o, Alberto  and  Fonollosa, Jos\'{e} A. R.  and  Marquez, Lluis},
+  title     = {The {TALP-UPC} Approach to System Selection: {Asiya} Features and Pairwise Classification Using Random Forests},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {359--364},
+  url       = {http://www.aclweb.org/anthology/W13-2244}
+}
+
+@InProceedings{han-EtAl:2013:WMT1,
+  author    = {Han, Aaron Li-Feng  and  Lu, Yi  and  Wong, Derek F.  and  Chao, Lidia S.  and  He, Liangye  and  Xing, Junwen},
+  title     = {Quality Estimation for Machine Translation Using the Joint Method of Evaluation Criteria and Statistical Modeling},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {365--372},
+  url       = {http://www.aclweb.org/anthology/W13-2245}
+}
+
+@InProceedings{hildebrand-vogel:2013:WMT,
+  author    = {Hildebrand, Silja  and  Vogel, Stephan},
+  title     = {{MT} Quality Estimation: The {CMU} System for {WMT}'13},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {373--379},
+  url       = {http://www.aclweb.org/anthology/W13-2246}
+}
+
+@InProceedings{langlois-smaili:2013:WMT,
+  author    = {Langlois, David  and  Smaili, Kamel},
+  title     = {{LORIA} System for the {WMT}13 Quality Estimation Shared Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {380--385},
+  url       = {http://www.aclweb.org/anthology/W13-2247}
+}
+
+@InProceedings{luong-lecouteux-besacier:2013:WMT,
+  author    = {Luong, Ngoc Quang  and  Lecouteux, Benjamin  and  Besacier, Laurent},
+  title     = {{LIG} System for {WMT}13 {QE} Task: Investigating the Usefulness of Features in Word Confidence Estimation for {MT}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {386--391},
+  url       = {http://www.aclweb.org/anthology/W13-2248}
+}
+
+@InProceedings{rubino-EtAl:2013:WMT2,
+  author    = {Rubino, Raphael  and  Wagner, Joachim  and  Foster, Jennifer  and  Roturier, Johann  and  Samad Zadeh Kaljahi, Rasoul  and  Hollowood, Fred},
+  title     = {{DCU-Symantec} at the {WMT} 2013 Quality Estimation Shared Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {392--397},
+  url       = {http://www.aclweb.org/anthology/W13-2249}
+}
+
+@InProceedings{singh-wisniewski-yvon:2013:WMT,
+  author    = {Singh, Anil Kumar  and  Wisniewski, Guillaume  and  Yvon, Fran\c{c}ois},
+  title     = {{LIMSI} Submission for the {WMT}'13 Quality Estimation Task: an Experiment with N-Gram Posteriors},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {398--404},
+  url       = {http://www.aclweb.org/anthology/W13-2250}
+}
+
+@InProceedings{fishel:2013:WMT,
+  author    = {Fishel, Mark},
+  title     = {Ranking Translations using Error Analysis and Quality Estimation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {405--407},
+  url       = {http://www.aclweb.org/anthology/W13-2251}
+}
+
+@InProceedings{hajlaoui:2013:WMT,
+  author    = {Hajlaoui, Najeh},
+  title     = {Are {ACT's} Scores Increasing with Better Translation Quality?},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {408--413},
+  url       = {http://www.aclweb.org/anthology/W13-2252}
+}
+
+@InProceedings{han-EtAl:2013:WMT2,
+  author    = {Han, Aaron Li-Feng  and  Wong, Derek F.  and  Chao, Lidia S.  and  Lu, Yi  and  He, Liangye  and  Wang, Yiming  and  Zhou, Jiaji},
+  title     = {A Description of Tunable Machine Translation Evaluation Systems in {WMT}13 Metrics Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {414--421},
+  url       = {http://www.aclweb.org/anthology/W13-2253}
+}
+
+@InProceedings{lo-wu:2013:WMT,
+  author    = {Lo, Chi-kiu  and  Wu, Dekai},
+  title     = {{MEANT} at {WMT} 2013: A Tunable, Accurate yet Inexpensive Semantic Frame Based {MT} Evaluation Metric},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {422--428},
+  url       = {http://www.aclweb.org/anthology/W13-2254}
+}
+
+@InProceedings{moreau-rubino:2013:WMT,
+  author    = {Moreau, Erwan  and  Rubino, Raphael},
+  title     = {An Approach Using Style Classification Features for Quality Estimation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {429--434},
+  url       = {http://www.aclweb.org/anthology/W13-2255}
+}
+
+@InProceedings{wu-yu-liu:2013:WMT,
+  author    = {Wu, Xiaofeng  and  Yu, Hui  and  Liu, Qun},
+  title     = {{DCU} Participation in {WMT}2013 Metrics Task},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {435--439},
+  url       = {http://www.aclweb.org/anthology/W13-2256}
+}
+
+@InProceedings{bisazza-federico:2013:WMT,
+  author    = {Bisazza, Arianna  and  Federico, Marcello},
+  title     = {Efficient Solutions for Word Reordering in {German-English} Phrase-Based Statistical Machine Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {440--451},
+  url       = {http://www.aclweb.org/anthology/W13-2257}
+}
+
+@InProceedings{huck-EtAl:2013:WMT,
+  author    = {Huck, Matthias  and  Wuebker, Joern  and  Rietig, Felix  and  Ney, Hermann},
+  title     = {A Phrase Orientation Model for Hierarchical Machine Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {452--463},
+  url       = {http://www.aclweb.org/anthology/W13-2258}
+}
+
+@InProceedings{graham:2013:WMT,
+  author    = {Graham, Yvette},
+  title     = {A Dependency-Constrained Hierarchical Model with {Moses}},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {464--471},
+  url       = {http://www.aclweb.org/anthology/W13-2259}
+}
+
+@InProceedings{aziz-dymetman-venkatapathy:2013:WMT,
+  author    = {Aziz, Wilker  and  Dymetman, Marc  and  Venkatapathy, Sriram},
+  title     = {Investigations in Exact Inference for Hierarchical Translation},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {472--483},
+  url       = {http://www.aclweb.org/anthology/W13-2260}
+}
+
+@InProceedings{zaidan-chowdhary:2013:WMT,
+  author    = {Zaidan, Omar  and  Chowdhary, Vishal},
+  title     = {Evaluating (and Improving) Sentence Alignment under Noisy Conditions},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {484--493},
+  url       = {http://www.aclweb.org/anthology/W13-2261}
+}
+
+@InProceedings{eyigoz-gildea-oflazer:2013:WMT,
+  author    = {Eyig\"{o}z, Elif  and  Gildea, Daniel  and  Oflazer, Kemal},
+  title     = {{Multi-Rate} {HMMs} for Word Alignment},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {494--502},
+  url       = {http://www.aclweb.org/anthology/W13-2262}
+}
+
+@InProceedings{kondo-duh-matsumoto:2013:WMT,
+  author    = {Kondo, Shuhei  and  Duh, Kevin  and  Matsumoto, Yuji},
+  title     = {Hidden {Markov} Tree Model for Word Alignment},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {503--511},
+  url       = {http://www.aclweb.org/anthology/W13-2263}
+}
+
+@InProceedings{niehues-waibel:2013:WMT,
+  author    = {Niehues, Jan  and  Waibel, Alex},
+  title     = {An {MT} Error-Driven Discriminative Word Lexicon using Sentence Structure Features},
+  booktitle = {Proceedings of the Eighth Workshop on Statistical Machine Translation},
+  month     = {August},
+  year      = {2013},
+  address   = {Sofia, Bulgaria},
+  publisher = {Association for Computational Linguistics},
+  pages     = {512--520},
+  url       = {http://www.aclweb.org/anthology/W13-2264}
+}
+
+@InProceedings{talp-upc-wmt12,
+  author    = {Formiga, Lluis  and  Henr\'{i}quez Q., Carlos A.  and  Hern\'{a}ndez, Adolfo  and  Mari\~{n}o, Jos\'{e} B.  and  Monte, Enric  and  Fonollosa, Jos\'{e} A. R.},
+  title     = {The {TALP-UPC} phrase-based translation systems for WMT12: Morphology simplification and domain adaptation},
+  booktitle = {Proceedings of the Seventh Workshop on Statistical Machine Translation},
+  month     = {June},
+  year      = {2012},
+  address   = {Montr{\'e}al, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {275--282},
+  url       = {http://www.aclweb.org/anthology/W12-3133}
+}
+@misc{murmur,
+  author={Austin Appleby},
+  title={{SMHasher} \& {MurmurHash}},
+  year={2012},
+  note={\url{https://code.google.com/p/smhasher/}},
+}
+@misc{boost-unordered,
+  author={Daniel James},
+  title={{Boost.Unordered}},
+  note={\url{http://www.boost.org/doc/libs/release/doc/html/unordered.html}},
+  year={2005},
+}
+@misc{clueweb09,
+  author={Jamie Callan and Mark Hoy and Changkuk Yoo and Le Zhao},
+  title={The {ClueWeb09} Dataset},
+  year={2009},
+  note={\url{http://lemurproject.org/clueweb09/}},
+}
+@inproceedings{jane,
+  title={Jane: Open Source Hierarchical Translation, Extended with Reordering and Lexicon Models},
+  author={Vilar, David and Stein, Daniel and Huck, Matthias and Ney, Hermann},
+  booktitle={Proceedings of the Joint Fifth Workshop on Statistical Machine Translation and MetricsMATR},
+  year={2010},
+  month={July},
+  address={Uppsala, Sweden},
+  pages={262--270},
+}
+@inproceedings{jane-phrase,
+  title={Jane 2: Open Source Phrase-based and Hierarchical Statistical Machine Translation},
+  author={Joern Wuebker and Matthias Huck and Stephan Peitz and Malte Nuhn and Markus Freitag and Jan-Thorsten Peter and Saab Mansour and Hermann Ney},
+  month={December},
+  address={Mumbai, India},
+  year={2012},
+  booktitle={Proceedings of COLING 2012: Demonstration Papers},
+  pages={483--492},
+}
+@inproceedings{search,
+  author = {Kenneth Heafield and Philipp Koehn and Alon Lavie},
+  title = {Grouping Language Model Boundary Words to Speed K-Best Extraction from Hypergraphs},
+  year = {2013},
+  month = {June},
+  booktitle = {Proceedings of the 2013 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies},
+  address = {Atlanta, Georgia, USA},
+  url = {http://kheafield.com/professional/edinburgh/search\_paper.pdf},
+}
+@misc{tcmalloc,
+  author={Sanjay Ghemawat},
+  title={{TCMalloc}: Thread-Caching Malloc},
+  note={\url{https://gperftools.googlecode.com/svn/trunk/doc/tcmalloc.html}},
+  year={2011},
+  month={July},
+}
+@book{phi-book,
+  title={Statistical Machine Translation},
+  author={Philipp Koehn},
+  year={2010},
+  isbn={0521874157},
+  publisher={Cambridge University Press},
+}
+@InProceedings{phrasal,
+	author    = {Cer, Daniel  and  Galley, Michel  and  Jurafsky, Daniel  and  Manning, Christopher D.},
+	title     = {Phrasal: A Statistical Machine Translation Toolkit for Exploring New Model Features},
+	booktitle = {Proceedings of the NAACL HLT 2010 Demonstration Session},
+	month     = {June},
+	year      = {2010},
+	address   = {Los Angeles, California},
+	publisher = {Association for Computational Linguistics},
+	pages     = {9--12},
+	url       = {http://www.aclweb.org/anthology/N10-2003}
+}
+@article{kriya,
+  author={Baskaran Sankaran and Majid Razmara and Anoop Sarkar},
+  title={Kriya – An end-to-end Hierarchical Phrase-based {MT} System},
+  year={2012},
+  journal={The Prague Bulletin of Mathematical Linguistics },
+  volume={97},
+  pages={83--98},
+}
+@inproceedings{wenduan-fakeimprovement,
+  title={Learning to Prune: Context-Sensitive Pruning for Syntactic {MT}},
+  author={Wenduan Xu and Yue Zhang and Philip Williams and Philipp Koehn},
+  year={2013},
+  month={August},
+  booktitle={Proceedings of The 51st Annual Meeting of the Association for Computational Linguistics},
+}
+@misc{jhu2009,
+  title={Final Report of the 2009 {JHU} {CLSP} Workshop},
+  author={Dekang Lin and Kenneth Church and Heng Ji and Satoshi Sekine and David Yarowsky and Shane Bergsma andKailash Patil and Emily Pitler and Rachel Lathbury and Vikram Rao and Kapil Dalwani and Sushant Narsale},
+  month={June},
+  year={2010},
+}
+
+@phdthesis{Heafield-thesis,
+  author = {Kenneth Heafield},
+  title = {Efficient Language Modeling Algorithms with Applications to Statistical Machine Translation},
+  year = {2013},
+  month = {September},
+  day = {20},
+  school = {{Carnegie} {Mellon} University},
+  url = {http://kheafield.com/professional/thesis.pdf},
+}
+
+
+@inproceedings{denero2008complexity,
+  title={The complexity of phrase alignment problems},
+  author={DeNero, John and Klein, Dan},
+  booktitle={Proceedings of the 46th Annual Meeting of the Association for Computational Linguistics on Human Language Technologies: Short Papers},
+  pages={25--28},
+  year={2008},
+  organization={Association for Computational Linguistics}
+}
+
+@inproceedings{denero2006generative,
+  title={Why generative phrase models underperform surface heuristics},
+  author={DeNero, John and Gillick, Dan and Zhang, James and Klein, Dan},
+  booktitle={Proceedings of the Workshop on Statistical Machine Translation},
+  pages={31--38},
+  year={2006},
+  organization={Association for Computational Linguistics}
+}
+
+@inproceedings{marcuwong,
+  title={A Phrase-Based, Joint Probability Model for Statistical Machine Translation},
+  author={Marcu, Daniel and Wong, William},
+  booktitle={Proceedings of the Conference on Empirical Methods in Natural
+    Language Processing ({EMNLP})},
+  pages={133--139},
+  organization={Association for Computational Linguistics},
+  year={2002},
+}
+
+@inproceedings{leaveoneout,
+  title={Training Phrase Translation Models with Leaving-One-Out},
+  author={Joern Wuebker and Arne Mauser and Hermann Ney},
+  booktitle={Proceedings of the 48th Annual Meeting of the Association for Computational Linguistics},
+  pages={475--484},
+  year={2010},
+}
+
+@article{halevy2009unreasonable,
+  title={The unreasonable effectiveness of data},
+  author={Halevy, Alon and Norvig, Peter and Pereira, Fernando},
+  journal={Intelligent Systems, IEEE},
+  volume={24},
+  number={2},
+  pages={8--12},
+  year={2009},
+  publisher={IEEE}
+}
+
+@inproceedings{prononlinear,
+  author = {Haddow, Barry},
+  title = {Applying Pairwise Ranked Optimisation to Improve the Interpolation of Translation Models},
+  year = {2013},
+  booktitle = {Proceedings of NAACL},
+}
+
+@inproceedings{nplm,
+  title={Decoding with large-scale neural language models improves translation},
+  author={Ashish Vaswani and Yinggong Zhao and Victoria Fossum and David Chiang},
+  year={2013},
+  booktitle={Proceedings of EMNLP},
+}
