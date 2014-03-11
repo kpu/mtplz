@@ -1,6 +1,7 @@
-#ifndef DECODE_HYPOTHESIS__
-#define DECODE_HYPOTHESIS__
+#ifndef DECODE_HYPOTHESIS
+#define DECODE_HYPOTHESIS
 
+#include "decode/coverage.hh"
 #include "decode/id.hh"
 #include "decode/phrase.hh"
 #include "lm/state.hh"
@@ -16,56 +17,6 @@
 namespace util { class Pool; }
 
 namespace decode {
-
-// TODO: coverage longer than 64 bits, which is needed if max_phrase + distortion > 64
-class Coverage {
-  public:
-    Coverage() : first_zero_(0), bits_(0) {}
-
-    bool operator==(const Coverage &other) const {
-      return (first_zero_ == other.first_zero_) && (bits_ == other.bits_);
-    }
-
-    void Set(std::size_t begin, std::size_t end) {
-      assert(Compatible(begin, end));
-      if (begin == first_zero_) {
-        first_zero_ = end;
-        bits_ >>= (end - begin);
-        while (bits_ & 1) {
-          ++first_zero_;
-          bits_ >>= 1;
-        }
-      } else {
-        bits_ |= Pattern(begin, end);
-      }
-    }
-
-    bool Compatible(std::size_t begin, std::size_t end) const {
-      return (begin >= first_zero_) && !(Pattern(begin, end) & bits_);
-    }
-
-    std::size_t FirstZero() const { return first_zero_; }
-
-  private:
-    friend inline uint64_t hash_value(const Coverage &coverage) {
-      return util::MurmurHashNative(&coverage.first_zero_, sizeof(coverage.first_zero_), coverage.bits_);
-    }
-
-    friend std::ostream &operator<<(std::ostream &stream, const Coverage &coverage);
-
-    inline uint64_t Pattern(std::size_t begin, std::size_t end) const {
-      assert(begin >= first_zero_);
-      assert(end - first_zero_ < 64);
-      // 1 in the bits.
-      return (1ULL << (end - first_zero_)) - (1ULL << (begin - first_zero_));
-    }
-
-    std::size_t first_zero_;
-    // Bits with the first zero removed.  
-    // We also assume anything beyond this is zero due to the reordering window.
-    // Lowest bits correspond to next word.
-    uint64_t bits_;
-};
 
 // TODO properly factored feature state.
 class Hypothesis {
@@ -91,8 +42,8 @@ class Hypothesis {
     }
 
     // Initialize root hypothesis.  Provide the LM's BeginSentence.
-    Hypothesis(const lm::ngram::Right &begin_sentence) :
-      score_(0.0),
+    Hypothesis(const lm::ngram::Right &begin_sentence, float score) :
+      score_(score),
       state_(begin_sentence),
       pre_(NULL),
       last_source_index_(0),
@@ -142,4 +93,4 @@ struct RecombineEqual : public std::binary_function<const Hypothesis &, const Hy
 
 } // namespace decode
 
-#endif // DECODE_HYPOTHESIS__
+#endif // DECODE_HYPOTHESIS

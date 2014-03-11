@@ -1,4 +1,6 @@
-#include "decode/hypothesis.hh"
+#include "decode/coverage.hh"
+
+#include <ostream>
 
 namespace decode {
 
