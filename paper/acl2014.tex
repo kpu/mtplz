@@ -45,13 +45,29 @@ When tuned to attain the same accuracy, our algorithm is OVER 9000 times as fast
 \end{abstract}
 
 \section{Introduction}
-Translation speed is critical to making suggestions as translators type, mining for parallel data by translating the web, and running on mobile devices without Internet connectivity.  This paper contributes a faster algorithm for phrase-based machine translation along with an implementation in a new open-source decoder.  
+Translation speed is critical to making suggestions as translators type, mining for parallel data by translating the web, and running on mobile devices without Internet connectivity.  We contribute a fast decoding algorithm for phrase-based machine translation along with an implementation in a new open-source (LGPL) decoder.  
 
-Like existing phrase-based decoders \cite{moses,jane-phrase,phrasal}, our algorithm assembles sentences from left to right on the target side.  
+Phrase-based decoders \cite{moses,phrasal,jane-phrase} keep track of several types of information with translation hypotheses: coverage of the source sentence thus far, context for the language model, and state for other features.  Existing decoders treat this information as atomic: hypotheses that have exactly the same information can be recombined and efficiently handled via dynamic programming, but there is no special handling for two hypotheses that have the same language model context.  Therefore, the language model is repeatedly consulted regarding hypotheses that differ only in ways irrelevant to its score, such as coverage of the source sentence.  Our decoder bundles hypotheses into equivalence classes that allow the language model to focus solely on the words that matter to its score.  
 
+Like most phrase-based decoders \cite{pharaoh}, hypotheses are built from left to right by appending phrases in the target language.  When this happens, the language model uses the last $N-1$ words of the hypothesis as context to score the first $N-1$ words of the phrase, where $N$ is the order of the model.  Traditional decoders \cite{cubepruning} try thousands of combinations of hypotheses and phrases, hoping to find ones that the language model likes.  Our algorithm instead discovers good combinations in a coarse-to-fine manner inspired by \newcite{search}, which presented a decoding algorithm for syntactic machine translation.  The algorithm exploits the fact that hypotheses often share the same suffix and phrases often share the same prefix.  These shared suffixes and prefixes allow the algorithm to coarsely reason over many combinations at once.   
 
+%The algorithm starts by examining boundary words: the last word of each hypothesis and the first word of each phrase.  Options that score well together are refined by examining additional words from hypotheses with matching suffixes and phrases with matching prefixes.  This refinement process continues until some combinations have been fully scored by examining all $2N-2$ relevant words.    
+
+As with most search algorithms for phrase-based machine translation, our algorithm is approximate.  One can trade between CPU time and search accuracy by choosing how many hypotheses to keep in each step of the search.  The primary claim is that our algorithm offers a better trade-off between time and accuracy when compared with the popular cube pruning algorithm \cite{cubepruning}.  
 
 \section{Related Work}
+Part of our phrase-based decoding algorithm is inspired by the syntactic decoding algorithm of \newcite{search}.  Their work exploited common prefixes and suffixes of translation hypotheses in order to efficiently reason over many hypotheses at once.  In some sense, phrase-based translation is simpler because hypotheses are constructed from left to right, so there is no need to worry about the prefix of a hypothesis.  However, this simplification comes with a different cost: phrase-based translation implements reordering by allowing hypotheses to correspond to discontiguous words in the source sentence.  There are exponentially many ways to cover the source sentence, so we developed an efficient way for the language model to reason over hypotheses that cover different parts of the source sentence.  In contrast, syntactic machine translation hypotheses correspond to contiguous spans in the source sentence, so \newcite{search} simply ran their algorithm separately in every possible span.  
+
+Another difference from \newcite{search} is that they made no effort to exploit common words that appear in translation rules, which in our case are analogous to phrases.  In this work, we explicitly group target phrases by common prefixes, doing so directly in the phrase table.  
+
+%.  We have adopted their iterative refinement approach to search for matches between hypotheses and phrases.  However, there are several key differences.  First, syntactic machine translation hypotheses correspond to contiguous spans in the source sentence, so they simply evaluated every possible span, as is common in syntactic translation.  However, phrase-based hypotheses correspond to discontiguous words in the source sentence, so there are exponentially many 
+
+%First, phrase-based machine translation supports reordering by allowing hypotheses to translate discontiguous words in the source sentence.  There are many possible sets of source words, so we contribute a way to hide this spurious information during language model scoring.  In contrast, hypotheses in syntactic machine translation correspond to contiguous spans in the source sentence, so there are far fewer options and they simply enumerated all of them.   
+
+%First, phrase-based hypotheses grow from left to right, so there is no need to keep track of the words at the beginning of the hypothesis.  This differs from syntactic hypotheses, which can grow in either direction, so they keep track of words on both sides, so our  
+
+
+Future cost \cite{pharaoh}
 
 
 \bibliographystyle{acl}
