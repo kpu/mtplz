@@ -46,8 +46,7 @@
 We contribute a faster decoding algorithm for phrase-based machine translation.  Translation hypotheses keep track of state, such as context for the language model and coverage of words in the source sentence.  Most features depend upon only part of the state, but traditional algorithms, including cube pruning, handle state atomically.  For example, cube pruning will repeatedly query the language model with hypotheses that differ only in source coverage, despite the fact that source coverage is irrelevant to the language model.  
 Our algorithm avoids this behavior by placing hypotheses into equivalence classes, masking the parts of state that matter least to the score.  
 Since our algorithm and cube pruning are both approximate, the improvement can be used to increase speed or accuracy.  
-%TODO result
-When tuned to attain the same accuracy, our algorithm is OVER 9000 times as fast as the Moses decoder with cube pruning.  
+When tuned to attain the same accuracy, our algorithm is 4.0--7.7 times as fast as the Moses decoder with cube pruning.  
 \end{abstract}
 
 \section{Introduction}
@@ -225,10 +224,8 @@ For purposes of scoring, the best child no longer counts as a descendant of $(\e
 Splitting alternates sides, so splitting $(\text{countries}, \epsilon)$ will reveal a word from the target phrase.  The exception is that language model scores are completely resolved before hypotheses reveal coverage vectors and other feature state.  
 
 \begin{figure*}[t]%
-\hspace{-20pt}\begin{tabular}{l}
-\input{plot/model.tex}\\%
-\input{plot/bleu.tex}
-\end{tabular}
+\input{plot/model.tex}\input{plot/bleu.tex}
+\caption{\label{results}Performance of our decoder and Moses for various pop limits $k$.}
 \end{figure*}
 
 \subsection{Priority Queue}
@@ -240,16 +237,15 @@ We build hypotheses from left-to-right and manage stacks just like cube pruning.
 When the decoder matches a hypothesis with a compatible source phrase, we immediately evaluate the distortion feature and update future costs.  Our future costs are exactly the same as those used in Moses \cite{moses}: the highest-scoring way to cover the rest of the source sentence.  This includes the language model score within target phrases but ignores the change in language model score that would occur were these phrases to be appended together.  The hypotheses compatible with each source phrase are arranged into a trie.  Finally, the priority queue algorithm from the preceding section searches for options that the language model likes.    
 
 \section{Experiments}
-The primary claim is that our algorithm performs better than cube pruning in terms of the trade-off between time and accuracy.  To test this claim, we compare our new decoder implementation with Moses \cite{moses}.  
-
-
-%We measure performance by translating a Chinese-English test set of 1677 sentences. This data is a subset of development data prepared for the BOLT Chinese-English translation task, and consists of translated Chinese online text sources, such as discussion forums. We trained our phrase table using a bitext of 10.8 million sentence pairs, which after tokenization amounts to approximately 290 million words on the English side. The bitext contains data from several sources, including news articles, UN proceedings, Hong Kong government documents, online forum data, and specialized sources such as an idiom translation table. Our language model was also trained using the English half of this bitext, using modified Kneser-Ney smoothing \cite{}. 
+The primary claim is that our algorithm performs better than cube pruning in terms of the trade-off between time and accuracy.  We compare our new decoder implementation with Moses \cite{moses} by translating 1677 sentences from Chinese to English.  These sentences are a deduplicated subset of the NIST Open MT 2012 test set and were drawn from Chinese online text sources, such as discussion forums.  We trained our phrase table using a bitext of 10.8 million sentence pairs, which after tokenization amounts to approximately 290 million words on the English side. The bitext contains data from several sources, including news articles, UN proceedings, Hong Kong government documents, online forum data, and specialized sources such as an idiom translation table. We also trained our language model on the English half of this bitext using unpruned interpolated modified Kneser-Ney smoothing \cite{kn,kn-modified}. 
 
 %We trained weights for our translation system using the Phrasal toolkit, using the online Adagrad technique to minimize a smoothed version of BLEU\cite{}. All our translation models used a simple feature set consisting of forward and backward translation models, a language model, a target word generation penalty and a linear distortion feature.  
 
-We used a basic phrase-based Chinese--English system for the NIST Open MT 2012 evaluation with standard phrase table features, the distortion feature, and a single language model.  The reordering limit was set to 15.   The phrase table was pre-filtered to at most 20 target-side phrases per source phrase using the same method as Moses uses internally; we then disabled these limits in the individual decoders to ensure a consistent set of target phrases.  We vary the pop limit $k$ and also set the Moses stack size to $k$ to disable this second form of pruning.  This system is not designed to be competitive, but rather a benchmark that removes as many confounds as possible.
+The system is limited to standard phrase table features, the distortion feature, and a single language model.  We set the reordering limit to 15.   The phrase table was pre-filtered to at most 20 target-side phrases per source phrase using the total score of the target phrase including the language model---the same method Moses uses internally.  We then disabled phrase table pruning in the individual decoders to ensure a consistent set of target phrases.  This system is not designed to be competitive, but rather a benchmark that removes as many confounds as possible.
 
-Moses \cite{moses} revision d6df825 was compiled with all optimizations recommended in the documentation.  We use the in-memory phrase table for speed.  Tests were run on otherwise-idle identical machines with 32 GB RAM; the processes did not come close to running out of memory.  Binarized KenLM language models in probing format were placed in a RAM disk and text phrase tables were forced into the disk cache before each run.  Timing is based on CPU usage reported by the kernel (user plus system) minus loading time, as measured by running on empty input; our decoder is also faster at loading.  All results are single-threaded.  Model score is averaged over all 1677 sentences; higher is better.  We have verified that the model scores are comparable across decoders through short sentences and $K$-best list agreement.
+Moses \cite{moses} revision d6df825 was compiled with all optimizations recommended in the documentation.  We use the in-memory phrase table for speed.  Tests were run on otherwise-idle identical machines with 32 GB RAM; the processes did not come close to running out of memory.  Binarized KenLM language models in probing format were placed in a RAM disk and text phrase tables were forced into the disk cache before each run.  Timing is based on CPU usage reported by the kernel (user plus system) minus loading time, as measured by running on empty input; our decoder is also faster at loading.  All results are single-threaded.  Model score is averaged over all 1677 sentences; higher is better.  We have verified that the model scores are comparable across decoders.  
+
+Figure~\ref{results} shows the results for pop limits $k$ ranging from $5$ to $10000$.  For Moses, we also set the stack size to $k$ to disable a second pruning pass, as is common.  Because Moses is slower, we also ran our decoder with higher beam sizes to fill in the graph.  Our decoder is faster and attains higher accuracy.  We can interpret accuracy improvments as speed improvements by asking how much time is required to attain the same accuracy as the baseline.  By this metric, our decoder is 4.0 to 7.7 times as fast as Moses.  
 
 \section{Conclusion}
 %TODO
