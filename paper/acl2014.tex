@@ -242,11 +242,19 @@ When the decoder matches a hypothesis with a compatible source phrase, we immedi
 \section{Experiments}
 The primary claim is that our algorithm performs better than cube pruning in terms of the trade-off between time and accuracy.  To test this claim, we compare our new decoder implementation with Moses \cite{moses}.  
 
+
+%We measure performance by translating a Chinese-English test set of 1677 sentences. This data is a subset of development data prepared for the BOLT Chinese-English translation task, and consists of translated Chinese online text sources, such as discussion forums. We trained our phrase table using a bitext of 10.8 million sentence pairs, which after tokenization amounts to approximately 290 million words on the English side. The bitext contains data from several sources, including news articles, UN proceedings, Hong Kong government documents, online forum data, and specialized sources such as an idiom translation table. Our language model was also trained using the English half of this bitext, using modified Kneser-Ney smoothing \cite{}. 
+
+%We trained weights for our translation system using the Phrasal toolkit, using the online Adagrad technique to minimize a smoothed version of BLEU\cite{}. All our translation models used a simple feature set consisting of forward and backward translation models, a language model, a target word generation penalty and a linear distortion feature.  
+
 We used a basic phrase-based Chinese--English system for the NIST Open MT 2012 evaluation with standard phrase table features, the distortion feature, and a single language model.  The reordering limit was set to 15.   The phrase table was pre-filtered to at most 20 target-side phrases per source phrase using the same method as Moses uses internally; we then disabled these limits in the individual decoders to ensure a consistent set of target phrases.  We vary the pop limit $k$ and also set the Moses stack size to $k$ to disable this second form of pruning.  This system is not designed to be competitive, but rather a benchmark that removes as many confounds as possible.
 
 Moses \cite{moses} revision d6df825 was compiled with all optimizations recommended in the documentation.  We use the in-memory phrase table for speed.  Tests were run on otherwise-idle identical machines with 32 GB RAM; the processes did not come close to running out of memory.  Binarized KenLM language models in probing format were placed in a RAM disk and text phrase tables were forced into the disk cache before each run.  Timing is based on CPU usage reported by the kernel (user plus system) minus loading time, as measured by running on empty input; our decoder is also faster at loading.  All results are single-threaded.  Model score is averaged over all 1677 sentences; higher is better.  We have verified that the model scores are comparable across decoders through short sentences and $K$-best list agreement.
 
 \section{Conclusion}
+%TODO
+When the decoder matches a hypothesis with a compatible source phrase, we immediately evaluate the distortion feature and update future costs.  Our future costs are exactly the same as those used in Moses \cite{moses}: the highest-scoring way to cover the rest of the source sentence.  This includes the language model score within target phrases but ignores the change in language model score that would occur were these phrases to be appended together.  The hypotheses compatible with each source phrase are arranged into a trie and the language model algorithm searches for good combinations of hypotheses and target phrases.
+
 
 \bibliographystyle{acl}
 \bibliography{paper}
