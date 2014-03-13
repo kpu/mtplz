@@ -210,11 +210,26 @@ As an optimization, a trie reveals multiple words when there would otherwise be 
 Following \newcite{search}, leaves in the trie take the score of the underlying hypothesis or target phrase.  If there are multiple target phrases with the same language model prefix, we take the highest score.  Nodes higher in the trie take the maximum score of their descendants.   Children of a node are sorted by score.   
 
 \subsection{Boundary Pairs}
-The idea is that the trie coarsely reasons about nodes high up in the trie before delving into detail.  In this way, it can determine what the language model likes and, conversely, quickly discard combinations of words that the model does not like.  
+The idea is that the decoder reasons over pairs of nodes in the hypothesis and phrase tries before devling into detail.  In this way, it can determine what the language model likes and, conversely, quickly discard combinations of words that the model does not like.  
 
 A boundary pair consists of a node in the hypothesis trie and a node in the target phrase trie.  For example, the decoder starts at the root of each trie with the boundary pair $(\epsilon, \epsilon)$.  The score of a boundary pair is the sum of the scores of the underlying trie nodes.  However, once some words have been revealed, the decoder calls the language model to compute a score adjustment.  For example, the boundary pair $(\text{country}, \text{that})$ has score adjustment
 \[\log \frac{p(\text{that}\mid\text{country})}{p(\text{that})} \]
-times the weight of the language model.  This has the effect of cancelling out the estimate made when the phrase was scored in isolation and replacing the estimate with a more accurate one based on available context.  These scores are efficient to compute because the decoder retains a pointer to that entry for ``that'' in the language model's data structure \cite{iwslt}. 
+times the weight of the language model.  This has the effect of cancelling out the estimate made when the phrase was scored in isolation and replacing the estimate with a more accurate one based on available context.  These score adjustments are efficient to compute because the decoder retains a pointer to the entry for ``that'' in the language model's data structure \cite{iwslt}. 
+
+\subsection{Splitting}
+Refinement is the notion that the boundary pair $(\epsilon, \epsilon)$ divides into several boundary pairs that reveal specific words from hypotheses or target phrases.  The most straightforward way to do this is simply to split into all children of a trie node.  Continuing the example from Figure~\ref{hypsuff}, we could split $(\epsilon, \epsilon)$ into three boundary pairs: $(\text{country}, \epsilon)$, $(\text{nations}, \epsilon)$, and $(\text{countries}, \epsilon)$.  However, it is somewhat inefficient to separately consider the low-scoring child $(\text{countries}, \epsilon)$.  Instead, we continue to split off the best child $(\text{country}, \epsilon)$ and leave a note that the zeroth child has been split off, denoted $(\epsilon[1^+], \epsilon)$.  The index increases each time a child is split off.  
+
+For purposes of scoring, the best child no longer counts as a descendant of $(\epsilon[1^+], \epsilon)$, so its score decreases.    
+
+Splitting alternates sides, so splitting $(\text{countries}, \epsilon)$ will reveal a word from the target phrase.  The exception is that language model scores are completely resolved before hypotheses reveal coverage vectors and other feature state.  
+
+\subsection{Priority Queue}
+Search proceeds in a best-first fashion controlled by a priority queue.  For each source phrase, we convert the compatible hypotheses into a trie.  The target phrases were already converted into a trie when the phrase table was loaded.  We then push the root $(\epsilon, \epsilon)$ boundary pair into the priority queue.  We do this for all source phrases under consideration, putting their root boundary pairs into the same priority queue.  The algorithm then loops by popping the top boundary pair.  It the top boundary pair uniquely describes a hypothesis and target phrase then remaining features are evaluated and the new hypothesis is output to the decoder's stack.  Otherwise, the algorithm splits the boundary pair and pushes both split versions.  Iteration continues until $k$ new hypotheses have been found.  
+
+\subsection{Overall Algorithm}
+We build hypotheses from left-to-right and manage stacks just like cube pruning. The only difference is how the $k$ elements of these stacks are selected.  
+
+When the decoder matches a hypothesis with a compatible source phrase, we immediately evaluate the distortion feature and update future costs.  Our future costs are exactly the same as those used in Moses \cite{moses}: the highest-scoring way to cover the rest of the source sentence.  This includes the language model score within target phrases but ignores the change in language model score that would occur were these phrases to be appended together.  The hypotheses compatible with each source phrase are arranged into a trie and the language model algorithm searches for good combinations of hypotheses and target phrases.  
 
 \bibliographystyle{acl}
 \bibliography{paper}
