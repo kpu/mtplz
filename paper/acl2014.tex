@@ -21,6 +21,7 @@
 \usepackage{latexsym}
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage{gnuplot-lua-tikz}
 \usetikzlibrary{chains,shapes,arrows}
 \tikzstyle{textbase} = [text height=1.5ex,text depth=.25ex]
 
@@ -223,13 +224,29 @@ For purposes of scoring, the best child no longer counts as a descendant of $(\e
 
 Splitting alternates sides, so splitting $(\text{countries}, \epsilon)$ will reveal a word from the target phrase.  The exception is that language model scores are completely resolved before hypotheses reveal coverage vectors and other feature state.  
 
+\begin{figure*}[t]%
+\hspace{-20pt}\begin{tabular}{l}
+\input{plot/model.tex}\\%
+\input{plot/bleu.tex}
+\end{tabular}
+\end{figure*}
+
 \subsection{Priority Queue}
 Search proceeds in a best-first fashion controlled by a priority queue.  For each source phrase, we convert the compatible hypotheses into a trie.  The target phrases were already converted into a trie when the phrase table was loaded.  We then push the root $(\epsilon, \epsilon)$ boundary pair into the priority queue.  We do this for all source phrases under consideration, putting their root boundary pairs into the same priority queue.  The algorithm then loops by popping the top boundary pair.  It the top boundary pair uniquely describes a hypothesis and target phrase then remaining features are evaluated and the new hypothesis is output to the decoder's stack.  Otherwise, the algorithm splits the boundary pair and pushes both split versions.  Iteration continues until $k$ new hypotheses have been found.  
 
 \subsection{Overall Algorithm}
 We build hypotheses from left-to-right and manage stacks just like cube pruning. The only difference is how the $k$ elements of these stacks are selected.  
 
-When the decoder matches a hypothesis with a compatible source phrase, we immediately evaluate the distortion feature and update future costs.  Our future costs are exactly the same as those used in Moses \cite{moses}: the highest-scoring way to cover the rest of the source sentence.  This includes the language model score within target phrases but ignores the change in language model score that would occur were these phrases to be appended together.  The hypotheses compatible with each source phrase are arranged into a trie and the language model algorithm searches for good combinations of hypotheses and target phrases.  
+When the decoder matches a hypothesis with a compatible source phrase, we immediately evaluate the distortion feature and update future costs.  Our future costs are exactly the same as those used in Moses \cite{moses}: the highest-scoring way to cover the rest of the source sentence.  This includes the language model score within target phrases but ignores the change in language model score that would occur were these phrases to be appended together.  The hypotheses compatible with each source phrase are arranged into a trie.  Finally, the priority queue algorithm from the preceding section searches for options that the language model likes.    
+
+\section{Experiments}
+The primary claim is that our algorithm performs better than cube pruning in terms of the trade-off between time and accuracy.  To test this claim, we compare our new decoder implementation with Moses \cite{moses}.  
+
+We used a basic phrase-based Chinese--English system for the NIST Open MT 2012 evaluation with standard phrase table features, the distortion feature, and a single language model.  The reordering limit was set to 15.   The phrase table was pre-filtered to at most 20 target-side phrases per source phrase using the same method as Moses uses internally; we then disabled these limits in the individual decoders to ensure a consistent set of target phrases.  We vary the pop limit $k$ and also set the Moses stack size to $k$ to disable this second form of pruning.  This system is not designed to be competitive, but rather a benchmark that removes as many confounds as possible.
+
+Moses \cite{moses} revision d6df825 was compiled with all optimizations recommended in the documentation.  We use the in-memory phrase table for speed.  Tests were run on otherwise-idle identical machines with 32 GB RAM; the processes did not come close to running out of memory.  Binarized KenLM language models in probing format were placed in a RAM disk and text phrase tables were forced into the disk cache before each run.  Timing is based on CPU usage reported by the kernel (user plus system) minus loading time, as measured by running on empty input; our decoder is also faster at loading.  All results are single-threaded.  Model score is averaged over all 1677 sentences; higher is better.  We have verified that the model scores are comparable across decoders through short sentences and $K$-best list agreement.
+
+\section{Conclusion}
 
 \bibliographystyle{acl}
 \bibliography{paper}
