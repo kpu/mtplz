@@ -19,6 +19,11 @@
 \usepackage{times}
 \usepackage{url}
 \usepackage{latexsym}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{chains,shapes,arrows}
+\tikzstyle{textbase} = [text height=1.5ex,text depth=.25ex]
+
 
 %\setlength\titlebox{5cm}
 
@@ -45,30 +50,171 @@ When tuned to attain the same accuracy, our algorithm is OVER 9000 times as fast
 \end{abstract}
 
 \section{Introduction}
+\label{intro_label}
 Translation speed is critical to making suggestions as translators type, mining for parallel data by translating the web, and running on mobile devices without Internet connectivity.  We contribute a fast decoding algorithm for phrase-based machine translation along with an implementation in a new open-source (LGPL) decoder.  
 
 Phrase-based decoders \cite{moses,phrasal,jane-phrase} keep track of several types of information with translation hypotheses: coverage of the source sentence thus far, context for the language model, and state for other features.  Existing decoders treat this information as atomic: hypotheses that have exactly the same information can be recombined and efficiently handled via dynamic programming, but there is no special handling for two hypotheses that have the same language model context.  Therefore, the language model is repeatedly consulted regarding hypotheses that differ only in ways irrelevant to its score, such as coverage of the source sentence.  Our decoder bundles hypotheses into equivalence classes that allow the language model to focus solely on the words that matter to its score.  
 
-Like most phrase-based decoders \cite{pharaoh}, hypotheses are built from left to right by appending phrases in the target language.  When this happens, the language model uses the last $N-1$ words of the hypothesis as context to score the first $N-1$ words of the phrase, where $N$ is the order of the model.  Traditional decoders \cite{cubepruning} try thousands of combinations of hypotheses and phrases, hoping to find ones that the language model likes.  Our algorithm instead discovers good combinations in a coarse-to-fine manner inspired by \newcite{search}, which presented a decoding algorithm for syntactic machine translation.  The algorithm exploits the fact that hypotheses often share the same suffix and phrases often share the same prefix.  These shared suffixes and prefixes allow the algorithm to coarsely reason over many combinations at once.   
+Like most phrase-based decoders \cite{pharaoh}, hypotheses are built from left to right by appending phrases in the target language.  When this happens, the language model uses the last $N-1$ words of the hypothesis as context to score the first $N-1$ words of the phrase, where $N$ is the order of the model.  Traditional decoders \cite{cubit} try thousands of combinations of hypotheses and phrases, hoping to find ones that the language model likes.  Our algorithm instead discovers good combinations in a coarse-to-fine manner inspired by \newcite{search}, which presented a decoding algorithm for syntactic machine translation.  The algorithm exploits the fact that hypotheses often share the same suffix and phrases often share the same prefix.  These shared suffixes and prefixes allow the algorithm to coarsely reason over many combinations at once.   
 
 %The algorithm starts by examining boundary words: the last word of each hypothesis and the first word of each phrase.  Options that score well together are refined by examining additional words from hypotheses with matching suffixes and phrases with matching prefixes.  This refinement process continues until some combinations have been fully scored by examining all $2N-2$ relevant words.    
 
-As with most search algorithms for phrase-based machine translation, our algorithm is approximate.  One can trade between CPU time and search accuracy by choosing how many hypotheses to keep in each step of the search.  The primary claim is that our algorithm offers a better trade-off between time and accuracy when compared with the popular cube pruning algorithm \cite{cubepruning}.  
+As with most search algorithms for phrase-based machine translation, our algorithm is approximate.  One can trade between CPU time and search accuracy by choosing how many hypotheses to keep in each step of the search.  The primary claim is that our algorithm offers a better trade-off between time and accuracy when compared with the popular cube pruning algorithm \cite{cubit}.  
 
 \section{Related Work}
 Part of our phrase-based decoding algorithm is inspired by the syntactic decoding algorithm of \newcite{search}.  Their work exploited common prefixes and suffixes of translation hypotheses in order to efficiently reason over many hypotheses at once.  In some sense, phrase-based translation is simpler because hypotheses are constructed from left to right, so there is no need to worry about the prefix of a hypothesis.  However, this simplification comes with a different cost: phrase-based translation implements reordering by allowing hypotheses to correspond to discontiguous words in the source sentence.  There are exponentially many ways to cover the source sentence, so we developed an efficient way for the language model to reason over hypotheses that cover different parts of the source sentence.  In contrast, syntactic machine translation hypotheses correspond to contiguous spans in the source sentence, so \newcite{search} simply ran their algorithm separately in every possible span.  
 
 Another difference from \newcite{search} is that they made no effort to exploit common words that appear in translation rules, which in our case are analogous to phrases.  In this work, we explicitly group target phrases by common prefixes, doing so directly in the phrase table.  
 
-%.  We have adopted their iterative refinement approach to search for matches between hypotheses and phrases.  However, there are several key differences.  First, syntactic machine translation hypotheses correspond to contiguous spans in the source sentence, so they simply evaluated every possible span, as is common in syntactic translation.  However, phrase-based hypotheses correspond to discontiguous words in the source sentence, so there are exponentially many 
+Coarse-to-fine approaches \cite{coarsetofine,coarsetofineorig} invoke the decoder multiple times with increasingly detailed models, pruning after each pass.  The key difference in our work is that, rather than refining models in lock step, we effectively refine the language model on demand for hypotheses that score well.  Moreover, their work was performed in syntactic machine translation while we address issues specific to phrase-based translation.  
 
-%First, phrase-based machine translation supports reordering by allowing hypotheses to translate discontiguous words in the source sentence.  There are many possible sets of source words, so we contribute a way to hide this spurious information during language model scoring.  In contrast, hypotheses in syntactic machine translation correspond to contiguous spans in the source sentence, so there are far fewer options and they simply enumerated all of them.   
+Our baseline is cube pruning, which was originally developed for syntactic machine translation \cite{cubepruning} and subsequently ported to phrase-based translation by \newcite{cubit}.  We have largely adopted their search strategy, which we summarize in Section \ref{basic_search}.  However, as noted in Section \ref{intro_label}, cube pruning repeatedly calls the language model regarding hypotheses that differ only in coverage, while we collapse these calls.  Moreover, we take a coarse-to-fine approach to finding good combinations of hypotheses and phrases rather than simply trying a large number of them.  
 
-%First, phrase-based hypotheses grow from left to right, so there is no need to keep track of the words at the beginning of the hypothesis.  This differs from syntactic hypotheses, which can grow in either direction, so they keep track of words on both sides, so our  
+\newcite{lagrangian-phrase} developed an exact decoding algorithm based on Lagrangian relaxation.  However, they experimented with trigram language models and it remains unclear whether their algorithm would tractably handle the 5-gram language models used by many modern machine translation systems.  We evaluate our approximate search algorithm using a 5-gram language model.  
+
+\section{Decoding}
+We begin by summarizing the high-level organization of phrase-based cube pruning in Moses \cite{moses}, which is largely based upon Cubit \cite{cubit}, and in turn based upon Pharaoh \cite{pharaoh}.  Sections \ref{contribution} and later show our contribution.  
+
+\subsection{Search Organization}
+\label{basic_search}
+Phrase-based decoders construct hypotheses from left to right by appending phrases in the target language.  The decoder organizes this search process using \emph{stacks}.  Shown in Figure~\ref{stacks}, stacks contain hypotheses that have translated the same number of source words.  The zeroth stack contains a single hypothesis that has translated nothing.  The decoder extends this hypothesis by translating one source word, producing a stack containing several competing hypotheses.  Hypotheses remember which source word they translated, as indicated by the filled circles.  The decoder then proceeds to search for hypotheses that translate two words of the source sentence.  This can be accomplished by extending the zeroth stack with a two-word source phrase or by extending the preceding stack with a one-word source phrase.  Returning to the example in Figure~\ref{stacks}, the decoder can apply a phrase pair to translate ``le chat'' as ``cat'' or it can derive ``the cat'' by translating one word at a time.  To generalize, the decoder populates the $i$th stack by pairing hypotheses in the $i-j$th stack with target phrases that translate source phrases of length $j$.  
+
+%the decoder produces a stack of hypotheses that have translated two words.  It can do so by translating another source word or by translating two source words at once using a longer phrase.  For example, Figure~\ref{stacks} shows a hypothesis that used a phrase to translate ``le chat'' as ``cat'', thereby covering two source words at once.  
+  
+\newcommand{\csiz}{1.5pt}
+\newcommand{\copen}{\node[draw,on chain,circle,inner sep=\csiz] {};}
+\newcommand{\cfull}{\node[draw,on chain,circle,fill=black,inner sep=\csiz] {};}
+\newcommand{\cov}[2]{\begin{tikzpicture}[start chain,node distance=1pt]#1\node[on chain,textbase]{#2};\end{tikzpicture}}
+\newcommand{\clin}{\\[-5pt]}
+
+\begin{figure}\small%
+\begin{tikzpicture}
+\node (h0) {\begin{tabular}{@{}c@{}}
+0 word\\
+\cov{\copen\copen\copen}{}
+\end{tabular}};
+\node[right=0pt of h0.north east,anchor=north west] (h1) {\begin{tabular}{l}
+\multicolumn{1}{c}{1 word}\\
+\cov{\cfull\copen\copen}{the}\clin
+\cov{\copen\cfull\copen}{cat}\clin
+\cov{\copen\copen\cfull}{.}\clin
+\end{tabular}};
+\node[right=0pt of h1.north east,anchor=north west] (h2){\begin{tabular}{l}
+\multicolumn{1}{c}{2 words}\\
+\cov{\cfull\cfull\copen}{cat}\clin
+\cov{\cfull\cfull\copen}{the cat}\clin
+\cov{\cfull\cfull\copen}{cat the}\clin
+\cov{\cfull\copen\cfull}{. the}\clin
+\end{tabular}};
+\node[right=0pt of h2.north east,anchor=north west] (h3){\begin{tabular}{l}
+\multicolumn{1}{c}{3 words}\\
+\cov{\cfull\cfull\cfull}{cat .}\clin
+\cov{\cfull\cfull\cfull}{the cat .}\clin
+\cov{\cfull\cfull\cfull}{cat the .}\clin
+\cov{\cfull\cfull\cfull}{. the cat}\clin
+\end{tabular}};
+\end{tikzpicture}
+\caption{\label{stacks}Stacks to translate the French ``le chat .'' into English.  Filled circles indicate that the source word has been translated.  A phrase translates ``le chat'' as simply ``cat'', emphasizing that stacks are organized by the number of source words rather than the number of target words.}
+\end{figure}
+
+In practice, the decoder enforces a reordering limit that prevents the search process from jumping around the source sentence too much and dramatically reduces the size of the search space.  Formally, when the reordering limit is $R$, the decoder must translate source words at indices $[0,n-R)$ before, or at the same time as, it can translate the $n$th source word.  
+
+The second practical constraint is a limit on the number of hypotheses in each stack.  There are generally too many possible hypotheses, so the decoder approximates by remembering at most $k$ hypotheses in each stack, where $k$ is a number chosen by the user.  Small $k$ makes search fast but may prune good hypotheses, while large $k$ is more thorough but takes more CPU time, thereby comprising a time-accuracy trade-off.  The central question in this paper is how to select these $k$ hypotheses while improving the time-accuracy trade-off.  
+
+%To formalize the preceding paragraph, stack $s_i$ is a set of hypotheses that have translated $i$ source words.  The initial stack $s_0$ contains a single hypothesis that translates nothing while the subsequent stacks are defined inductively
+%\[s_i = \bigcup_{j=0}^{i-1} \text{extend}(s_j, \text{source}_{i-j}) \]
+Populating a stack can be boiled down into two steps.  In the first step, the decoder matches hypotheses with source phrases subject to three constraints: the total source length matches the stack being populated, none of the source words has already been translated by the hypothesis, and the reordering limit.  We do not improve this first step, which is largely driven by checking whether a hypothesis and source phrase are compatible along with some knowledge about the reordering limit.  In the second step, the decoder runs an algorithm that searches through these matches to select $k$ high-scoring hypotheses for placement in the stack.  We improve this second step.   
+
+%First, the decoder matches hypotheses with source phrases that they have yet to translate and that will meet the source length requirement of the stack.  The purpose of the reordering limit is to substantially reduce the size of the search space to make search tractable and as a workaround for models that are too weak to handle long-distance reordering.  Second, the decoder searches through 
+
+%Second, the decoder searches through these matches for good pairings 
+The decoder provides our algorithm with pairs consisting of a hypothesis and a compatible source phrase.  Each source phrase translates to multiple compatible target phrases.  The task is to grow these hypotheses by appending a compatible target phrase, yielding a new hypothesis.  These new hypotheses will be placed into a stack of size $k$, so we are interested in selecting $k$ new hypotheses that score highly.  The user chooses parameter $k$.
+
+Beam search \cite{beam-speech,pharaoh} takes a brute force approach: try every hypothesis with every compatible target phrase then select the top $k$ new hypotheses by score.  This seems wasteful because most hypotheses are discarded.  Instead, we follow cube pruning \cite{cubepruning} in using a priority queue to generate $k$ hypotheses.  The key difference is that we generate these hypotheses iteratively rather than atomically.  
+
+%To formalize the problem, we want to extract $k$ high-scoring hypotheses from the set
+%\[\{\text{append}(h, t): (h,s) \in \text{input}, t \in \text{target}(s) \}\]
+%where $h$ denotes a hypothesis, $t$ denotes a target phrase, $s$ denotes a source phrase, and the input was provided by the decoder.  We begin by grouping the hypotheses according to the source phrase
+%\[\bigcup_s \{\text{append}(h, t): (h,s) \in \text{input}, t \in \text{target}(s) \}\]
 
 
-Future cost \cite{pharaoh}
+\subsection{Tries}
+\label{contribution}
+For each source phrase, we collect the set of compatible hypotheses.  We then place these hypotheses in a trie that emphasizes the suffix words because these matter most when appending a target phrase.  Figure~\ref{hypsuff} shows an example.  While it suffices to build this trie on the last $N-1$ words that matter to the language model, \newcite{zhifei} have shown that fewer words are necessary in cases where the language model will provably back off.  Therefore, the trie does not necessarily have uniform depth.  The leaves of the trie are complete hypotheses and reveal information irrelevant to the language model, such as coverage of the source sentence and the state of other features.  
 
+\begin{figure}\centering
+\begin{tikzpicture}[grow=left,->,arrows={-angle 90},line width=1pt,inner sep=1pt]
+\tikzstyle{level 1}=[level distance=1.6cm, sibling distance=1.3cm]
+\tikzstyle{level 2}=[level distance=2.3cm, sibling distance=1cm]
+\tikzstyle{level 3}=[level distance=2.3cm, sibling distance=0.5cm]
+\node{$\epsilon$}
+child {
+  node {country}
+  child {
+    node{a}
+    child {
+      node{\cov{\cfull\copen\cfull\copen}{}}
+    }
+    child {
+      node{\cov{\cfull\cfull\copen\copen}{}}
+    }
+  }
+}
+child {
+  node {nations}
+  child {
+    node {few}
+    child {
+      node{\cov{\cfull\copen\cfull\copen}{}}
+    }
+  }
+  child {
+%    node {several}
+%    child {
+      node{\cov{\cfull\copen\cfull\copen}{}}
+%    }
+  }
+}
+child {
+  node {countries}
+  child {
+    node{\cov{\cfull\cfull\copen\copen}{}}
+  }
+}
+;
+\end{tikzpicture}
+\caption{\label{hypsuff}Hypothesis suffixes arranged into a trie.  The leaves indicate source coverage and any other hypothesis state.}
+\end{figure}
+
+Each source phrase translates to a set of target phrases.  Because these phrases will be appended to a hypothesis, the first few words matter the most to the language model.  We therefore arrange the source phrases into a prefix trie.  An example is shown in Figure~\ref{tgtpre}.  Similar to the hypothesis trie, the depth may be shorter than $N-1$ in cases where the language model will provably back off \cite{zhifei}.  The trie can also be short because the target phrase has fewer than $N-1$ words.  We currently store this trie data structure directly in the phrase table, though it could also be computed on demand to save memory.  Empirically, our phrase table uses less RAM than Moses's memory-based phrase table.  
+
+\begin{figure}\centering
+\begin{tikzpicture}[grow=right,->,arrows={-angle 90},line width=1pt,inner sep=1pt]
+\node{$\epsilon$}
+child {
+  node {which}
+}
+child {
+  node {that}
+  child {
+    node {have}
+  }
+}
+;
+\end{tikzpicture}
+\caption{\label{tgtpre}Target phrase prefixes arranged into a trie.}
+\end{figure}
+
+As an optimization, a trie reveals multiple words when there would otherwise be no branching.  This allows the search algorithm to make decisions only when needed.  
+
+Following \newcite{search}, leaves in the trie take the score of the underlying hypothesis or target phrase.  If there are multiple target phrases with the same language model prefix, we take the highest score.  Nodes higher in the trie take the maximum score of their descendants.   Children of a node are sorted by score.   
+
+\subsection{Boundary Pairs}
+The idea is that the trie coarsely reasons about nodes high up in the trie before delving into detail.  In this way, it can determine what the language model likes and, conversely, quickly discard combinations of words that the model does not like.  
+
+A boundary pair consists of a node in the hypothesis trie and a node in the target phrase trie.  For example, the decoder starts at the root of each trie with the boundary pair $(\epsilon, \epsilon)$.  The score of a boundary pair is the sum of the scores of the underlying trie nodes.  However, once some words have been revealed, the decoder calls the language model to compute a score adjustment.  For example, the boundary pair $(\text{country}, \text{that})$ has score adjustment
+\[\log \frac{p(\text{that}\mid\text{country})}{p(\text{that})} \]
+times the weight of the language model.  This has the effect of cancelling out the estimate made when the phrase was scored in isolation and replacing the estimate with a more accurate one based on available context.  These scores are efficient to compute because the decoder retains a pointer to that entry for ``that'' in the language model's data structure \cite{iwslt}. 
 
 \bibliographystyle{acl}
 \bibliography{paper}
