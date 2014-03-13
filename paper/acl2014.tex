@@ -231,7 +231,7 @@ We build hypotheses from left-to-right and manage stacks just like cube pruning.
 
 When the decoder matches a hypothesis with a compatible source phrase, we immediately evaluate the distortion feature and update future costs.  Our future costs are exactly the same as those used in Moses \cite{moses}: the highest-scoring way to cover the rest of the source sentence.  This includes the language model score within target phrases but ignores the change in language model score that would occur were these phrases to be appended together.  The hypotheses compatible with each source phrase are arranged into a trie and the language model algorithm searches for good combinations of hypotheses and target phrases.
 
-\subsection{Data}
+\section{Experiments}
 
 We measure performance by translating a Chinese-English test set of 1677 sentences. This data is a subset of development data prepared for the BOLT Chinese-English translation task, and consists of translated Chinese online text sources, such as discussion forums. We trained our phrase table using a bitext of 10.8 million sentence pairs, which after tokenization amounts to approximately 290 million words on the English side. The bitext contains data from several sources, including news articles, UN proceedings, Hong Kong government documents, online forum data, and specialized sources such as an idiom translation table. Our language model was also trained using the English half of this bitext, using modified Kneser-Ney smoothing \cite{}. 
 
