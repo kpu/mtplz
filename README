@@ -1,4 +1,4 @@
-How to convert from moses.ini weights to our weights.  We don't believe in arbitrary constants so this is largely about undoing the constants in Moses.
+How to convert from moses.ini weights to our weights.  Our length feature is just the length without any transform, so to some extent this is removing constants that Moses uses.
 
 MOSES        MTPLZ                 MULTIPLY
 WordPenalty0 target_word_insertion -1
