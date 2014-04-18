@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
       ("verbose,v", "Produce verbose output")
       ("lm,l", po::value<std::string>(&lm)->required(), "Language model file")
       ("phrase,p", po::value<std::string>(&phrase)->required(), "Phrase table")
-      ("weights_file,W", po::value<std::string>(&weights_file), "Weights file")
+      ("weights_file,W", po::value<std::string>(&weights_file)->required(), "Weights file")
       ("beam,K", po::value<unsigned int>(&config.pop_limit)->required(), "Beam size")
       ("reordering,R", po::value<std::size_t>(&config.reordering_limit)->required(), "Reordering limit");
     if (argc == 1) {
