@@ -51,6 +51,8 @@ path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
 
 boost 104100 ;
+project : requirements $(requirements) <include>. ;
+project : default-build <threading>multi <warnings>on <variant>release <link>static ;
 
 external-lib z ;
 
@@ -65,7 +67,7 @@ project : default-build <threading>multi <warnings>on <variant>release ;
 build-projects search lm util decode ;
 
 lib kenlm : lm//kenlm ;
-install-bin-libs lm//programs kenlm decode//decode ;
+install-bin-libs lm//programs util//programs kenlm decode//decode ;
 
 install-headers headers : [ glob-tree *.hh : dist include ] : . ;
 alias install : prefix-bin prefix-lib prefix-include ; 

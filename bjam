@@ -12,12 +12,12 @@ then
   exec "${bjam}" "$@"
 fi
 
-if [ ! -x "$top"/jam-files/bjam ] || "$top"/jam-files/bjam -v |grep 2011.4 >/dev/null; then
+if [ ! -x "$top"/jam-files/bjam-1_55 ]; then
   pushd "$top/jam-files/engine"
   ./build.sh
-  cp -f bin.*/bjam ../bjam
+  cp -f bin.*/bjam ../bjam-1_55
   popd
 fi
 
 export BOOST_BUILD_PATH="$top"/jam-files/boost-build 
-exec "$top"/jam-files/bjam "$@"
+exec "$top"/jam-files/bjam-1_55 "$@"
