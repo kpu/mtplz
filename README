@@ -4,6 +4,6 @@ MOSES        MTPLZ                 MULTIPLY
 WordPenalty0 target_word_insertion -1
 LM           lm                    2.30258509299404568401
 Distortion0  distortion            -1
-Phase*       phrase_table          1
+Phrase*       phrase_table          1
 
 mtplz does not transform the phrase table.  Moses takes the natural log as it reads.  So take the natural log when converting a phrase table from Moses.
