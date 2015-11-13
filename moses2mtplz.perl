@@ -11,7 +11,12 @@ while (my $line = <STDIN>) {
   my @scores = split(" ", $cols[6]);
 	#print STDERR "num scores=" .scalar(@scores);
   for (my $i = 0; $i < scalar(@scores); ++$i) {
+      if ($scores[$i] == 0) {
+	  print "-100 ";
+      }
+      else {
  	  print log($scores[$i]) ." ";
+      }
   }
   print "\n";
 }
