@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 			verbose = true;
 		}
     decode::Context context(lm.c_str(), weights_file, config);
-    decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
+    decode::PhraseTableOld table(phrase.c_str(), context.GetVocab(), context.GetScorer());
     util::FilePiece f(0, NULL, &std::cerr);
     util::FakeOFStream out(1);
 		decode::ScoreHistoryMap map;
