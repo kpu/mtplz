@@ -41,6 +41,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.107607712" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
 								<option id="gnu.cpp.link.option.libs.59782350" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="boost_system"/>
+									<listOptionValue builtIn="false" value="boost_serialization"/>
 									<listOptionValue builtIn="false" value="boost_thread"/>
 									<listOptionValue builtIn="false" value="boost_program_options"/>
 									<listOptionValue builtIn="false" value="pthread"/>
@@ -59,8 +60,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.2095302796.939878788" name="storing.hh" rcbsApplicability="disable" resourcePath="ProbingPT/storing.hh" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.2095302796.644665650" name="StoreTarget.h" rcbsApplicability="disable" resourcePath="ProbingPT/StoreTarget.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.2095302796.1886315162" name="line_splitter.hh" rcbsApplicability="disable" resourcePath="ProbingPT/line_splitter.hh" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="lm/query_main.cc|lm/builder/lmplz_main.cc|lm/builder/corpus_count_test.cc|lm/builder/adjust_counts_test.cc|util/pcqueue_test.cc|util/stream/io_test.cc|util/stream/sort_test.cc|util/stream/stream_test.cc|lm/builder/dump_counts_main.cc|lm/fragment_main.cc|lm/build_binary_main.cc|lm/interpolate/example_sort_main.cc|util/cat_compressed_main.cc|util/tokenize_piece_test.cc|util/sorted_uniform_test.cc|util/sized_iterator_test.cc|util/read_compressed_test.cc|util/probing_hash_table_test.cc|util/mutable_vocab_test.cc|util/joint_sort_test.cc|util/file_piece_test.cc|lm/partial_test.cc|lm/model_test.cc|lm/left_test.cc|decode/phrase_table_test.cc|decode/filter_test.cc|ProbingPT|lm/interpolate/arpa_to_stream.cc|lm/neural|util/bit_packing_test.cc|lm/wrappers|decode/coverage_test.cc" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="ProbingPT/storing.hh|ProbingPT/storing.cpp|ProbingPT/line_splitter.hh|ProbingPT/line_splitter.cpp|ProbingPT/StoreTarget.h|ProbingPT/StoreTarget.cpp|lm/query_main.cc|lm/builder/lmplz_main.cc|lm/builder/corpus_count_test.cc|lm/builder/adjust_counts_test.cc|util/pcqueue_test.cc|util/stream/io_test.cc|util/stream/sort_test.cc|util/stream/stream_test.cc|lm/builder/dump_counts_main.cc|lm/fragment_main.cc|lm/build_binary_main.cc|lm/interpolate/example_sort_main.cc|util/cat_compressed_main.cc|util/tokenize_piece_test.cc|util/sorted_uniform_test.cc|util/sized_iterator_test.cc|util/read_compressed_test.cc|util/probing_hash_table_test.cc|util/mutable_vocab_test.cc|util/joint_sort_test.cc|util/file_piece_test.cc|lm/partial_test.cc|lm/model_test.cc|lm/left_test.cc|decode/phrase_table_test.cc|decode/filter_test.cc|lm/interpolate/arpa_to_stream.cc|lm/neural|util/bit_packing_test.cc|lm/wrappers|decode/coverage_test.cc" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
