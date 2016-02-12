@@ -1,6 +1,6 @@
 fakelib decode_lib : [ glob *.cc : *_test.cc *_main.cc ] ../util//kenutil ../lm//kenlm ../search//search ;
 
-exe decode : decode_lib decode_main.cc ..//boost_program_options ;
+exe decode : decode_lib decode_main.cc ../ProbingPT/hash.cpp ..//boost_program_options ;
 
 import testing ;
 
