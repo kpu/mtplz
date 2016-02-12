@@ -72,7 +72,7 @@ PhraseTableOld::PhraseTableOld(const char *file, util::MutableVocab &vocab, Scor
 std::size_t PhraseTableOld::MaxSourcePhraseLength() const { return max_source_phrase_length_; }
 
 
-const PhraseTableOld::Entry* PhraseTableOld::Phrases(const ID *begin, const ID *end) const {
+const PhraseTable::Entry* PhraseTableOld::Phrases(const ID *begin, const ID *end) const {
   uint64_t hash_code = MurmurHashNative(begin, (end-begin) * sizeof(ID));
   Map::const_iterator hash_iterator = map_.find(hash_code);
   return hash_iterator == map_.end() ? NULL : &(hash_iterator->second);

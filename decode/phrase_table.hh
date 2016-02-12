@@ -32,7 +32,7 @@ class PhraseTable : boost::noncopyable {
 
     // Get all target phrases matching the source phrase specified by [begin, end)
     // Returns NULL if the source phrase does not exist in the table.
-    void Phrases(const ID *begin, const ID *end, search::Vertex &out) const = 0;
+    virtual const Entry *Phrases(const ID *begin, const ID *end) const = 0;
     virtual std::size_t MaxSourcePhraseLength() const = 0;
 };
 
@@ -42,7 +42,7 @@ class PhraseTableOld : public PhraseTable {
 
     // Get all target phrases matching the source phrase specified by [begin, end)
     // Returns NULL if the source phrase does not exist in the table.
-    const Entry *Phrases(const ID *begin, const ID *end) const;
+    const PhraseTable::Entry *Phrases(const ID *begin, const ID *end) const;
     virtual std::size_t MaxSourcePhraseLength() const; // { return max_source_phrase_length_; }
 
   private:
