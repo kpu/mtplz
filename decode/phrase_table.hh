@@ -30,12 +30,20 @@ class PhraseTable : boost::noncopyable {
   public:
     typedef TargetPhrases Entry;
 
-    PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &scorer);
+    // Get all target phrases matching the source phrase specified by [begin, end)
+    // Returns NULL if the source phrase does not exist in the table.
+    void Phrases(const ID *begin, const ID *end, search::Vertex &out) const = 0;
+    virtual std::size_t MaxSourcePhraseLength() const = 0;
+};
+
+class PhraseTableOld : public PhraseTable {
+  public:
+    PhraseTableOld(const char *file, util::MutableVocab &vocab, Scorer &scorer);
 
     // Get all target phrases matching the source phrase specified by [begin, end)
     // Returns NULL if the source phrase does not exist in the table.
     const Entry *Phrases(const ID *begin, const ID *end) const;
-    std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
+    virtual std::size_t MaxSourcePhraseLength() const; // { return max_source_phrase_length_; }
 
   private:
     struct Hash : public std::unary_function<uint64_t, std::size_t> {

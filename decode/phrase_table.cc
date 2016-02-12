@@ -26,7 +26,8 @@ void TargetPhrases::MakePassthrough(util::Pool &pool, Scorer &scorer, ID word) {
   vertex.Root().FinishRoot(search::kPolicyLeft);
 }
 
-PhraseTable::PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &scorer) {
+PhraseTableOld::PhraseTableOld(const char *file, util::MutableVocab &vocab, Scorer &scorer)
+{
   max_source_phrase_length_ = 0;
   FilePiece in(file, &std::cerr);
 
@@ -68,7 +69,10 @@ PhraseTable::PhraseTable(const char *file, util::MutableVocab &vocab, Scorer &sc
 }
 
 
-const PhraseTable::Entry* PhraseTable::Phrases(const ID *begin, const ID *end) const {
+std::size_t PhraseTableOld::MaxSourcePhraseLength() const { return max_source_phrase_length_; }
+
+
+const PhraseTableOld::Entry* PhraseTableOld::Phrases(const ID *begin, const ID *end) const {
   uint64_t hash_code = MurmurHashNative(begin, (end-begin) * sizeof(ID));
   Map::const_iterator hash_iterator = map_.find(hash_code);
   return hash_iterator == map_.end() ? NULL : &(hash_iterator->second);
