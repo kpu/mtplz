@@ -1,4 +1,5 @@
 #include "hash.hh"
+#include "util/tokenize_piece.hh"
 
 namespace ProbingPT {
 
