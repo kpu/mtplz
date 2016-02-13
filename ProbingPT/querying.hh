@@ -8,7 +8,7 @@
 #include "hash.hh" //Includes line splitter
 #include "line_splitter.hh"
 
-namespace Moses2
+namespace ProbingPT
 {
 
 char * read_binary_file(char * filename);

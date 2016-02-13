@@ -28,7 +28,7 @@
 using namespace std;
 using namespace boost::algorithm;
 
-namespace Moses2
+namespace ProbingPT
 {
 OutputFileStream::OutputFileStream()
   :boost::iostreams::filtering_ostream()

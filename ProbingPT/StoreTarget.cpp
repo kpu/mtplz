@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace Moses2 {
+namespace ProbingPT {
 
 StoreTarget::StoreTarget(const std::string &basepath)
 :m_basePath(basepath)
@@ -205,4 +205,4 @@ void StoreTarget::AppendLexRO(std::string &prop, std::vector<float> &retvector, 
   }
 }
 
-} /* namespace Moses2 */
+} /* namespace ProbingPT */

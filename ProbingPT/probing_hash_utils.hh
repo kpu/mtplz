@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <fstream>
 
-namespace Moses2
+namespace ProbingPT
 {
 
 #define API_VERSION 9

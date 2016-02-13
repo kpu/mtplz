@@ -27,7 +27,7 @@
 #include <iostream>
 #include <boost/iostreams/filtering_stream.hpp>
 
-namespace Moses2
+namespace ProbingPT
 {
 
 /** Version of std::ostream with transparent compression.

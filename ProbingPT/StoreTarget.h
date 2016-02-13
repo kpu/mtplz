@@ -11,7 +11,7 @@
 #include <inttypes.h>
 #include <boost/unordered_map.hpp>
 
-namespace Moses2 {
+namespace ProbingPT {
 
 class line_text;
 class target_text;
@@ -39,5 +39,5 @@ protected:
 
 };
 
-} /* namespace Moses2 */
+} /* namespace ProbingPT */
 

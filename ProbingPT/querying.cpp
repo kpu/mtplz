@@ -1,10 +1,8 @@
-#include "quering.hh"
+#include "querying.hh"
 
-namespace Moses2
-{
+namespace ProbingPT {
 
-unsigned char * read_binary_file(const char * filename, size_t filesize)
-{
+unsigned char * read_binary_file(const char * filename, size_t filesize) {
   //Get filesize
   int fd;
   unsigned char * map;
@@ -89,8 +87,7 @@ uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
   return key;
 }
 
-std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
-{
+std::pair<bool, uint64_t> QueryEngine::query(uint64_t key) {
 	std::pair<bool, uint64_t> ret;
 
   const Entry * entry;

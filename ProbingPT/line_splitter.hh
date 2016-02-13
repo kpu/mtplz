@@ -9,7 +9,7 @@
 #include "util/tokenize_piece.hh"
 #include <vector>
 
-namespace Moses2
+namespace ProbingPT
 {
 
 //Struct for holding processed line

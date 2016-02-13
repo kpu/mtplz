@@ -5,7 +5,7 @@
 #include "../Util2.h"
 #include "../InputFileStream.h"
 
-namespace Moses2
+namespace ProbingPT
 {
 
 void createProbingPT(

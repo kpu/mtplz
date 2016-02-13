@@ -1,6 +1,6 @@
 #include "vocabid.hh"
 
-namespace Moses2
+namespace ProbingPT
 {
 
 void add_to_map(std::map<uint64_t, std::string> *karta, const StringPiece &textin)

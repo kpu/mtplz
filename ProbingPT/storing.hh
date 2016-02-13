@@ -14,7 +14,7 @@
 #include "util/file.hh"
 #include "vocabid.hh"
 
-namespace Moses2
+namespace ProbingPT
 {
 
 void createProbingPT(

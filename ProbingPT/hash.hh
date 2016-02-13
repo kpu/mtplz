@@ -1,19 +1,23 @@
 #pragma once
 
-#include "util/string_piece.hh"
 #include "util/murmur_hash.hh"
-#include "util/string_piece.hh"  //Tokenization and work with StringPiece
-#include "util/tokenize_piece.hh"
+#include "util/string_piece.hh"
+#include <string>
 #include <vector>
 
-namespace Moses2
-{
+namespace ProbingPT {
 
 //Gets the MurmurmurHash for give string
-uint64_t getHash(StringPiece text);
+uint64_t getHash(StringPiece text) {
+  return util::MurmurHashNative(text.data(), text.size());
+}
 
+// Vocab ids are hashes.
+uint64_t getVocabID(const StringPiece &candidate) {
+  return getHash(candidate);
+}
+
+// TODO: this vector usage is inefficient.
 std::vector<uint64_t> getVocabIDs(const StringPiece &textin);
 
-uint64_t getVocabID(const std::string &candidate);
-
-}
+} // namespace ProbingPT

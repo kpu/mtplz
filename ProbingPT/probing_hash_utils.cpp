@@ -1,6 +1,6 @@
 #include "probing_hash_utils.hh"
 
-namespace Moses2
+namespace ProbingPT
 {
 
 //Read table from disk, return memory map location
