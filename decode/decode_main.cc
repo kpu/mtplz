@@ -3,7 +3,7 @@
 #include "decode/output.hh"
 #include "decode/phrase_table.hh"
 #include "decode/stacks.hh"
-#include "util/fake_ofstream.hh"
+#include "util/file_stream.hh"
 #include "util/usage.hh"
 
 #include <boost/program_options.hpp>
@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace decode {
-void Decode(Context &context, const PhraseTable &table, const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FakeOFStream &out) {
+void Decode(Context &context, const PhraseTable &table, const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
   Chart chart(table, in, context.GetVocab(), context.GetScorer());
   Stacks stacks(context, chart);
   const Hypothesis *hyp = stacks.End();
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     decode::Context context(lm.c_str(), weights_file, config);
     decode::PhraseTableOld table(phrase.c_str(), context.GetVocab(), context.GetScorer());
     util::FilePiece f(0, NULL, &std::cerr);
-    util::FakeOFStream out(1);
+    util::FileStream out(1);
 		decode::ScoreHistoryMap map;
     while (true) {
       StringPiece line;
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
 			decode::Decode(context, table, line, map, verbose, out);
-      out.Flush();
+      out.flush();
       f.UpdateProgress();
 		}
     util::PrintUsage(std::cerr);

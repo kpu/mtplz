@@ -2,7 +2,9 @@
 
 #include "util/scoped.hh"
 
-#include <stdlib.h>
+#include <cstdlib>
+
+#include <algorithm>
 
 namespace util {
 
@@ -25,9 +27,7 @@ void Pool::FreeAll() {
 }
 
 void *Pool::More(std::size_t size) {
-  // Double in size.
-  std::size_t desired_size = static_cast<size_t>(32) << free_list_.size();
-  std::size_t amount = std::max(desired_size, size);
+  std::size_t amount = std::max(static_cast<size_t>(32) << free_list_.size(), size);
   uint8_t *ret = static_cast<uint8_t*>(MallocOrThrow(amount));
   free_list_.push_back(ret);
   current_ = ret + size;
