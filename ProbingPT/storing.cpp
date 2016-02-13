@@ -5,16 +5,15 @@
 #include "../Util2.h"
 #include "../InputFileStream.h"
 
-namespace ProbingPT
-{
+namespace ProbingPT {
 
 void createProbingPT(
-		const std::string &phrasetable_path,
-		const std::string &basepath,
-        int num_scores,
-		int num_lex_scores,
-		bool log_prob,
-		int max_cache_size)
+    const std::string &phrasetable_path,
+    const std::string &basepath,
+    int num_scores,
+    int num_lex_scores,
+    bool log_prob,
+    int max_cache_size)
 {
   std::cerr << "Starting..." << std::endl;
 
@@ -54,31 +53,31 @@ void createProbingPT(
 
       ++line_num;
       if (line_num % 1000000 == 0) {
-    	  std::cerr << line_num << " " << std::flush;
+        std::cerr << line_num << " " << std::flush;
       }
 
       //Add source phrases to vocabularyIDs
       add_to_map(&source_vocabids, line.source_phrase);
 
       if (prevSource.empty()) {
-    	  // 1st line
-    	  prevSource = line.source_phrase.as_string();
-          storeTarget.Append(line, log_prob);
+        // 1st line
+        prevSource = line.source_phrase.as_string();
+        storeTarget.Append(line, log_prob);
       }
       else if (prevSource == line.source_phrase) {
-          //If we still have the same line, just append to it:
-    	  storeTarget.Append(line, log_prob);
+        //If we still have the same line, just append to it:
+        storeTarget.Append(line, log_prob);
       }
       else {
-    	assert(prevSource != line.source_phrase);
+        assert(prevSource != line.source_phrase);
 
         //Create a new entry even
 
         // save
         uint64_t targetInd = storeTarget.Save();
 
-          // next line
-      	storeTarget.Append(line, log_prob);
+        // next line
+        storeTarget.Append(line, log_prob);
 
         //Create an entry for the previous source phrase:
         Entry pesho;
@@ -96,21 +95,21 @@ void createProbingPT(
 
         // update cache
         if (max_cache_size) {
-			std::string countStr = line.counts.as_string();
-			countStr = Trim(countStr);
-			if (!countStr.empty()) {
-				std::vector<float> toks = Tokenize<float>(countStr);
+          std::string countStr = line.counts.as_string();
+          countStr = Trim(countStr);
+          if (!countStr.empty()) {
+            std::vector<float> toks = Tokenize<float>(countStr);
 
-				if (toks.size() >= 2) {
-					totalSourceCount += toks[1];
-					CacheItem *item = new CacheItem(Trim(line.source_phrase.as_string()), toks[1]);
-					cache.push(item);
+            if (toks.size() >= 2) {
+              totalSourceCount += toks[1];
+              CacheItem *item = new CacheItem(Trim(line.source_phrase.as_string()), toks[1]);
+              cache.push(item);
 
-					if (max_cache_size > 0 && cache.size() > max_cache_size) {
-						cache.pop();
-					}
-				}
-			}
+              if (max_cache_size > 0 && cache.size() > max_cache_size) {
+                cache.pop();
+              }
+            }
+          }
         }
 
         //Set prevLine
@@ -162,44 +161,44 @@ void createProbingPT(
 
 size_t countUniqueSource(const std::string &path)
 {
-	size_t ret = 0;
-	InputFileStream strme(path);
+  size_t ret = 0;
+  InputFileStream strme(path);
 
-	std::string line, prevSource;
-	while (std::getline(strme, line)) {
-		std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
-		assert(toks.size() == 0);
+  std::string line, prevSource;
+  while (std::getline(strme, line)) {
+    std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
+    assert(toks.size() == 0);
 
-		if (prevSource != toks[0]) {
-			prevSource = toks[0];
-			++ret;
-		}
-	}
+    if (prevSource != toks[0]) {
+      prevSource = toks[0];
+      ++ret;
+    }
+  }
 
-	return ret;
+  return ret;
 }
 
 void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
-		const std::string &path,
-		float totalSourceCount)
+    const std::string &path,
+    float totalSourceCount)
 {
   std::vector<const CacheItem*> vec(cache.size());
 
   size_t ind = cache.size() - 1;
   while (!cache.empty()) {
-	  const CacheItem *item = cache.top();
-	  vec[ind] = item;
-	  cache.pop();
-	  --ind;
+    const CacheItem *item = cache.top();
+    vec[ind] = item;
+    cache.pop();
+    --ind;
   }
 
   std::ofstream os (path.c_str());
 
   os << totalSourceCount << std::endl;
   for (size_t i = 0; i < vec.size(); ++i) {
-	  const CacheItem *item = vec[i];
-	  os << item->count << "\t" << item->source << std::endl;
-	  delete item;
+    const CacheItem *item = vec[i];
+    os << item->count << "\t" << item->source << std::endl;
+    delete item;
   }
 
   os.close();
