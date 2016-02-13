@@ -6,13 +6,13 @@
 #include "util/file.hh"
 #include "util/mmap.hh"
 #include "util/read_compressed.hh"
+#include "util/spaces.hh"
 #include "util/string_piece.hh"
 
 #include <cstddef>
 #include <iosfwd>
 #include <string>
-
-#include <assert.h>
+#include <cassert>
 #include <stdint.h>
 
 namespace util {
@@ -22,8 +22,6 @@ class ParseNumberException : public Exception {
     explicit ParseNumberException(StringPiece value) throw();
     ~ParseNumberException() throw() {}
 };
-
-extern const bool kSpaces[256];
 
 // Memory backing the returned StringPiece may vanish on the next call.
 class FilePiece {
@@ -56,7 +54,7 @@ class FilePiece {
       return Consume(FindDelimiterOrEOF(delim));
     }
 
-    // Read word until the line or file ends.
+    /// Read word until the line or file ends.
     bool ReadWordSameLine(StringPiece &to, const bool *delim = kSpaces) {
       assert(delim[static_cast<unsigned char>('\n')]);
       // Skip non-enter spaces.
@@ -76,12 +74,30 @@ class FilePiece {
       return true;
     }
 
-    // Unlike ReadDelimited, this includes leading spaces and consumes the delimiter.
-    // It is similar to getline in that way.
-    StringPiece ReadLine(char delim = '\n');
+    /** Read a line of text from the file.
+     *
+     * Unlike ReadDelimited, this includes leading spaces and consumes the
+     * delimiter.   It is similar to getline in that way.
+     *
+     * If strip_cr is true, any trailing carriate return (as would be found on
+     * a file written on Windows) will be left out of the returned line.
+     *
+     * Throws EndOfFileException if the end of the file is encountered.  If the
+     * file does not end in a newline, this could mean that the last line is
+     * never read.
+     */
+    StringPiece ReadLine(char delim = '\n', bool strip_cr = true);
 
-    // Doesn't throw EndOfFileException, just returns false.
-    bool ReadLineOrEOF(StringPiece &to, char delim = '\n');
+    /** Read a line of text from the file, or return false on EOF.
+     *
+     * This is like ReadLine, except it returns false where ReadLine throws
+     * EndOfFileException.  Like ReadLine it may not read the last line in the
+     * file if the file does not end in a newline.
+     *
+     * If strip_cr is true, any trailing carriate return (as would be found on
+     * a file written on Windows) will be left out of the returned line.
+     */
+    bool ReadLineOrEOF(StringPiece &to, char delim = '\n', bool strip_cr = true);
 
     float ReadFloat();
     double ReadDouble();
@@ -108,6 +124,7 @@ class FilePiece {
 
     const std::string &FileName() const { return file_name_; }
 
+    // Force a progress update.
     void UpdateProgress();
 
   private:

@@ -2,13 +2,13 @@
 #define UTIL_TOKENIZE_PIECE_H
 
 #include "util/exception.hh"
+#include "util/spaces.hh"
 #include "util/string_piece.hh"
 
 #include <boost/iterator/iterator_facade.hpp>
 
 #include <algorithm>
-
-#include <string.h>
+#include <cstring>
 
 namespace util {
 
@@ -63,7 +63,7 @@ class BoolCharacter {
   public:
     BoolCharacter() {}
 
-    explicit BoolCharacter(const bool *delimiter) { delimiter_ = delimiter; }
+    explicit BoolCharacter(const bool *delimiter = kSpaces) { delimiter_ = delimiter; }
 
     StringPiece Find(const StringPiece &in) const {
       for (const char *i = in.data(); i != in.data() + in.size(); ++i) {
@@ -128,7 +128,7 @@ template <class Find, bool SkipEmpty = false> class TokenIter : public boost::it
         } else {
           after_ = StringPiece(found.data() + found.size(), after_.data() - found.data() + after_.size() - found.size());
         }
-      } while (SkipEmpty && current_.data() && current_.empty()); // Compiler should optimize this away if SkipEmpty is false.  
+      } while (SkipEmpty && current_.data() && current_.empty()); // Compiler should optimize this away if SkipEmpty is false.
     }
 
     bool equal(const TokenIter<Find, SkipEmpty> &other) const {
@@ -145,6 +145,16 @@ template <class Find, bool SkipEmpty = false> class TokenIter : public boost::it
 
     Find finder_;
 };
+
+inline StringPiece Trim(StringPiece str, const bool *spaces = kSpaces) {
+  while (!str.empty() && spaces[static_cast<unsigned char>(*str.data())]) {
+    str = StringPiece(str.data() + 1, str.size() - 1);
+  }
+  while (!str.empty() && spaces[static_cast<unsigned char>(str[str.size() - 1])]) {
+    str = StringPiece(str.data(), str.size() - 1);
+  }
+  return str;
+}
 
 } // namespace util
 

@@ -1,14 +1,14 @@
 #include "decode/output.hh"
 
 #include "decode/hypothesis.hh"
-#include "util/fake_ofstream.hh"
+#include "util/file_stream.hh"
 #include "util/mutable_vocab.hh"
 
 #include <string.h>
 
 namespace decode {
 
-void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FakeOFStream &to) {
+void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FileStream &to) {
   // TODO more efficient algorithm?  Also, I wish rope was part of the standard.
   std::vector<const Hypothesis*> hypos;
   for (const Hypothesis *h = &hypo; h; h = h->Previous()) {
@@ -26,7 +26,7 @@ void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FakeO
 
 // TODO: fix bad code duplication. 
 
-void OutputVerbose(const Hypothesis &hypo, const util::MutableVocab &vocab, ScoreHistoryMap &map, util::FakeOFStream &out) {
+void OutputVerbose(const Hypothesis &hypo, const util::MutableVocab &vocab, ScoreHistoryMap &map, util::FileStream &out) {
   // TODO more efficient algorithm?  Also, I wish rope was part of the standard.
   std::vector<const Hypothesis*> hypos;
   for (const Hypothesis *h = &hypo; h; h = h->Previous()) {
