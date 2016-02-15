@@ -4,6 +4,7 @@
 
 #include <boost/range/iterator_range_core.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 
@@ -175,7 +176,9 @@ template <class T, class Size = std::size_t> class VectorField {
      */
     template <class Allocator = util::Pool> class FakeVector {
       public:
-        /** Append to the vector.  Updates the void * base pointer */
+        /**Append to the vector.  Updates the void * base pointer.  Try to use
+         * resize instead!
+         */
         void push_back(const T &t) {
           resize(size() + 1);
           back() = t;
@@ -186,47 +189,50 @@ template <class T, class Size = std::size_t> class VectorField {
           void *old_base = base_;
           std::ptrdiff_t change = (to - size()) * sizeof(T);
           if (allocator_.Continue(base_, change)) {
-            ReBase(begin_, old_base);
-            ReBase(end_offset_, old_base);
+            std::ptrdiff_t moved = static_cast<uint8_t*>(base_) - static_cast<uint8_t*>(old_base);
+            ShiftRange(vec_, moved);
+            ShiftRange(offsets_, moved);
           }
-          *end_offset_ += change;
-          end_ = begin_ + to;
+          vec_ = boost::make_iterator_range_n(vec_.begin(), to);
+          std::fill(offsets_.begin(), offsets_.end(), offsets_.front() + change);
         }
 
         void clear() { resize(0); }
 
-        bool empty() const { return begin_ == end_; }
+        bool empty() const { return vec_.empty(); }
 
-        std::size_t size() const { return end_ - begin_; }
+        std::size_t size() const { return vec_.size(); }
 
-        const T* begin() const { return begin_; }
-        T* begin() { return begin_; }
+        const T* begin() const { return vec_.begin(); }
+        T* begin() { return vec_.begin(); }
 
-        const T* end() const { return end_; }
-        T* end() { return end_; }
+        const T* end() const { return vec_.end(); }
+        T* end() { return vec_.end(); }
 
-        const T &back() const { return *(end() - 1); }
-        T &back() { return *(end() - 1); }
+        const T &back() const { return vec_.back(); }
+        T &back() { return vec_.back(); }
         
-        const T &front() const { return *begin(); }
-        T &front() { return *begin(); }
+        const T &front() const { return vec_.front(); }
+        T &front() { return vec_.front(); }
 
-        const T &operator[](std::size_t index) const { return begin_[index]; }
-        T &operator[](std::size_t index) { return begin_[index]; }
+        const T &operator[](std::size_t index) const { return vec_[index]; }
+        T &operator[](std::size_t index) { return vec_[index]; }
 
       private:
         friend VectorField;
-        FakeVector(void *&base, boost::iterator_range<T*> it, Size *end_offset, Allocator &allocator)
-          : base_(base), begin_(it.begin()), end_(it.end()), end_offset_(end_offset), allocator_(allocator) {}
+        FakeVector(void *&base, boost::iterator_range<T*> it, boost::iterator_range<Size*> offsets, Allocator &allocator)
+          : base_(base), vec_(it), offsets_(offsets), allocator_(allocator) {}
 
-        template <class P> void ReBase(P *&ptr, void *old_base) {
-          ptr = reinterpret_cast<P*>(reinterpret_cast<uint8_t*>(ptr) - static_cast<uint8_t*>(old_base) + static_cast<uint8_t*>(base_));
+        template <class P> static void ShiftRange(boost::iterator_range<P*> &range, std::ptrdiff_t by) {
+          range = boost::make_iterator_range(
+              reinterpret_cast<P*>(reinterpret_cast<uint8_t*>(range.begin()) + by),
+              reinterpret_cast<P*>(reinterpret_cast<uint8_t*>(range.end()) + by));
         }
 
         void *&base_;
 
-        T *begin_, *end_;
-        Size *end_offset_;
+        boost::iterator_range<T*> vec_;
+        boost::iterator_range<Size*> offsets_;
 
         Allocator &allocator_;
     };
@@ -242,7 +248,17 @@ template <class T, class Size = std::size_t> class VectorField {
      * allocation page.
      */
     template <class Allocator> FakeVector<Allocator> operator()(void *&base, Allocator &allocator) {
-      return FakeVector<Allocator>(base, (*this)(base), &OffsetsBegin(base)[index_], allocator);
+#ifdef DEBUG
+      // Check that sizing is being done in order.
+      for (const Size *i = OffsetsBegin(base) + index + 1; i < reinterpret_cast<const Size*>(VariableStart(base)); ++i) {
+        assert(*i == OffsetsBegin(base)[index]);
+      }
+#endif // DEBUG
+      return FakeVector<Allocator>(
+          base,
+          (*this)(base),
+          boost::make_iterator_range(OffsetsBegin(base) + index_, reinterpret_cast<Size*>(VariableStart(base))),
+          allocator);
     }
 
     /**Read elements of the vector.*/
