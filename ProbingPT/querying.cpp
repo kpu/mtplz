@@ -76,13 +76,12 @@ QueryEngine::~QueryEngine()
 
 }
 
-uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
-{
+uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const {
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
-  uint64_t key = 0;
+  uint64_t key = 1;
   for (size_t i = 0; i < size; i++) {
-	key += (source_phrase[i] << i);
+  	key = ChainHash(key, source_phrase[i]);
   }
   return key;
 }

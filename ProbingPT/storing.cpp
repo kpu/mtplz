@@ -2,10 +2,24 @@
 #include "line_splitter.hh"
 #include "storing.hh"
 #include "StoreTarget.h"
-#include "../Util2.h"
-#include "../InputFileStream.h"
+
+#include "util/file_piece.hh"
 
 namespace ProbingPT {
+
+void WriteTableEntry(Table &table, StringPiece source, uint64_t targetInd) {
+  //Create an entry for the previous source phrase:
+  Entry pesho;
+  //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
+  //Probably not entirerly correct, but fast and seems to work fine in practise.
+  pesho.key = 1;
+  for (util::TokenIter<util::SingleCharacter> it(source, util::SingleCharacter(' ')); it; ++it) {
+    pesho.key = ChainHash(pesho.key, HashWord(*it));
+  }
+  pesho.value = targetInd;
+  //Put into table
+  table.Insert(pesho);
+}
 
 void createProbingPT(
     const std::string &phrasetable_path,
@@ -13,8 +27,7 @@ void createProbingPT(
     int num_scores,
     int num_lex_scores,
     bool log_prob,
-    int max_cache_size)
-{
+    int max_cache_size) {
   std::cerr << "Starting..." << std::endl;
 
   //Get basepath and create directory if missing
@@ -32,10 +45,8 @@ void createProbingPT(
   util::FilePiece filein(phrasetable_path.c_str());
 
   //Init the probing hash table
-  size_t size = Table::Size(uniq_entries, 1.2);
-  char * mem = new char[size];
-  memset(mem, 0, size);
-  Table table(mem, size);
+  util::scoped_memory mem(Table::Size(uniq_entries, 1.2), true);
+  Table table(mem.get(), mem.size());
 
   std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> cache;
   float totalSourceCount = 0;
@@ -63,12 +74,10 @@ void createProbingPT(
         // 1st line
         prevSource = line.source_phrase.as_string();
         storeTarget.Append(line, log_prob);
-      }
-      else if (prevSource == line.source_phrase) {
+      } else if (prevSource == line.source_phrase) {
         //If we still have the same line, just append to it:
         storeTarget.Append(line, log_prob);
-      }
-      else {
+      } else {
         assert(prevSource != line.source_phrase);
 
         //Create a new entry even
@@ -79,30 +88,17 @@ void createProbingPT(
         // next line
         storeTarget.Append(line, log_prob);
 
-        //Create an entry for the previous source phrase:
-        Entry pesho;
-        pesho.value = targetInd;
-        //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
-        //Probably not entirerly correct, but fast and seems to work fine in practise.
-        pesho.key = 0;
-        std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
-        for (int i = 0; i < vocabid_source.size(); i++) {
-          pesho.key += (vocabid_source[i] << i);
-        }
-
-        //Put into table
-        table.Insert(pesho);
+        WriteTableEntry(table, prevSource, targetInd);
 
         // update cache
         if (max_cache_size) {
-          std::string countStr = line.counts.as_string();
-          countStr = Trim(countStr);
+          StringPiece countStr(util::Trim(line.counts));
           if (!countStr.empty()) {
             std::vector<float> toks = Tokenize<float>(countStr);
 
             if (toks.size() >= 2) {
               totalSourceCount += toks[1];
-              CacheItem *item = new CacheItem(Trim(line.source_phrase.as_string()), toks[1]);
+              CacheItem *item = new CacheItem(util::Trim(line.source_phrase), toks[1]);
               cache.push(item);
 
               if (max_cache_size > 0 && cache.size() > max_cache_size) {
@@ -124,18 +120,7 @@ void createProbingPT(
       //Create an entry for the previous source phrase:
       uint64_t targetInd = storeTarget.Save();
 
-      Entry pesho;
-      pesho.value = targetInd;
-
-      //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
-      pesho.key = 0;
-      std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
-      for (int i = 0; i < vocabid_source.size(); i++) {
-        pesho.key += (vocabid_source[i] << i);
-      }
-      //Put into table
-      table.Insert(pesho);
-
+      WriteTableEntry(table, prevSource, targetInd);
       break;
     }
   }
@@ -145,8 +130,6 @@ void createProbingPT(
   serialize_map(&source_vocabids, (basepath + "/source_vocabids"));
 
   serialize_cache(cache, (basepath + "/cache"), totalSourceCount);
-
-  delete[] mem;
 
   //Write configfile
   std::ofstream configfile;
@@ -159,22 +142,17 @@ void createProbingPT(
   configfile.close();
 }
 
-size_t countUniqueSource(const std::string &path)
-{
+// How many unique source phrases are in the text phrase table?
+std::size_t countUniqueSource(const char *path) {
+  std::string previous_source;
+  StringPiece line;
   size_t ret = 0;
-  InputFileStream strme(path);
-
-  std::string line, prevSource;
-  while (std::getline(strme, line)) {
-    std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
-    assert(toks.size() == 0);
-
-    if (prevSource != toks[0]) {
-      prevSource = toks[0];
+  for (util::FilePiece f(path); f.ReadLineOrEOF(line);) {
+    StringPiece source(line.substr(0, line.find("|||")));
+    if (previous_source != source)
       ++ret;
-    }
+    previous_source.assign(source.data(), source.size());
   }
-
   return ret;
 }
 

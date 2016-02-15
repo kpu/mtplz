@@ -8,8 +8,8 @@
 #include "StoreTarget.h"
 #include "line_splitter.hh"
 #include "probing_hash_utils.hh"
-#include "../OutputFileStream.h"
-#include "../Util2.h"
+#include "util/file.hh"
+#include "util/file_stream.hh"
 
 using namespace std;
 
@@ -31,15 +31,14 @@ StoreTarget::~StoreTarget() {
 	m_fileTargetColl.close();
 
 	// vocab
-    std::string path = m_basePath + "/TargetVocab.dat";
-    OutputFileStream strme(path);
-
-	boost::unordered_map<std::string, uint32_t>::const_iterator iter;
+  std::string path = m_basePath + "/TargetVocab.dat";
+  util::scoped_fd file(util::CreateOrThrow((m_basePath + "/TargetVocab.dat").c_str()));
+  util::FileStream out(file.get());
+	
+  boost::unordered_map<std::string, uint32_t>::const_iterator iter;
 	for (iter = m_vocab.begin(); iter != m_vocab.end(); ++iter) {
-	  strme << iter->first << "\t" << iter->second << endl;
-    }
-
-    strme.Close();
+	  out << iter->first << "\t" << iter->second << '\n';
+  }
 }
 
 uint64_t StoreTarget::Save()
