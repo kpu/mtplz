@@ -9,41 +9,35 @@
 
 namespace util {
 
-class Layout;
-
-template <class Allocator = util::Pool> class Initialize {
-  public:
-    Initialize(Layout &layout, Allocator &pool);
-
-    void *Done() { return base_; }
-    const void *Done() const { return base_; }
-
-    operator void*() { return base_; }
-
-    bool Continue(std::ptrdiff_t change) {
-      return pool_.Continue(base_, change);
-    }
-
-    void *base_;
-    Allocator &pool_;
-};
-
 /**Layout: design flat data structures at runtime.
  * Layouts are created by attaching fields:
  *   PODField stores some type.
+ *     Example: PODField<int> an_int(layout);
  *   ArrayField is an array whose length is constant across data structures
+ *     Example: ArrayField<MyStruct> array(layout, 3); // array of 3 elements
  *   VectorField is a variable-length array with a vector-like interface.
- * This is done by constructing the relevant type and passing the layout e.g.
- *   PODField<int> an_int(layout);
- *   ArrayField<MyStruct> array(layout, 3); // array of 3 elements
- *   VectorField<unsigned int> variable_length(layout);
+ *     Example: VectorField<unsigned int> variable_length(layout);
  * 
  * Once the layout has been created, one can allocate the flat data structure:
- *   Initialize<> init(layout, pool);
- *   init implicitly casts to void *.
- *   It can also be passed to VectorField::operator() to change the size of a
- *   variable-length vector.  This should only be used to populate the
- *   structure.
+ *   void *base = layout.Allocate(pool);
+ * If there are variable-length fields, then VectorField reserves the right to
+ * change the base upon vector resize.
+ *
+ * Then populate:
+ * an_int(base) = 1;
+ * array(base)[0] = MyStruct(1);
+ * variable_length(base, pool).push_back(2); // Requires pool used to Allocate
+ *
+ * Complete example:
+ * Layout layout;
+ * PODField<int> an_int(layout);
+ *
+ * util::Pool pool;
+ * void *base = layout.Allocate(pool);
+ * an_int(base) = 0;
+ *
+ * The only external function call is Allocate; all others are used by Field
+ * objects, though one could use them to write a custom Field.
  */
 class Layout {
   public:
@@ -54,14 +48,15 @@ class Layout {
     }
 
     /** Allocate the flat data structure from a pool.
-     * @return An Initialize object.  This is required to set the length of any
-     *   VectorField.  It also casts to void *.
-     * Note that the void * is invalidated any time VectorField is resized. */
-    template <class Allocator> Initialize<Allocator> Allocate(Allocator &pool) {
+     * Note that the returned void * is updated by VectorField on resize. */
+    template <class Allocator> void *Allocate(Allocator &pool) {
 #ifdef DEBUG
       frozen_ = true;
 #endif
-      return Initialize<Allocator>(*this, pool);
+      void *ret = pool.Allocate(OffsetsEnd());
+      // Initially everything in the variable length table is blank.
+      std::memset(static_cast<uint8_t*>(ret) + OffsetsBegin(), 0, OffsetsEnd() - OffsetsBegin());
+      return ret;
     }
 
     // Add a fixed-length field and return its beginning offset.
@@ -102,12 +97,6 @@ class Layout {
     bool frozen_;
 #endif
 };
-
-template <class Allocator> inline Initialize<Allocator>::Initialize(Layout &layout, Allocator &pool) 
-  : base_(pool.Allocate(layout.OffsetsEnd())), pool_(pool) {
-  // Initially everything in the variable length table is blank.
-  std::memset(static_cast<uint8_t*>(base_) + layout.OffsetsBegin(), 0, layout.OffsetsEnd() - layout.OffsetsBegin());
-}
 
 /**Store and access a POD in a Layout.
  * @param T the type to store.  T must be POD.
@@ -186,24 +175,25 @@ template <class T, class Size = std::size_t> class VectorField {
      */
     template <class Allocator = util::Pool> class FakeVector {
       public:
-
-        /** Append to the vector.  Invalidates the void * base pointer */
+        /** Append to the vector.  Updates the void * base pointer */
         void push_back(const T &t) {
           resize(size() + 1);
           back() = t;
         }
 
-        /** Resize the vector.  Invalidates the void * base pointer */
+        /** Resize the vector.  Updates the void * base pointer */
         void resize(std::size_t to) {
-          uint8_t *old_base = reinterpret_cast<uint8_t*>(session_.Done());
+          void *old_base = base_;
           std::ptrdiff_t change = (to - size()) * sizeof(T);
-          if (session_.Continue(change)) {
+          if (allocator_.Continue(base_, change)) {
             ReBase(begin_, old_base);
             ReBase(end_offset_, old_base);
           }
           *end_offset_ += change;
           end_ = begin_ + to;
         }
+
+        void clear() { resize(0); }
 
         bool empty() const { return begin_ == end_; }
 
@@ -226,17 +216,19 @@ template <class T, class Size = std::size_t> class VectorField {
 
       private:
         friend VectorField;
-        FakeVector(boost::iterator_range<T*> it, Size *end_offset, Initialize<Allocator> &session)
-          : begin_(it.begin()), end_(it.end()), end_offset_(end_offset), session_(session) {}
+        FakeVector(void *&base, boost::iterator_range<T*> it, Size *end_offset, Allocator &allocator)
+          : base_(base), begin_(it.begin()), end_(it.end()), end_offset_(end_offset), allocator_(allocator) {}
 
-        template <class P> void ReBase(P *&ptr, uint8_t *old_base) {
-          ptr = reinterpret_cast<P*>(reinterpret_cast<uint8_t*>(ptr) - old_base + reinterpret_cast<uint8_t*>(session_.Done()));
+        template <class P> void ReBase(P *&ptr, void *old_base) {
+          ptr = reinterpret_cast<P*>(reinterpret_cast<uint8_t*>(ptr) - static_cast<uint8_t*>(old_base) + static_cast<uint8_t*>(base_));
         }
+
+        void *&base_;
 
         T *begin_, *end_;
         Size *end_offset_;
 
-        Initialize<Allocator> &session_;
+        Allocator &allocator_;
     };
 
     /** Attach a variable-length field to a layout. */
@@ -245,10 +237,12 @@ template <class T, class Size = std::size_t> class VectorField {
     /**Access the vector (as a FakeVector) including the ability to resize.
      * The underlying pool must not have been used to allocate something else.
      * If multiple VectorField instances are attached to the same Layout, then
-     *   sizing must be done in the same order as they were attached.
+     *   sizing must be done in the same order as they were attached to Layout.
+     * The base pointer may be changed as a result of hitting the end of the
+     * allocation page.
      */
-    template <class Allocator> FakeVector<Allocator> operator()(Initialize<Allocator> &init) {
-      return FakeVector<Allocator>((*this)(init.Done()), &OffsetsBegin(init.Done())[index_], init);
+    template <class Allocator> FakeVector<Allocator> operator()(void *&base, Allocator &allocator) {
+      return FakeVector<Allocator>(base, (*this)(base), &OffsetsBegin(base)[index_], allocator);
     }
 
     /**Read elements of the vector.*/
