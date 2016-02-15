@@ -250,7 +250,7 @@ template <class T, class Size = std::size_t> class VectorField {
     template <class Allocator> FakeVector<Allocator> operator()(void *&base, Allocator &allocator) {
 #ifdef DEBUG
       // Check that sizing is being done in order.
-      for (const Size *i = OffsetsBegin(base) + index + 1; i < reinterpret_cast<const Size*>(VariableStart(base)); ++i) {
+      for (const Size *i = OffsetsBegin(base) + index_ + 1; i < reinterpret_cast<const Size*>(VariableStart(base)); ++i) {
         assert(*i == OffsetsBegin(base)[index]);
       }
 #endif // DEBUG

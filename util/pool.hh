@@ -4,10 +4,11 @@
 #ifndef UTIL_POOL_H
 #define UTIL_POOL_H
 
+#include <cassert>
+#include <cstring>
 #include <vector>
 
 #include <stdint.h>
-#include <string.h>
 
 namespace util {
 
@@ -70,7 +71,7 @@ class Pool {
 
 #ifdef DEBUG
     // For debugging, check that Continue came from the most recent call.
-    uint8_t *base_check_;
+    void *base_check_;
 #endif // DEBUG
 
     // no copying
