@@ -1,0 +1,7 @@
+Use cmake
+  cmake .
+  make -j 4
+But they recommend building out of tree
+  mkdir -p build && cd build
+  cmake ..
+  make -j 4
