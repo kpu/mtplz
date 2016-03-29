@@ -61,4 +61,5 @@ include_directories(
 # Process subdirectories
 add_subdirectory(util)
 add_subdirectory(lm)
-
+add_subdirectory(search)
+add_subdirectory(decode)

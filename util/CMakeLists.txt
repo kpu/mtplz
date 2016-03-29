@@ -9,23 +9,23 @@
 #    CMake files in the parent directory won't be able to access this variable.
 #
 set(KENLM_UTIL_SOURCE
-		bit_packing.cc
-		ersatz_progress.cc
-		exception.cc
-		file.cc
-		file_piece.cc
-		float_to_string.cc
-		integer_to_string.cc
-		mmap.cc
-		murmur_hash.cc
-		parallel_read.cc
-		pool.cc
-		read_compressed.cc
-		scoped.cc
-    spaces.cc
-		string_piece.cc
-		usage.cc
-	)
+  bit_packing.cc
+  ersatz_progress.cc
+  exception.cc
+  file.cc
+  file_piece.cc
+  float_to_string.cc
+  integer_to_string.cc
+  mmap.cc
+  murmur_hash.cc
+  mutable_vocab.cc
+  parallel_read.cc
+  pool.cc
+  read_compressed.cc
+  scoped.cc
+  spaces.cc
+  string_piece.cc
+  usage.cc)
 
 set(READ_COMPRESSED_FLAGS)
 set(READ_COMPRESSED_LIBS)
