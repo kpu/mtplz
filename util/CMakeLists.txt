@@ -76,6 +76,7 @@ if(BUILD_TESTING)
     bit_packing_test
     integer_to_string_test
     joint_sort_test
+    layout_test
     multi_intersection_test
     pcqueue_test
     probing_hash_table_test
