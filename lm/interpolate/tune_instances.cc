@@ -2,7 +2,7 @@
  * instance is an n-gram in the tuning file.  To tune towards these, we want
  * the correct probability p_i(w_n | w_1^{n-1}) from each model as well as
  * all the denominators p_i(v | w_1^{n-1}) that appear in normalization.
- * 
+ *
  * In other words, we filter the models to only those n-grams whose context
  * appears in the tuning data.  This can be divided into two categories:
  * - All unigrams.  This goes into Instances::ln_unigrams_
@@ -11,11 +11,11 @@
  *   w_1^{n-1}v since that is what will be used for the probability.
  * Because there is a large number of extensions (we tried keeping them in RAM
  * and ran out), the streaming framework is used to keep track of extensions
- * and sort them so they can be streamed in.  Downstream code 
+ * and sort them so they can be streamed in.  Downstream code
  * (tune_derivatives.hh) takes a stream of extensions ordered by tuning
  * instance, the word v, and the model the extension came from.
  */
-#include "lm/interpolate/tune_instance.hh"
+#include "lm/interpolate/tune_instances.hh"
 
 #include "lm/common/compare.hh"
 #include "lm/common/joint_order.hh"
@@ -42,6 +42,9 @@
 
 namespace lm { namespace interpolate {
 
+// gcc 4.6 complains about uninitialized when sort code is generated for a 4-byte POD.  But that sort code is never used.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
 bool Extension::operator<(const Extension &other) const {
   if (instance != other.instance)
     return instance < other.instance;
@@ -51,6 +54,7 @@ bool Extension::operator<(const Extension &other) const {
     return model < other.model;
   return false;
 }
+#pragma GCC diagnostic pop
 
 namespace {
 
@@ -182,7 +186,7 @@ class JointOrderCallback {
         std::size_t full_order_minus_1,
         ContextMap &contexts,
         util::stream::Stream &out,
-        const InstanceMatch *base_instance) 
+        const InstanceMatch *base_instance)
       : full_order_minus_1_(full_order_minus_1),
         contexts_(contexts),
         out_(out),
@@ -227,13 +231,13 @@ class JointOrderCallback {
     // Mapping is constant but values are being manipulated to tell them about
     // n-grams.
     ContextMap &contexts_;
-    
+
     // Reused variable.  model is set correctly.
     InitialExtension ext_;
 
     util::stream::Stream &out_;
-    
-    const InstanceMatch *const base_instance_;    
+
+    const InstanceMatch *const base_instance_;
 };
 
 // This populates the ln_unigrams_ matrix.  It can (and should for efficiency)
@@ -243,7 +247,7 @@ class ReadUnigrams {
     explicit ReadUnigrams(Matrix::ColXpr out) : out_(out) {}
 
     // Read renumbered unigrams, fill with <unk> otherwise.
-    void Run(const util::stream::ChainPosition &position) { 
+    void Run(const util::stream::ChainPosition &position) {
       NGramStream<ProbBackoff> stream(position);
       assert(stream);
       Accum unk = stream->Value().prob * M_LN10;
@@ -311,7 +315,7 @@ class IdentifyTuning : public EnumerateVocab {
 // Store information about the first iteration.
 class ExtensionsFirstIteration {
   public:
-    explicit ExtensionsFirstIteration(std::size_t instances, std::size_t models, std::size_t max_order, util::stream::Chain &extension_input, const util::stream::SortConfig &config) 
+    explicit ExtensionsFirstIteration(std::size_t instances, std::size_t models, std::size_t max_order, util::stream::Chain &extension_input, const util::stream::SortConfig &config)
       : backoffs_by_instance_(new std::vector<Matrix>(instances)), sort_(extension_input, config) {
       // Initialize all the backoff matrices to zeros.
       for (std::vector<Matrix>::iterator i = backoffs_by_instance_->begin(); i != backoffs_by_instance_->end(); ++i) {
@@ -382,12 +386,12 @@ Instances::Instances(int tune_file, const std::vector<StringPiece> &model_names,
     // Load tuning set and join vocabulary.
     std::vector<WordIndex> vocab_sizes;
     vocab_sizes.reserve(model_names.size());
-    util::FixedArray<util::scoped_fd> vocab_files(model_names.size());
+    util::FixedArray<int> vocab_files(model_names.size());
     std::size_t max_order = 0;
     for (std::vector<StringPiece>::const_iterator i = model_names.begin(); i != model_names.end(); ++i) {
       models.push_back(*i);
       vocab_sizes.push_back(models.back().Counts()[0]);
-      vocab_files.push_back(models.back().StealVocabFile());
+      vocab_files.push_back(models.back().VocabFile());
       max_order = std::max(max_order, models.back().Order());
     }
     UniversalVocab vocab(vocab_sizes);
@@ -439,11 +443,13 @@ Instances::Instances(int tune_file, const std::vector<StringPiece> &model_names,
     ln_unigrams_.resize(combined_vocab_size, models.size());
     // The backoffs in extensions_first_
     for (std::size_t m = 0; m < models.size(); ++m) {
+      std::cerr << "Processing model " << m << '/' << models.size() << ": " << model_names[m] << std::endl;
       util::stream::Chains chains(models[m].Order());
       for (std::size_t i = 0; i < models[m].Order(); ++i) {
         // TODO: stop wasting space for backoffs of highest order.
         chains.push_back(util::stream::ChainConfig(NGram<ProbBackoff>::TotalSize(i + 1), 2, config.model_read_chain_mem));
       }
+      chains.back().ActivateProgress();
       models[m].Source(chains);
       for (std::size_t i = 0; i < models[m].Order(); ++i) {
         chains[i] >> Renumber(vocab.Mapping(m), i + 1);
@@ -484,8 +490,12 @@ void Instances::ReadExtensions(util::stream::Chain &on) {
     extensions_subsequent_.reset(new util::stream::FileBuffer(util::MakeTemp(temp_prefix_)));
     on >> extensions_subsequent_->Sink();
   } else {
+    on.SetProgressTarget(extensions_subsequent_->Size());
     on >> extensions_subsequent_->Source();
   }
 }
+
+// Back door.
+Instances::Instances() {}
 
 }} // namespaces

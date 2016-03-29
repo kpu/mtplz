@@ -45,7 +45,7 @@ struct InstancesConfig {
 
 class Instances {
   private:
-    typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> BackoffMatrix;
+    typedef Eigen::Matrix<Accum, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> BackoffMatrix;
 
   public:
     Instances(int tune_file, const std::vector<StringPiece> &model_names, const InstancesConfig &config);
@@ -59,7 +59,7 @@ class Instances {
       return ln_backoffs_.row(instance);
     }
 
-    std::size_t NumInstances() const { return ln_backoffs_.rows(); }
+    InstanceIndex NumInstances() const { return ln_backoffs_.rows(); }
 
     const Vector &CorrectGradientTerm() const { return neg_ln_correct_sum_; }
 
@@ -73,9 +73,13 @@ class Instances {
     WordIndex BOS() const { return bos_; }
 
   private:
+    // Allow the derivatives test to get access.
+    friend class MockInstances;
+    Instances();
+
     // backoffs_(instance, model) is the backoff all the way to unigrams.
     BackoffMatrix ln_backoffs_;
-    
+
     // neg_correct_sum_(model) = -\sum_{instances} ln p_{model}(correct(instance) | context(instance)).
     // This appears as a term in the gradient.
     Vector neg_ln_correct_sum_;

@@ -73,6 +73,8 @@ class EndOfFileException : public Exception {
     ~EndOfFileException() throw();
 };
 
+class UnsupportedOSException : public Exception {};
+
 // Open for read only.
 int OpenReadOrThrow(const char *name);
 // Create file if it doesn't exist, truncate if it does.  Opened for write.
@@ -107,6 +109,10 @@ uint64_t SizeOrThrow(int fd);
 
 void ResizeOrThrow(int fd, uint64_t to);
 
+// It bothers me that fallocate has offset before size while pread has size
+// before offset.  But best to follow the call.
+void HolePunch(int fd, uint64_t offset, uint64_t size);
+
 std::size_t PartialRead(int fd, void *to, std::size_t size);
 void ReadOrThrow(int fd, void *to, std::size_t size);
 std::size_t ReadOrEOF(int fd, void *to_void, std::size_t size);
@@ -139,6 +145,9 @@ std::FILE *FDOpenReadOrThrow(scoped_fd &file);
 void NormalizeTempPrefix(std::string &base);
 int MakeTemp(const StringPiece &prefix);
 std::FILE *FMakeTemp(const StringPiece &prefix);
+
+// Where should we put temporary files?  Handles all the windows/POSIX defaults fun.
+std::string DefaultTempDirectory();
 
 // dup an fd.
 int DupOrThrow(int fd);

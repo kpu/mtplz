@@ -139,10 +139,9 @@ double CPUTime() {
 #if defined(_WIN32) || defined(_WIN64)
   return 0.0;
 #else
-  struct rusage usage;
-  if (getrusage(RUSAGE_SELF, &usage))
-    return 0.0;
-  return DoubleSec(usage.ru_utime) + DoubleSec(usage.ru_stime);
+  struct timespec usage;
+  UTIL_THROW_IF(clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &usage), ErrnoException, "clock_gettime failed?!"); 
+  return DoubleSec(usage);
 #endif
 }
 
@@ -180,8 +179,7 @@ void PrintUsage(std::ostream &out) {
   }
   out << "RSSMax:" << usage.ru_maxrss << " kB" << '\t';
   out << "user:" << DoubleSec(usage.ru_utime) << "\tsys:" << DoubleSec(usage.ru_stime) << '\t';
-  out << "CPU:" << (DoubleSec(usage.ru_utime) + DoubleSec(usage.ru_stime));
-  out << '\t';
+  out << "CPU:" << CPUTime() << '\t';
 #endif
 
   out << "real:" << WallTime() << '\n';

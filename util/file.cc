@@ -10,8 +10,8 @@
 #include <cstdio>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <sstream>
-
 
 #include <cassert>
 #include <cerrno>
@@ -133,6 +133,14 @@ void ResizeOrThrow(int fd, uint64_t to) {
   UTIL_THROW_IF_ARG(ret, FDException, (fd), "while resizing to " << to << " bytes");
 }
 
+void HolePunch(int fd, uint64_t offset, uint64_t size) {
+#if defined(__linux__) && defined(FALLOC_FL_PUNCH_HOLE) && defined(FALLOC_FL_KEEP_SIZE)
+  UTIL_THROW_IF_ARG(-1 == fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, offset, size), FDException, (fd), "in punching a hole at " << offset << " for " << size << " bytes.");
+#else
+  UTIL_THROW(UnsupportedOSException, "fallocate hole punching requires Linux and glibc >= 2.18");
+#endif
+}
+
 namespace {
 std::size_t GuardLarge(std::size_t size) {
   // The following operating systems have broken read/write/pread/pwrite that
@@ -158,7 +166,7 @@ std::size_t PartialRead(int fd, void *to, std::size_t amount) {
     DWORD ret;
     HANDLE file_handle = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
     DWORD larger_size = static_cast<DWORD>(std::min<std::size_t>(kMaxDWORD, amount));
-    DWORD smaller_size = 28672; // Received reports that 31346 worked but higher values did not. This rounds down to the nearest multiple of 4096, the page size. 
+    DWORD smaller_size = 28672; // Received reports that 31346 worked but higher values did not. This rounds down to the nearest multiple of 4096, the page size.
     if (!ReadFile(file_handle, to, larger_size, &ret, NULL))
     {
         DWORD last_error = GetLastError();
@@ -513,6 +521,29 @@ int MakeTemp(const StringPiece &base) {
 std::FILE *FMakeTemp(const StringPiece &base) {
   util::scoped_fd file(MakeTemp(base));
   return FDOpenOrThrow(file);
+}
+
+std::string DefaultTempDirectory() {
+#if defined(_WIN32) || defined(_WIN64)
+  char dir_buffer[1000];
+  if (GetTempPath(1000, dir_buffer) == 0)
+    throw std::runtime_error("Could not read temporary directory.");
+  return std::string(dir_buffer);
+#else
+  // POSIX says to try these environment variables, in this order:
+  const char *const vars[] = {"TMPDIR", "TMP", "TEMPDIR", "TEMP", 0};
+  for (int i=0; vars[i]; ++i) {
+#if defined(_GNU_SOURCE) && __GLIBC_PREREQ(2,17)
+    const char *val = secure_getenv(vars[i]);
+#else
+    const char *val = getenv(vars[i]);
+#endif
+    // Environment variable is set and nonempty.  Use it.
+    if (val && *val) return val;
+  }
+  // No environment variables set.  Default to /tmp.
+  return "/tmp";
+#endif
 }
 
 int DupOrThrow(int fd) {

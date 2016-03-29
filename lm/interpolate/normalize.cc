@@ -20,16 +20,6 @@
 namespace lm { namespace interpolate {
 namespace {
 
-struct SuffixLexicographicLess : public std::binary_function<NGramHeader, NGramHeader, bool> {
-  bool operator()(const NGramHeader first, const NGramHeader second) const {
-    for (const WordIndex *f = first.end() - 1, *s = second.end() - 1; f >= first.begin() && s >= second.begin(); --f, --s) {
-      if (*f < *s) return true;
-      if (*f > *s) return false;
-    }
-    return first.size() < second.size();
-  }
-};
-
 class BackoffQueueEntry {
   public:
     BackoffQueueEntry(float &entry, const util::stream::ChainPosition &position)
@@ -59,7 +49,7 @@ class BackoffQueueEntry {
 
 struct PtrGreater : public std::binary_function<const BackoffQueueEntry *, const BackoffQueueEntry *, bool> {
   bool operator()(const BackoffQueueEntry *first, const BackoffQueueEntry *second) const {
-    return SuffixLexicographicLess()(**second, **first);
+    return SuffixLexicographicLess<NGramHeader>()(**second, **first);
   }
 };
 
@@ -112,7 +102,7 @@ class BackoffManager {
       for (std::size_t i = to.Order() - 1; i < entered_.size(); ++i) {
         assert(entered_[i].empty());
       }
-      SuffixLexicographicLess less;
+      SuffixLexicographicLess<NGramHeader> less;
       while (!queue_.empty() && less(**queue_.top(), to))
         SkipRecord();
       while (TopMatches(to)) {
@@ -164,8 +154,6 @@ class BackoffManager {
 
     // Indexed by order then just all the matching models.
     util::FixedArray<util::FixedArray<BackoffQueueEntry*> > entered_;
-
-    std::size_t order_;
 
     BackoffMatrix matrix_;
 
@@ -362,6 +350,7 @@ class Thread {
       }
       if (max_order > 1) {
         higher_order->ExtendContext(NGramHeader(NULL, 0), log_z);
+        backoffs.Finish();
         higher_order->Finish();
       }
     }

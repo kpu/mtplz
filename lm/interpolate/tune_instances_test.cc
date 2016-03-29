@@ -1,4 +1,4 @@
-#include "lm/interpolate/tune_instance.hh"
+#include "lm/interpolate/tune_instances.hh"
 
 #include "util/file.hh"
 #include "util/file_stream.hh"
@@ -10,8 +10,6 @@
 #define BOOST_TEST_MODULE InstanceTest
 #include <boost/test/unit_test.hpp>
 
-#include <iostream>
-
 #include <vector>
 
 namespace lm { namespace interpolate { namespace {
@@ -20,7 +18,7 @@ BOOST_AUTO_TEST_CASE(Toy) {
   util::scoped_fd test_input(util::MakeTemp("temporary"));
   util::FileStream(test_input.get()) << "c\n";
 
-  StringPiece dir("tune_instance_data/");
+  StringPiece dir("../common/test_data/");
   if (boost::unit_test::framework::master_test_suite().argc == 2) {
     StringPiece zero_file(boost::unit_test::framework::master_test_suite().argv[1]);
     BOOST_REQUIRE(zero_file.size() > strlen("toy0.1"));
@@ -47,7 +45,7 @@ BOOST_AUTO_TEST_CASE(Toy) {
 
   BOOST_CHECK_EQUAL(1, inst.BOS());
   const Matrix &ln_unigrams = inst.LNUnigrams();
-  
+
   // <unk>=0
   BOOST_CHECK_CLOSE(-0.90309 * M_LN10, ln_unigrams(0, 0), 0.001);
   BOOST_CHECK_CLOSE(-1 * M_LN10, ln_unigrams(0, 1), 0.001);
@@ -64,7 +62,7 @@ BOOST_AUTO_TEST_CASE(Toy) {
   BOOST_CHECK_CLOSE(-0.90309 * M_LN10, ln_unigrams(4, 0), 0.001); // <unk>
   BOOST_CHECK_CLOSE(-0.7659168 * M_LN10, ln_unigrams(4, 1), 0.001);
   // too lazy to do b = 5.
-  
+
   // Two instances:
   // <s> predicts c
   // <s> c predicts </s>
@@ -72,7 +70,7 @@ BOOST_AUTO_TEST_CASE(Toy) {
   BOOST_CHECK_CLOSE(-0.30103 * M_LN10, inst.LNBackoffs(0)(0), 0.001);
   BOOST_CHECK_CLOSE(-0.30103 * M_LN10, inst.LNBackoffs(0)(1), 0.001);
 
-  
+
   // Backoffs of <s> c
   BOOST_CHECK_CLOSE(0.0, inst.LNBackoffs(1)(0), 0.001);
   BOOST_CHECK_CLOSE((-0.30103 - 0.30103) * M_LN10, inst.LNBackoffs(1)(1), 0.001);
@@ -88,7 +86,7 @@ BOOST_AUTO_TEST_CASE(Toy) {
   // <s> b from model 0
   // c </s> from model 1
   // Magic probabilities come from querying the models directly.
-  
+
   // <s> a from model 0
   BOOST_REQUIRE(stream);
   BOOST_CHECK_EQUAL(0, stream->instance);

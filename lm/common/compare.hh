@@ -1,6 +1,7 @@
 #ifndef LM_COMMON_COMPARE_H
 #define LM_COMMON_COMPARE_H
 
+#include "lm/common/ngram.hh"
 #include "lm/word_index.hh"
 
 #include <functional>
@@ -167,6 +168,16 @@ class PrefixOrder : public Comparator<PrefixOrder> {
     }
 
     static const unsigned kMatchOffset = 0;
+};
+
+template <class Range> struct SuffixLexicographicLess : public std::binary_function<const Range, const Range, bool> {
+  bool operator()(const Range first, const Range second) const {
+    for (const WordIndex *f = first.end() - 1, *s = second.end() - 1; f >= first.begin() && s >= second.begin(); --f, --s) {
+      if (*f < *s) return true;
+      if (*f > *s) return false;
+    }
+    return first.size() < second.size();
+  }
 };
 
 } // namespace lm
