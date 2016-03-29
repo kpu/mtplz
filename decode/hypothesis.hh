@@ -25,6 +25,7 @@ class Hypothesis {
     Hypothesis() : target_(NULL) {}
 
     // Extend a previous hypothesis.
+    // TODO keep score, coverage, 
     Hypothesis(
         const lm::ngram::Right &state,
         float score,

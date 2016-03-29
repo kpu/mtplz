@@ -14,7 +14,7 @@ namespace util { class MutableVocab; }
 
 namespace decode {
 
-class TargetPhrases;
+struct TargetPhrases;
 
 // Poorly designed object that does scoring.
 class Scorer {
