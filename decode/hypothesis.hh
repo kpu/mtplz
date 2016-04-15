@@ -25,16 +25,13 @@ class Hypothesis {
     Hypothesis() : target_(NULL) {}
 
     // Extend a previous hypothesis.
-    // TODO keep score, coverage, 
     Hypothesis(
-        const lm::ngram::Right &state,
         float score,
         const Hypothesis &previous,
         std::size_t source_begin,
         std::size_t source_end,
         Phrase target) :
       score_(score),
-      state_(state),
       pre_(&previous),
       last_source_index_(source_end),
       target_(target),
@@ -43,9 +40,8 @@ class Hypothesis {
     }
 
     // Initialize root hypothesis.  Provide the LM's BeginSentence.
-    Hypothesis(const lm::ngram::Right &begin_sentence, float score) :
+    Hypothesis(float score) :
       score_(score),
-      state_(begin_sentence),
       pre_(NULL),
       last_source_index_(0),
       target_(NULL),
@@ -54,8 +50,6 @@ class Hypothesis {
     const Coverage &GetCoverage() const { return coverage_; }
 
     float Score() const { return score_; }
-
-    const lm::ngram::Right &State() const { return state_; }
 
     std::size_t LastSourceIndex() const { return last_source_index_; }
 
@@ -66,7 +60,6 @@ class Hypothesis {
   private:
     float score_;
 
-    lm::ngram::Right state_;
     // Null for base hypothesis.
     const Hypothesis *pre_;
 	// TODO: this is really "one past the last source index." We have to clean this up.
