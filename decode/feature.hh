@@ -22,6 +22,18 @@ struct PhrasePair {
   TargetPhrase *targetPhrase;
 };
 
+struct HypothesisAndSourcePhrase {
+  const Hypothesis &hypothesis;
+  const Span source_span;
+  const Phrase &phrase;
+};
+
+struct HypothesisAndPhrasePair {
+  const Hypothesis &hypothesis;
+  const Span source_span;
+  PhrasePair phrase_pair;
+};
+
 class Feature {
   public:
     // recommended constructor: Feature(const std::string &config);
@@ -35,12 +47,10 @@ class Feature {
     virtual void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
     virtual void ScoreHypothesisWithSourcePhrase(
-        const Hypothesis &hypothesis, const Phrase &phrase,
-        const Span source_span, ScoreCollector &collector) const = 0;
+        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const = 0;
 
     virtual void ScoreHypothesisWithPhrasePair(
-        const Hypothesis &hypothesis, PhrasePair phrase_pair,
-        const Span source_span, ScoreCollector &collector) const = 0;
+        HypothesisAndPhrasePair combination, ScoreCollector &collector) const = 0;
 
     virtual unsigned DenseFeatureCount() const = 0;
 

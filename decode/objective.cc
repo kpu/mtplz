@@ -1,7 +1,5 @@
 #include "decode/objective.hh"
 
-#include "util/exception.hh"
-
 namespace decode {
 
 Objective::Objective(FeatureInit feature_init)
@@ -14,46 +12,40 @@ void Objective::AddFeature(Feature &feature) {
   feature.Init(feature_init_);
   unsigned dense_feature_count = feature.DenseFeatureCount();
   feature_offsets_.push_back(dense_feature_count);
-  for (unsigned i=0; i<dense_feature_count; i++) {
-    weights.push_back(1);
-  }
+  weights.resize(dense_feature_count, 1);
 }
 
-void Objective::ScorePhrase(PhrasePair phrase_pair) const {
-  auto collector = getCollector();
+float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const {
+  auto collector = getCollector(storage);
   for (unsigned i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].ScorePhrase(phrase_pair, collector);
   }
-  // TODO read collector
+  return collector.Score();
 }
 
-void Objective::ScoreHypothesisWithSourcePhrase(
-    const Hypothesis &hypothesis, const Phrase &phrase, const Span source_span) const {
-  auto collector = getCollector();
+float Objective::ScoreHypothesisWithSourcePhrase(
+    HypothesisAndSourcePhrase combination, FeatureStore *storage) const {
+  auto collector = getCollector(storage);
   for (unsigned i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
-    // TODO call feature (see ScorePhrase)
+    features_[i].ScoreHypothesisWithSourcePhrase(combination, collector);
   }
-  // TODO read collector
+  return collector.Score();
 }
 
-void Objective::ScoreHypothesisWithPhrasePair(
-    const Hypothesis &hypothesis, PhrasePair phrase_pair, const Span source_span) const {
-  auto collector = getCollector();
+float Objective::ScoreHypothesisWithPhrasePair(
+    HypothesisAndPhrasePair combination, FeatureStore *storage) const {
+  auto collector = getCollector(storage);
   for (unsigned i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
-    // TODO call feature (see ScorePhrase)
+    features_[i].ScoreHypothesisWithPhrasePair(combination, collector);
   }
-  // TODO read collector
+  return collector.Score();
 }
 
 unsigned Objective::DenseFeatureCount() const {
-  unsigned feature_count = 0;
-  for (unsigned i = 0; i < features_.size(); i++) {
-    feature_count += features_[i].DenseFeatureCount();
-  }
-  return feature_count;
+  return feature_offsets_.back();
 }
 
 std::string Objective::FeatureDescription(unsigned index) const {
@@ -66,8 +58,8 @@ std::string Objective::FeatureDescription(unsigned index) const {
   }
 }
 
-ScoreCollector Objective::getCollector() const {
-  return ScoreCollector(); // TODO condition: which ScoreCollector to use (accumulating?)
+ScoreCollector Objective::getCollector(FeatureStore *storage) const {
+  return ScoreCollector(weights, storage);
 }
 
 } // namespace decode

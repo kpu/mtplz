@@ -4,7 +4,6 @@
 #include "decode/coverage.hh"
 #include "decode/id.hh"
 #include "decode/phrase.hh"
-#include "lm/state.hh"
 #include "util/murmur_hash.hh"
 
 #include <boost/utility.hpp>
@@ -40,7 +39,7 @@ class Hypothesis {
     }
 
     // Initialize root hypothesis.  Provide the LM's BeginSentence.
-    Hypothesis(float score) :
+    explicit Hypothesis(float score) :
       score_(score),
       pre_(NULL),
       last_source_index_(0),
@@ -73,13 +72,12 @@ class Hypothesis {
 struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> {
   uint64_t operator()(const Hypothesis &hypothesis) const {
     std::size_t source_index = hypothesis.LastSourceIndex();
-    return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.State(), hash_value(hypothesis.GetCoverage())));
+    return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.GetCoverage()));
   }
 };
 
 struct RecombineEqual : public std::binary_function<const Hypothesis &, const Hypothesis &, bool> {
   bool operator()(const Hypothesis &first, const Hypothesis &second) const {
-    if (!(first.State() == second.State())) return false;
     if (!(first.GetCoverage() == second.GetCoverage())) return false;
     return (first.LastSourceIndex() == second.LastSourceIndex());
   }
