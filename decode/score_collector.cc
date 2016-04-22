@@ -2,7 +2,7 @@
 
 namespace decode {
 
-void ScoreCollector::AddDense(unsigned index, float value) {
+void ScoreCollector::AddDense(std::size_t index, float value) {
   if (dense_features_) {
     (*dense_features_)[dense_feature_offset_ + index] = value;
   }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <iterator>
 #include <vector>
 
@@ -16,7 +17,7 @@ class ScoreCollector {
     ScoreCollector(const std::vector<float> &weights, FeatureStore *dense_features)
       : weights_(weights), dense_features_(dense_features) {}
 
-    void SetDenseOffset(unsigned offset) {
+    void SetDenseOffset(std::size_t offset) {
       dense_feature_offset_ = offset;
     }
 
@@ -24,7 +25,7 @@ class ScoreCollector {
       return score_;
     }
 
-    void AddDense(unsigned index, float value);
+    void AddDense(std::size_t index, float value);
 
     // TODO (later)
     /* SparseNameBuilder getSparseNameBuilder(float); */
@@ -32,7 +33,7 @@ class ScoreCollector {
   private:
     float score_ = 0;
     const std::vector<float> &weights_;
-    unsigned dense_feature_offset_;
+    std::size_t dense_feature_offset_;
     FeatureStore *dense_features_;
 };
 

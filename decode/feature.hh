@@ -5,6 +5,7 @@
 #include "decode/feature_init.hh"
 #include "decode/score_collector.hh"
 
+#include <cstddef>
 #include <utility> // for std::pair
 #include <string>
 
@@ -23,6 +24,7 @@ struct PhrasePair {
 };
 
 struct HypothesisAndSourcePhrase {
+  // TODO add constructors
   const Hypothesis &hypothesis;
   const Span source_span;
   const Phrase &phrase;
@@ -52,9 +54,9 @@ class Feature {
     virtual void ScoreHypothesisWithPhrasePair(
         HypothesisAndPhrasePair combination, ScoreCollector &collector) const = 0;
 
-    virtual unsigned DenseFeatureCount() const = 0;
+    virtual std::size_t DenseFeatureCount() const = 0;
 
-    virtual std::string FeatureDescription(unsigned index) const = 0;
+    virtual std::string FeatureDescription(std::size_t index) const = 0;
 };
 
 } // namespace decode

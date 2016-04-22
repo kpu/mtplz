@@ -12,7 +12,6 @@ class Objective {
   public:
     std::vector<float> weights = std::vector<float>();
 
-    // TODO what constructor?
     explicit Objective(FeatureInit feature_init);
 
     void AddFeature(Feature &feature);
@@ -28,13 +27,13 @@ class Objective {
     float ScoreHypothesisWithPhrasePair(
         HypothesisAndPhrasePair combination, FeatureStore *storage) const;
 
-    unsigned DenseFeatureCount() const;
+    std::size_t DenseFeatureCount() const;
 
-    std::string FeatureDescription(unsigned index) const;
+    std::string FeatureDescription(std::size_t index) const;
 
   private:
     boost::ptr_vector<Feature> features_;
-    std::vector<unsigned> feature_offsets_;
+    std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
 
     ScoreCollector getCollector(FeatureStore *storage) const;

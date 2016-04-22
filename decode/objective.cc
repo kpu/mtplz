@@ -10,14 +10,14 @@ Objective::Objective(FeatureInit feature_init)
 void Objective::AddFeature(Feature &feature) {
   features_.push_back(&feature);
   feature.Init(feature_init_);
-  unsigned dense_feature_count = feature.DenseFeatureCount();
+  std::size_t dense_feature_count = feature.DenseFeatureCount();
   feature_offsets_.push_back(dense_feature_count);
   weights.resize(dense_feature_count, 1);
 }
 
 float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const {
   auto collector = getCollector(storage);
-  for (unsigned i=0; i<features_.size(); i++) {
+  for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].ScorePhrase(phrase_pair, collector);
   }
@@ -27,7 +27,7 @@ float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) cons
 float Objective::ScoreHypothesisWithSourcePhrase(
     HypothesisAndSourcePhrase combination, FeatureStore *storage) const {
   auto collector = getCollector(storage);
-  for (unsigned i=0; i<features_.size(); i++) {
+  for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].ScoreHypothesisWithSourcePhrase(combination, collector);
   }
@@ -37,22 +37,22 @@ float Objective::ScoreHypothesisWithSourcePhrase(
 float Objective::ScoreHypothesisWithPhrasePair(
     HypothesisAndPhrasePair combination, FeatureStore *storage) const {
   auto collector = getCollector(storage);
-  for (unsigned i=0; i<features_.size(); i++) {
+  for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].ScoreHypothesisWithPhrasePair(combination, collector);
   }
   return collector.Score();
 }
 
-unsigned Objective::DenseFeatureCount() const {
+std::size_t Objective::DenseFeatureCount() const {
   return feature_offsets_.back();
 }
 
-std::string Objective::FeatureDescription(unsigned index) const {
+std::string Objective::FeatureDescription(std::size_t index) const {
   assert(index < feature_offsets_.back());
-  for (unsigned i=0; ; i++) {
+  for (std::size_t i=0; ; i++) {
     if (index < feature_offsets_[i+1]) {
-      unsigned local_index = index - feature_offsets_[i];
+      std::size_t local_index = index - feature_offsets_[i];
       return features_[local_index].FeatureDescription(local_index);
     }
   }

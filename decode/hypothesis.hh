@@ -17,7 +17,6 @@ namespace util { class Pool; }
 
 namespace decode {
 
-// TODO properly factored feature state.
 class Hypothesis {
   public:
     // STL default constructor.
@@ -32,7 +31,7 @@ class Hypothesis {
         Phrase target) :
       score_(score),
       pre_(&previous),
-      last_source_index_(source_end),
+      end_index_(source_end),
       target_(target),
       coverage_(previous.coverage_) {
       coverage_.Set(source_begin, source_end);
@@ -42,7 +41,7 @@ class Hypothesis {
     explicit Hypothesis(float score) :
       score_(score),
       pre_(NULL),
-      last_source_index_(0),
+      end_index_(0),
       target_(NULL),
       coverage_() {}
 
@@ -50,7 +49,7 @@ class Hypothesis {
 
     float Score() const { return score_; }
 
-    std::size_t LastSourceIndex() const { return last_source_index_; }
+    std::size_t SourceEndIndex() const { return end_index_; }
 
     const Hypothesis *Previous() const { return pre_; }
 
@@ -61,8 +60,8 @@ class Hypothesis {
 
     // Null for base hypothesis.
     const Hypothesis *pre_;
-	// TODO: this is really "one past the last source index." We have to clean this up.
-    std::size_t last_source_index_;
+	// one past the last source index of the hypothesis extension
+    std::size_t end_index_;
     // Null for base hypothesis.
     Phrase target_;
 
@@ -71,7 +70,7 @@ class Hypothesis {
 
 struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> {
   uint64_t operator()(const Hypothesis &hypothesis) const {
-    std::size_t source_index = hypothesis.LastSourceIndex();
+    std::size_t source_index = hypothesis.SourceEndIndex();
     return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.GetCoverage()));
   }
 };
@@ -79,7 +78,7 @@ struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> 
 struct RecombineEqual : public std::binary_function<const Hypothesis &, const Hypothesis &, bool> {
   bool operator()(const Hypothesis &first, const Hypothesis &second) const {
     if (!(first.GetCoverage() == second.GetCoverage())) return false;
-    return (first.LastSourceIndex() == second.LastSourceIndex());
+    return (first.SourceEndIndex() == second.SourceEndIndex());
   }
 };
 

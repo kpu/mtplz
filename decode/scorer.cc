@@ -46,7 +46,7 @@ float Scorer::LM(const ID *words_begin, const ID *words_end, lm::ngram::ChartSta
 }
 
 float Scorer::Transition(const Hypothesis &hypothesis, const TargetPhrases &phrases, std::size_t source_begin, std::size_t source_end) {
-	std::size_t jump_size = abs((int) hypothesis.LastSourceIndex() - source_begin);
+	std::size_t jump_size = abs((int) source_end - source_begin);
 	return (jump_size * weights_.DistortionWeight());
 }
 
