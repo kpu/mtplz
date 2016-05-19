@@ -6,6 +6,10 @@
 #include <cstddef>
 #include <cstdlib>
 
+#if __cplusplus >= 201103L
+#include <memory>
+#endif
+
 namespace util {
 
 class MallocException : public ErrnoException {
@@ -26,6 +30,12 @@ template <class T, class Closer> class scoped_base {
     explicit scoped_base(T *p = NULL) : p_(p) {}
 
     ~scoped_base() { Closer::Close(p_); }
+
+#if __cplusplus >= 201103L
+    scoped_base(scoped_base &&from) noexcept : p_(from.p_) {
+      from.p_ = nullptr;
+    }
+#endif
 
     void reset(T *p = NULL) {
       scoped_base other(p_);
@@ -82,6 +92,10 @@ class scoped_malloc : public scoped_c<void, std::free> {
     void call_realloc(std::size_t to);
 };
 
+#if __cplusplus >= 201103L
+template <class T> using scoped_ptr = std::unique_ptr<T>;
+template <class T> using scoped_array = std::unique_ptr<T[]>;
+#else
 /* scoped_array using delete[] */
 struct scoped_delete_array_forward {
   template <class T> static void Close(T *p) { delete [] p; }
@@ -103,6 +117,7 @@ template <class T> class scoped_ptr : public scoped<T, scoped_delete_forward> {
   public:
     explicit scoped_ptr(T *p = NULL) : scoped<T, scoped_delete_forward>(p) {}
 };
+#endif
 
 void AdviseHugePages(const void *addr, std::size_t size);
 

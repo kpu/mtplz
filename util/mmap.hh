@@ -72,6 +72,13 @@ class scoped_memory {
     // Calls HugeMalloc
     scoped_memory(std::size_t to, bool zero_new);
 
+#if __cplusplus >= 201103L
+    scoped_memory(scoped_memory &&from) noexcept
+      : data_(from.data_), size_(from.size_), source_(from.source_) {
+      from.steal();
+    }
+#endif
+
     ~scoped_memory() { reset(); }
 
     void *get() const { return data_; }
