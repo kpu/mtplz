@@ -20,6 +20,9 @@ FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::Lo
     h.map = 1;
     h.total = 0;
     util::WriteOrThrow(fd, &h, sizeof(SizeHeader));
+    // Leave space for the direct write.
+    uint64_t direct_write_size = 0;
+    util::WriteOrThrow(fd, &direct_write_size, sizeof(direct_write_size));
     // Note: seeked to direct write location.
   } else {
     std::string buf(header.size() , 0);
@@ -33,17 +36,37 @@ FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::Lo
   }
 }
 
-FileRegion &FileFormat::Attach() {
-  /*void *base = regions_.empty() ? 
-  regions_.emplace_back();
-  if (!writing_) {
-    regions_.back().mem_.reset(
-  }*/
+util::scoped_memory &FileFormat::Attach() {
+  if (writing_) {
+    regions_.emplace_back();
+  } else {
+    char *base = regions_.empty() ? full_backing_.begin() : regions_.back().end();
+    const uint64_t &size = *reinterpret_cast<const uint64_t*>(base);
+    UTIL_THROW_IF2(base + sizeof(uint64_t) + size > full_backing_.end(), "File size header " << size << " goes off end of file.");
+    regions_.emplace_back(base + sizeof(uint64_t), size, util::scoped_memory::NONE_ALLOCATED);
+  }
+  return regions_.back();
 }
 
 void FileFormat::Write() {
-  for (FileRegion &r : regions_) {
-    
+  SizeHeader head;
+  head.total = direct_write_size_;
+  for (util::scoped_memory &r : regions_) {
+    head.total += r.size();
+  }
+  // Exclude the vocabulary from the mapped region.
+  assert(!regions_.empty());
+  head.map = head.total - regions_.back().size();
+  // Write the total file size header.
+  util::SeekOrThrow(file_.get(), header_offset_ - sizeof(SizeHeader));
+  util::WriteOrThrow(file_.get(), &head, sizeof(SizeHeader));
+  // Write the size of the direct-write region (its header), for which we had earlier reserved space.
+  util::WriteOrThrow(file_.get(), &direct_write_size_, sizeof(uint64_t));
+  // Write the regions with their own size headers.  This includes vocab.
+  for (util::scoped_memory &r : regions_) {
+    uint64_t size = r.size();
+    util::WriteOrThrow(file_.get(), &size, sizeof(uint64_t));
+    util::WriteOrThrow(file_.get(), r.get(), r.size());
   }
 }
 

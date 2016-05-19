@@ -20,28 +20,12 @@
 
 namespace phrase {
 
-class FileRegion {
-  public:
-    FileRegion() {}
-
-    void Resize(std::size_t to, bool zero_new) {
-      util::HugeRealloc(to, zero_new, mem_);
-    }
-
-    const void *get() const { return mem_.get(); }
-    void *get() { return mem_.get(); }
-
-  private:
-    friend class FileFormat;
-    util::scoped_memory mem_;
-};
-
 class FileFormat {
   public:
     // Takes ownership of file.
     FileFormat(int fd, const std::string &header, bool writing, util::LoadMethod load_method);
 
-    FileRegion &Attach();
+    util::scoped_memory &Attach();
 
     // Two special regions:
     // 1. Target phrases at the beginning are written directly to the file.
@@ -60,7 +44,7 @@ class FileFormat {
     util::scoped_fd file_;
     bool writing_;
 
-    std::deque<FileRegion> regions_;
+    std::deque<util::scoped_memory> regions_;
 
     // When the file is mapped as one giant region, this is the giant region.
     util::scoped_memory full_backing_;
