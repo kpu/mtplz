@@ -24,25 +24,24 @@ FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::Lo
   } else {
     std::string buf(header.size() , 0);
     util::ReadOrThrow(fd, &buf[0], buf.size());
-    UTIL_THROW_IF_ARG(buf != header, FDException, (fd), "Header did not match reference value");
-    util::ReadOrThrow(fd, &h, sizeof(Header));
-    UTIL_THROW_IF_ARG(h.map > h.total, FDException, (fd), "Binary file is incomplete or corrupt");
-    util::MapRead(load_method, fd, 0 /* header is unlikely to be more than a page */, CheckOverflow((uint64_t)header_offset_ + h.map), full_backing_);
+    UTIL_THROW_IF_ARG(buf != header, util::FDException, (fd), "Header did not match reference value");
+    util::ReadOrThrow(fd, &h, sizeof(SizeHeader));
+    UTIL_THROW_IF_ARG(h.map > h.total, util::FDException, (fd), "Binary file is incomplete or corrupt");
+    util::MapRead(load_method, fd, 0 /* header is unlikely to be more than a page */, util::CheckOverflow((uint64_t)header_offset_ + h.map), full_backing_);
     // Setup reading for vocab.  TODO: support reading from pipe.
     util::SeekOrThrow(fd, header_offset_ + h.map);
   }
 }
 
 FileRegion &FileFormat::Attach() {
-  void *base = regions_.empty() ? 
+  /*void *base = regions_.empty() ? 
   regions_.emplace_back();
   if (!writing_) {
     regions_.back().mem_.reset(
-  }
+  }*/
 }
 
 void FileFormat::Write() {
-
   for (FileRegion &r : regions_) {
     
   }

@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <deque>
 
 namespace phrase {
 
@@ -24,7 +25,7 @@ class FileRegion {
     FileRegion() {}
 
     void Resize(std::size_t to, bool zero_new) {
-      util::HugeRealloc(mem_, to, zero_new);
+      util::HugeRealloc(to, zero_new, mem_);
     }
 
     const void *get() const { return mem_.get(); }
@@ -45,12 +46,12 @@ class FileFormat {
     // Two special regions:
     // 1. Target phrases at the beginning are written directly to the file.
     void DirectWriteTargetPhrases(void *data, std::size_t size) {
-      util::WriteOrThrow(fd_, data, size);
+      util::WriteOrThrow(file_.get(), data, size);
       direct_write_size_ += size;
     }
     // 2. Vocab at the end is created in RAM but not read into RAM.
     void DirectReadVocab(void *data, std::size_t size) {
-      util::ReadOrThrow(fd_, data, size);
+      util::ReadOrThrow(file_.get(), data, size);
     }
 
     void Write();
