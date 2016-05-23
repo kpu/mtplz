@@ -303,6 +303,8 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
       return end_;
     }
 
+    std::size_t Buckets() const { return buckets_; }
+
   private:
     friend class AutoProbing<Entry, Hash, Equal>;
 

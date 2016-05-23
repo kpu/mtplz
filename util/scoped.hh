@@ -85,6 +85,8 @@ class scoped_malloc : public scoped_c<void, std::free> {
   public:
     explicit scoped_malloc(void *p = NULL) : scoped_c<void, std::free>(p) {}
 
+    explicit scoped_malloc(std::size_t size) : scoped_c<void, std::free>(MallocOrThrow(size)) {}
+
     void call_realloc(std::size_t to);
 };
 
