@@ -17,10 +17,12 @@ class FieldConfig {
     void Save(util::scoped_memory &mem);
     void Restore(const util::scoped_memory &mem);
 
+    static constexpr std::size_t kNotPresent = std::numeric_limits<std::size_t>::max();
+
     bool target = true;
-    std::size_t dense_features = std::numeric_limits<std::size_t>::max();
+    std::size_t dense_features = kNotPresent;
     bool sparse_features = false;
-    std::size_t lexical_reordering = std::numeric_limits<std::size_t>::max();
+    std::size_t lexical_reordering = kNotPresent;
 };
 
 template <class Field> class OptionalField {
@@ -32,7 +34,7 @@ template <class Field> class OptionalField {
     }
 
     OptionalField(util::Layout &layout, std::size_t size) {
-      if (size != std::numeric_limits<std::size_t>::max()) {
+      if (size != FieldConfig::kNotPresent) {
         field_ = Field(layout, size);
       }
     }

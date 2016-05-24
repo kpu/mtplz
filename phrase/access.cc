@@ -15,7 +15,7 @@ enum FieldLabel {
 };
 
 void Append(FieldLabel label, std::size_t length, util::scoped_memory &mem) {
-  if (length != std::numeric_limits<std::size_t>::max()) {
+  if (length != FieldConfig::kNotPresent) {
     HugeRealloc(mem.size() + sizeof(uint32_t) + sizeof(uint64_t), false, mem);
     *reinterpret_cast<uint32_t*>(mem.end() - sizeof(uint32_t) - sizeof(uint64_t)) = label;
     *reinterpret_cast<uint64_t*>(mem.end() - sizeof(uint64_t)) = length;
@@ -43,7 +43,7 @@ void Consume(FieldLabel label, const char *&ptr, const char *end, std::size_t &o
     out = *reinterpret_cast<const uint64_t*>(ptr);
     ptr += sizeof(uint64_t);
   } else {
-    out = std::numeric_limits<std::size_t>::max();
+    out = FieldConfig::kNotPresent;
   }
 }
 
