@@ -238,7 +238,7 @@ template <class T, class Size = std::size_t> class VectorField {
     };
 
     /** Attach a variable-length field to a layout. */
-    explicit VectorField(Layout &layout) : layout_(layout), index_(layout.ReserveVariable<Size>()) {}
+    explicit VectorField(Layout &layout) : layout_(&layout), index_(layout.ReserveVariable<Size>()) {}
 
     /**Access the vector (as a FakeVector) including the ability to resize.
      * The underlying pool must not have been used to allocate something else.
@@ -281,24 +281,24 @@ template <class T, class Size = std::size_t> class VectorField {
   private:
     // Where the offsets array starts, given the structure base pointer.
     const Size *OffsetsBegin(const void *base_void) const {
-      return reinterpret_cast<const Size*>(static_cast<const uint8_t*>(base_void) + layout_.OffsetsBegin());
+      return reinterpret_cast<const Size*>(static_cast<const uint8_t*>(base_void) + layout_->OffsetsBegin());
     }
     Size *OffsetsBegin(void *base_void) const {
-      return reinterpret_cast<Size*>(static_cast<uint8_t*>(base_void) + layout_.OffsetsBegin());
+      return reinterpret_cast<Size*>(static_cast<uint8_t*>(base_void) + layout_->OffsetsBegin());
     }
 
     // Where the variable-length storage starts.  This is right after the
     // offsets array.
     const uint8_t *VariableStart(const void *base_void) const {
-      return static_cast<const uint8_t*>(base_void) + layout_.OffsetsEnd();
+      return static_cast<const uint8_t*>(base_void) + layout_->OffsetsEnd();
     }
     uint8_t *VariableStart(void *base_void) const {
-      return static_cast<uint8_t*>(base_void) + layout_.OffsetsEnd();
+      return static_cast<uint8_t*>(base_void) + layout_->OffsetsEnd();
     }
 
     // layout to get the location of the offsets array (which can change after
     // this was constructed since more fixed or variable fields can be added).
-    Layout &layout_;
+    Layout *layout_;
 
     // The index of this field's end pointer in the offsets array.
     std::size_t index_;

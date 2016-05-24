@@ -1,4 +1,5 @@
 set (PT_SOURCE
+  access.cc
   format.cc
 )
 add_library(mtplz_phrase ${PT_SOURCE})
