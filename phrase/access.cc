@@ -6,7 +6,7 @@ namespace phrase {
 
 namespace {
 enum FieldLabel {
-  Words = 0,
+  Target = 0,
   DenseFeatures = 1,
   SparseFeatures = 2,
   LexicalReordering = 3,
@@ -54,7 +54,7 @@ void Consume(FieldLabel label, const char *&ptr, const char *end, bool &out) {
 } // namespace
 
 void FieldConfig::Save(util::scoped_memory &mem) {
-  Append(Words, words, mem);
+  Append(Target, target, mem);
   Append(DenseFeatures, dense_features, mem);
   Append(SparseFeatures, sparse_features, mem);
   Append(LexicalReordering, lexical_reordering, mem);
@@ -62,7 +62,7 @@ void FieldConfig::Save(util::scoped_memory &mem) {
 
 void FieldConfig::Restore(const util::scoped_memory &mem) {
   const char *ptr = mem.begin();
-  Consume(Words, ptr, mem.end(), words);
+  Consume(Target, ptr, mem.end(), target);
   Consume(DenseFeatures, ptr, mem.end(), dense_features);
   Consume(SparseFeatures, ptr, mem.end(), sparse_features);
   Consume(LexicalReordering, ptr, mem.end(), lexical_reordering);

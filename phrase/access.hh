@@ -17,7 +17,7 @@ class FieldConfig {
     void Save(util::scoped_memory &mem);
     void Restore(const util::scoped_memory &mem);
 
-    bool words = true;
+    bool target = true;
     std::size_t dense_features = std::numeric_limits<std::size_t>::max();
     bool sparse_features = false;
     std::size_t lexical_reordering = std::numeric_limits<std::size_t>::max();
@@ -63,12 +63,12 @@ class Access {
 
   public:
     explicit Access(const FieldConfig &config) :
-      words(layout_, config.words),
+      target(layout_, config.target),
       dense_features(layout_, config.dense_features),
       sparse_features(layout_, config.sparse_features),
       lexical_reordering(layout_, config.lexical_reordering) {}
 
-    OptionalField<util::VectorField<WordIndex, VectorSize> > words;
+    OptionalField<util::VectorField<WordIndex, VectorSize> > target;
     OptionalField<util::ArrayField<float> > dense_features;
     OptionalField<util::VectorField<SparseFeature, VectorSize> > sparse_features;
     OptionalField<util::ArrayField<float> > lexical_reordering;
