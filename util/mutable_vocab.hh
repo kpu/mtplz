@@ -1,5 +1,5 @@
-#ifndef UTIL_MUTABLE_VOCAB__
-#define UTIL_MUTABLE_VOCAB__
+#ifndef UTIL_MUTABLE_VOCAB_H
+#define UTIL_MUTABLE_VOCAB_H
 
 /* A vocabulary mapping class that's mutable at runtime.  The kenlm code has
  * a specialized immutable vocabulary.
@@ -54,4 +54,4 @@ class MutableVocab {
 };
 
 } // namespace util
-#endif // UTIL_MUTABLE_VOCAB__
+#endif // UTIL_MUTABLE_VOCAB_H
