@@ -12,8 +12,8 @@ struct SparseFeature {
   float value;
 };
 
-// Not defined as this is backed by Layout.  This is just a pointer to pass
-// around.  See Access on how to interpret a const Phrase *.
-class Phrase;
+// Row in a phrase table, except for the source phrase.  This is just a pointer
+// to pass around.  See Access on how to interpret a const Row *.
+class Row;
 
 } // namespace pt

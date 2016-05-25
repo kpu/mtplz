@@ -39,13 +39,13 @@ template <class Field> class OptionalField {
       }
     }
 
-    auto operator()(const Phrase *phr) const -> typename std::result_of<Field(const void*)>::type {
+    auto operator()(const Row *phr) const -> typename std::result_of<Field(const void*)>::type {
       return (*field_)(phr);
     }
-    template <class Alloc> auto operator()(Phrase *phr, Alloc &alloc) const -> typename std::result_of<Field(void*, Alloc &)>::type {
+    template <class Alloc> auto operator()(Row *phr, Alloc &alloc) const -> typename std::result_of<Field(void*, Alloc &)>::type {
       return (*field_)(phr, alloc);
     }
-    auto operator()(Phrase *phr) const -> typename std::result_of<Field(void*)>::type {
+    auto operator()(Row *phr) const -> typename std::result_of<Field(void*)>::type {
       return (*field_)(phr);
     }
     operator bool() const { return field_; }
@@ -77,13 +77,13 @@ class Access {
     // TODO word alignment, properties?
 
     // Get the pointer to the next phrase.
-    const Phrase *End(const Phrase *phrase) const {
+    const Row *End(const Row *phrase) const {
       // TODO optimize.
       // TODO this assumes there's at least one VectorField.
       const uint8_t *base = reinterpret_cast<const uint8_t*>(phrase);
       const uint8_t *end = base + layout_.OffsetsEnd() + 
         *(reinterpret_cast<const VectorSize*>(base + layout_.OffsetsEnd()) - 1);
-      return reinterpret_cast<const Phrase*>(end);
+      return reinterpret_cast<const Row*>(end);
     }
 };
 
