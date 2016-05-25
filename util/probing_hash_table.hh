@@ -405,7 +405,7 @@ template <class EntryT, class HashT, class EqualT = std::equal_to<typename Entry
       threshold_ = std::min<std::size_t>(backend_.buckets_ - 1, backend_.buckets_ * 0.9);
     }
 
-    bool KeyIsRawZero(const Key &key) {
+    static bool KeyIsRawZero(const Key &key) {
       for (const uint8_t *i = reinterpret_cast<const uint8_t*>(&key); i < reinterpret_cast<const uint8_t*>(&key) + sizeof(Key); ++i) {
         if (*i) return false;
       }
