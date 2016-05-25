@@ -1,7 +1,7 @@
 #ifndef PT_SOURCE_MAP_H
 #define PT_SOURCE_MAP_H
 
-#include "phrase/types.hh"
+#include "pt/types.hh"
 #include "util/probing_hash_table.hh"
 #include "util/layout.hh"
 #include "util/murmur_hash.hh"

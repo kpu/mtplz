@@ -18,7 +18,7 @@
 #include <cstddef>
 #include <deque>
 
-namespace phrase {
+namespace pt {
 
 class FileFormat {
   public:
@@ -54,4 +54,4 @@ class FileFormat {
     std::size_t header_offset_;
 };
 
-} // namespace phrase
+} // namespace pt

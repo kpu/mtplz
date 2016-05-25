@@ -1,11 +1,11 @@
 #pragma once
 
-#include "phrase/format.hh"
+#include "pt/format.hh"
 
 #include <cassert>
 #include <memory>
 
-namespace phrase {
+namespace pt {
 
 /* Format written:
  * uin16_t count of target phrases
@@ -96,4 +96,4 @@ class TargetBundleWriter {
     RecordWriter &master_;
 };
 
-} // namespace phrase
+} // namespace pt

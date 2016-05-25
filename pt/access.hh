@@ -1,6 +1,6 @@
 #pragma once
 
-#include "phrase/types.hh"
+#include "pt/types.hh"
 #include "util/layout.hh"
 
 #include <boost/optional.hpp> // Or C++17
@@ -10,7 +10,7 @@
 namespace util { class scoped_memory; }
 
 /* Accessors to interpret a target phrase pointer */
-namespace phrase {
+namespace pt {
 
 class FieldConfig {
   public:
@@ -87,4 +87,4 @@ class Access {
     }
 };
 
-} // namespace phrase
+} // namespace pt

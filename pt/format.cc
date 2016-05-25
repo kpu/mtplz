@@ -1,6 +1,6 @@
-#include "phrase/format.hh"
+#include "pt/format.hh"
 
-namespace phrase {
+namespace pt {
 
 namespace {
 struct SizeHeader {
@@ -70,4 +70,4 @@ void FileFormat::Write() {
   }
 }
 
-} // namespace phrase
+} // namespace pt

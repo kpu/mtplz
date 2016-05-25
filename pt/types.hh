@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-namespace phrase {
+namespace pt {
 
 typedef uint32_t WordIndex;
 // Type for sizing VectorField in the binary format.
@@ -16,4 +16,4 @@ struct SparseFeature {
 // around.  See Access on how to interpret a const Phrase *.
 class Phrase;
 
-} // namespace phrase
+} // namespace pt

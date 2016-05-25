@@ -1,8 +1,8 @@
-#include "phrase/access.hh"
+#include "pt/access.hh"
 #include "util/exception.hh"
 #include "util/mmap.hh"
 
-namespace phrase {
+namespace pt {
 
 namespace {
 enum FieldLabel {
@@ -68,4 +68,4 @@ void FieldConfig::Restore(const util::scoped_memory &mem) {
   Consume(LexicalReordering, ptr, mem.end(), lexical_reordering);
 }
 
-} // namespace phrase
+} // namespace pt
