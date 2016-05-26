@@ -27,6 +27,10 @@ class Objective {
     float ScoreHypothesisWithPhrasePair(
         HypothesisAndPhrasePair combination, FeatureStore *storage) const;
 
+    // storage can be null
+    float RescoreHypothesis(
+        const Hypothesis &hypothesis, FeatureStore *storage) const;
+
     std::size_t DenseFeatureCount() const;
 
     std::string FeatureDescription(std::size_t index) const;

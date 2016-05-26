@@ -44,6 +44,16 @@ float Objective::ScoreHypothesisWithPhrasePair(
   return collector.Score();
 }
 
+float Objective::RescoreHypothesis(
+    const Hypothesis &hypothesis, FeatureStore *storage) const {
+  auto collector = getCollector(storage);
+  for (std::size_t i=0; i<features_.size(); i++) {
+    collector.SetDenseOffset(feature_offsets_[i]);
+    features_[i].RescoreHypothesis(hypothesis, collector);
+  }
+  return collector.Score();
+}
+
 std::size_t Objective::DenseFeatureCount() const {
   return feature_offsets_.back();
 }

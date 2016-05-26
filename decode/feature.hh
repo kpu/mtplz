@@ -54,6 +54,9 @@ class Feature {
     virtual void ScoreHypothesisWithPhrasePair(
         HypothesisAndPhrasePair combination, ScoreCollector &collector) const = 0;
 
+    virtual void RescoreHypothesis(
+        const Hypothesis &hypothesis, ScoreCollector &collector) const = 0;
+
     virtual std::size_t DenseFeatureCount() const = 0;
 
     virtual std::string FeatureDescription(std::size_t index) const = 0;
