@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     std::string lm, phrase;
     std::string weights_file;
     decode::Config config;
-		bool verbose = false;
+    bool verbose = false;
 
     options.add_options()
       ("verbose,v", "Produce verbose output")
@@ -54,23 +54,24 @@ int main(int argc, char *argv[]) {
     po::store(po::parse_command_line(argc, argv, options), vm);
     po::notify(vm);
 
-		if(vm.count("verbose")) {
-			verbose = true;
-		}
-    decode::Context context(lm.c_str(), weights_file, config);
+    if(vm.count("verbose")) {
+        verbose = true;
+    }
+    System system(config);
+    decode::Context context(lm.c_str(), weights_file, system);
     decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
-		decode::ScoreHistoryMap map;
+    decode::ScoreHistoryMap map;
     while (true) {
       StringPiece line;
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
-			decode::Decode(context, table, line, map, verbose, out);
+      decode::Decode(context, table, line, map, verbose, out);
       out.flush();
       f.UpdateProgress();
-		}
+    }
     util::PrintUsage(std::cerr);
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;

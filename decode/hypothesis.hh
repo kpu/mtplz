@@ -6,6 +6,7 @@
 #include "decode/phrase.hh"
 #include "lm/state.hh"
 #include "util/murmur_hash.hh"
+#include "util/layout.hh"
 
 #include <boost/utility.hpp>
 
@@ -24,29 +25,28 @@ namespace decode {
 class Hypothesis {
   public:
     // STL default constructor.
-    Hypothesis() : target_(NULL) {}
+    Hypothesis() : layout_(Layout()), target_(NULL) {}
 
     // Extend a previous hypothesis.
     Hypothesis(
-        const lm::ngram::Right &state,
         float score,
-        const Hypothesis &previous,
+        const Hypothesis *&previous,
         std::size_t source_begin,
         std::size_t source_end,
         Phrase target) :
+      layout_(previous->Layout()),
       score_(score),
-      state_(state),
-      pre_(&previous),
+      pre_(previous),
       end_index_(source_end),
       target_(target),
-      coverage_(previous.coverage_) {
+      coverage_(previous->coverage_) {
       coverage_.Set(source_begin, source_end);
     }
 
-    // Initialize root hypothesis.  Provide the LM's BeginSentence.
-    Hypothesis(const lm::ngram::Right &begin_sentence, float score) :
+    // Initialize root hypothesis.
+    Hypothesis(util::Layout &layout, float score) :
+      layout_(layout),
       score_(score),
-      state_(begin_sentence),
       pre_(NULL),
       end_index_(0),
       target_(NULL),
@@ -56,18 +56,17 @@ class Hypothesis {
 
     float Score() const { return score_; }
 
-    const lm::ngram::Right &State() const { return state_; }
-
     std::size_t SourceEndIndex() const { return end_index_; }
 
     const Hypothesis *Previous() const { return pre_; }
 
     const Phrase &Target() const { return target_; }
 
+    util::Layout &Layout() const { return layout_; }
+
   private:
     float score_;
 
-    lm::ngram::Right state_;
     // Null for base hypothesis.
     const Hypothesis *pre_;
 	// one past the last source index of the hypothesis extension
@@ -76,18 +75,23 @@ class Hypothesis {
     Phrase target_;
 
     Coverage coverage_;
+
+    // layout of hypothesis
+    util::Layout &layout_;
 };
 
 struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> {
   uint64_t operator()(const Hypothesis &hypothesis) const {
     std::size_t source_index = hypothesis.SourceEndIndex();
-    return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.State(), hash_value(hypothesis.GetCoverage())));
+    return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.GetCoverage()));
+    // TODO hash lm state, too? original hypothesis does it
   }
 };
 
 struct RecombineEqual : public std::binary_function<const Hypothesis &, const Hypothesis &, bool> {
   bool operator()(const Hypothesis &first, const Hypothesis &second) const {
-    if (!(first.State() == second.State())) return false;
+    // if (!(first.State() == second.State())) return false; // TODO
+    // find equivalent with Hypothesis Layout lm_state
     if (!(first.GetCoverage() == second.GetCoverage())) return false;
     return (first.SourceEndIndex() == second.SourceEndIndex());
   }

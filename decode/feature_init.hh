@@ -6,9 +6,9 @@ namespace decode {
 
 class FeatureInit {
   public:
-    util::Layout &getHypothesisLayout();
-    util::Layout &getTargetPhraseLayout();
-    util::Layout &getWordLayout();
+    util::Layout &GetHypothesisLayout();
+    util::Layout &GetTargetPhraseLayout();
+    util::Layout &GetWordLayout();
 
   private:
     util::Layout hypothesis_ = util::Layout();
