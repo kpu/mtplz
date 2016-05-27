@@ -247,7 +247,7 @@ template <class T, class Size = std::size_t> class VectorField {
      * The base pointer may be changed as a result of hitting the end of the
      * allocation page.
      */
-    template <class Allocator> FakeVector<Allocator> operator()(void *&base, Allocator &allocator) {
+    template <class Allocator> FakeVector<Allocator> operator()(void *&base, Allocator &allocator) const {
 #ifdef DEBUG
       // Check that sizing is being done in order.
       for (const Size *i = OffsetsBegin(base) + index_ + 1; i < reinterpret_cast<const Size*>(VariableStart(base)); ++i) {
@@ -272,7 +272,7 @@ template <class T, class Size = std::size_t> class VectorField {
      * Resizing must be done immediately after allocation by using
      * Initialize<Allocator>.
      */
-    boost::iterator_range<T*> operator()(void *base) {
+    boost::iterator_range<T*> operator()(void *base) const {
       return boost::make_iterator_range(
           reinterpret_cast<T*>(VariableStart(base) + (index_ ? OffsetsBegin(base)[index_ - 1] : 0)),
           reinterpret_cast<T*>(VariableStart(base) + OffsetsBegin(base)[index_]));

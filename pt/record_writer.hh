@@ -15,14 +15,16 @@ class TargetWriter {
   public:
     TargetWriter(FileFormat &file, std::size_t initial_buffer = 16384)
       : buffer_(initial_buffer), 
-        buffer_end_(static_cast<char*>(buffer_.get() + initial_buffer)),
+        buffer_end_(static_cast<char*>(buffer_.get()) + initial_buffer),
         file_(file) {}
+
+    uint64_t Offset() { return file_.DirectWriteSize(); }
 
   private:
     friend class TargetBundleWriter;
 
     void Write(char *current) {
-      file_.DirectWriteTargetPhrases(buffer_.get(), current_ - static_cast<char*>(buffer_.get()));
+      file_.DirectWriteTargetPhrases(buffer_.get(), current - static_cast<char*>(buffer_.get()));
     }
 
     void Reallocate(std::size_t to) {
@@ -34,22 +36,22 @@ class TargetWriter {
     char *buffer_end_;
 
     FileFormat &file_;
+
+    uint64_t written_ = 0;
 };
 
 // Write target phrases for a given source phrase.
 class TargetBundleWriter {
   public:
-    explicit TargetBundleWriter(TargetRecords &master) : master_(master) {
-      // Save space for count.
-      current_ = BufferBegin() + sizeof(uint16_t);
-    }
+    explicit TargetBundleWriter(TargetWriter &master) :
+      master_(master),
+      current_(BufferBegin() + sizeof(uint16_t)) // save space for count
+    {}
 
     ~TargetBundleWriter() {
       *reinterpret_cast<uint16_t*>(BufferBegin()) = count_;
       master_.Write(current_);
     }
-
-    uint64_t Offset() const { return master_.Offset(); }
 
     void *Allocate(std::size_t size) {
       ++count_;
@@ -93,7 +95,7 @@ class TargetBundleWriter {
 
     char *current_;
     uint16_t count_ = 0;
-    RecordWriter &master_;
+    TargetWriter &master_;
 };
 
 } // namespace pt
