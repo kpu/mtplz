@@ -20,6 +20,8 @@
 
 namespace pt {
 
+extern const char kFileHeader[];
+
 class FileFormat {
   public:
     // Takes ownership of file.
@@ -33,6 +35,8 @@ class FileFormat {
       util::WriteOrThrow(file_.get(), data, size);
       direct_write_size_ += size;
     }
+    uint64_t DirectWriteSize() const { return direct_write_size_; }
+
     // 2. Vocab at the end is created in RAM but not read into RAM.
     void DirectReadVocab(void *data, std::size_t size) {
       util::ReadOrThrow(file_.get(), data, size);
@@ -40,6 +44,7 @@ class FileFormat {
 
     void Write();
 
+    bool Writing() const { return writing_; }
   private:
     util::scoped_fd file_;
     bool writing_;

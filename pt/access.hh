@@ -23,6 +23,9 @@ class FieldConfig {
     std::size_t dense_features = kNotPresent;
     bool sparse_features = false;
     std::size_t lexical_reordering = kNotPresent;
+
+    static bool Present(bool value) { return value; }
+    static bool Present(std::size_t value) { return value != kNotPresent; }
 };
 
 template <class Field> class OptionalField {
@@ -42,13 +45,13 @@ template <class Field> class OptionalField {
     auto operator()(const Row *phr) const -> typename std::result_of<Field(const void*)>::type {
       return (*field_)(phr);
     }
-    template <class Alloc> auto operator()(Row *phr, Alloc &alloc) const -> typename std::result_of<Field(void*, Alloc &)>::type {
-      return (*field_)(phr, alloc);
+    template <class Alloc> auto operator()(Row *&phr, Alloc &alloc) const -> typename std::result_of<Field(void*&, Alloc &)>::type {
+      return (*field_)(*reinterpret_cast<void **>(&phr), alloc);
     }
     auto operator()(Row *phr) const -> typename std::result_of<Field(void*)>::type {
       return (*field_)(phr);
     }
-    operator bool() const { return field_; }
+    operator bool() const { return bool(field_); }
 
   private: 
     boost::optional<Field> field_;
@@ -84,6 +87,10 @@ class Access {
       const uint8_t *end = base + layout_.OffsetsEnd() + 
         *(reinterpret_cast<const VectorSize*>(base + layout_.OffsetsEnd()) - 1);
       return reinterpret_cast<const Row*>(end);
+    }
+
+    template <class Allocator> Row *Allocate(Allocator &pool) {
+      return static_cast<Row*>(layout_.Allocate(pool));
     }
 };
 

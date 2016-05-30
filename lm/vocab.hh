@@ -240,7 +240,6 @@ template <class NewWordAction = NoOpUniqueWords> class GrowableVocab {
       return Lookup::MemUsage(content > 2 ? content : 2);
     }
 
-    // Does not take ownership of write_wordi
     template <class NewWordConstruct> GrowableVocab(WordIndex initial_size, const NewWordConstruct &new_word_construct = NewWordAction())
       : lookup_(initial_size), new_word_(new_word_construct) {
       FindOrInsert("<unk>"); // Force 0

@@ -61,8 +61,6 @@ class AnyCharacter {
 
 class BoolCharacter {
   public:
-    BoolCharacter() {}
-
     explicit BoolCharacter(const bool *delimiter = kSpaces) { delimiter_ = delimiter; }
 
     StringPiece Find(const StringPiece &in) const {
@@ -102,6 +100,9 @@ template <class Find, bool SkipEmpty = false> class TokenIter : public boost::it
     TokenIter() {}
 
     template <class Construct> TokenIter(const StringPiece &str, const Construct &construct) : after_(str), finder_(construct) {
+      increment();
+    }
+    explicit TokenIter(const StringPiece &str) : after_(str), finder_() {
       increment();
     }
 
