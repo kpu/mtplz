@@ -45,11 +45,11 @@ class TargetBundleWriter {
   public:
     explicit TargetBundleWriter(TargetWriter &master) :
       master_(master),
-      current_(BufferBegin() + sizeof(uint16_t)) // save space for count
+      current_(BufferBegin() + sizeof(RowCount)) // save space for count
     {}
 
     ~TargetBundleWriter() {
-      *reinterpret_cast<uint16_t*>(BufferBegin()) = count_;
+      *reinterpret_cast<RowCount*>(BufferBegin()) = count_;
       master_.Write(current_);
     }
 
@@ -94,7 +94,7 @@ class TargetBundleWriter {
     char *BufferEnd() { return master_.buffer_end_; }
 
     char *current_;
-    uint16_t count_ = 0;
+    RowCount count_ = 0;
     TargetWriter &master_;
 };
 

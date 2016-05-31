@@ -24,7 +24,7 @@ if (FORCE_STATIC)
 	    endif(${flag_var} MATCHES "/MD")
 	  endforeach(flag_var)
   else (MSVC)
-    if (NOT CMAKE_C_COMPILER_ID MATCHES "*Clang")
+    if (NOT CMAKE_C_COMPILER_ID MATCHES ".*Clang")
       set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
     endif ()
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
@@ -69,8 +69,6 @@ find_package(Boost 1.36.0 REQUIRED COMPONENTS
   system
   thread
   unit_test_framework
-  date_time
-  chrono
 )
 
 # Define where include files live
