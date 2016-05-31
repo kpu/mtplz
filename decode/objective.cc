@@ -2,9 +2,10 @@
 
 namespace decode {
 
-Objective::Objective(FeatureInit feature_init)
-  : feature_init_(feature_init), feature_offsets_() {
+Objective::Objective()
+  : feature_init_(), feature_offsets_() {
   feature_offsets_.push_back(0);
+  util::PODField<Hypothesis> hypothesis(feature_init_.HypothesisLayout());
 }
 
 void Objective::AddFeature(Feature &feature) {
@@ -16,7 +17,7 @@ void Objective::AddFeature(Feature &feature) {
 }
 
 float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const {
-  auto collector = getCollector(storage);
+  auto collector = GetCollector(storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].ScorePhrase(phrase_pair, collector);
@@ -26,7 +27,7 @@ float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) cons
 
 float Objective::ScoreHypothesisWithSourcePhrase(
     HypothesisAndSourcePhrase combination, FeatureStore *storage) const {
-  auto collector = getCollector(storage);
+  auto collector = GetCollector(storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].ScoreHypothesisWithSourcePhrase(combination, collector);
@@ -36,7 +37,7 @@ float Objective::ScoreHypothesisWithSourcePhrase(
 
 float Objective::ScoreHypothesisWithPhrasePair(
     HypothesisAndPhrasePair combination, FeatureStore *storage) const {
-  auto collector = getCollector(storage);
+  auto collector = GetCollector(storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].ScoreHypothesisWithPhrasePair(combination, collector);
@@ -46,7 +47,7 @@ float Objective::ScoreHypothesisWithPhrasePair(
 
 float Objective::RescoreHypothesis(
     const Hypothesis &hypothesis, FeatureStore *storage) const {
-  auto collector = getCollector(storage);
+  auto collector = GetCollector(storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i].RescoreHypothesis(hypothesis, collector);
@@ -68,7 +69,7 @@ std::string Objective::FeatureDescription(std::size_t index) const {
   }
 }
 
-ScoreCollector Objective::getCollector(FeatureStore *storage) const {
+ScoreCollector Objective::GetCollector(FeatureStore *storage) const {
   return ScoreCollector(weights, storage);
 }
 

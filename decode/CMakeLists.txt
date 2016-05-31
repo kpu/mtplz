@@ -7,6 +7,7 @@ set(DECODE_SOURCE
   phrase.cc
   phrase_table.cc
   scorer.cc
+  objective.cc
   stacks.cc
   weights.cc)
 add_library(mtplz_decode ${DECODE_SOURCE})

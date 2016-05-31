@@ -1,7 +1,7 @@
 #ifndef DECODE_STACKS__
 #define DECODE_STACKS__
 #include "decode/hypothesis.hh"
-#include "util/pool.hh"
+#include "decode/hypothesis_builder.hh"
 
 #include <vector>
 
@@ -12,7 +12,7 @@ namespace decode {
 class Context;
 class Chart;
 
-typedef std::vector<Hypothesis> Stack;
+typedef std::vector<Hypothesis*> Stack;
 
 class Stacks {
   public:
@@ -28,6 +28,10 @@ class Stacks {
     // this is needed to provide backing for an end-of-sentence phrase
     // TODO: consider refactoring
     util::Pool eos_phrase_pool_;
+
+    util::Pool hypothesis_pool_;
+
+    HypothesisBuilder hypothesis_builder_;
 
     const Hypothesis *end_;
 };

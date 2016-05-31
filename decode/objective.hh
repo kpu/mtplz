@@ -12,9 +12,13 @@ class Objective {
   public:
     std::vector<float> weights = std::vector<float>();
 
-    explicit Objective(FeatureInit feature_init);
+    explicit Objective();
 
     void AddFeature(Feature &feature);
+
+    // cannot be const because it contains layouts,
+    // which are modified on alloc
+    FeatureInit &GetFeatureInit() { return feature_init_; }
 
     // storage can be null
     float ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const;
@@ -40,7 +44,7 @@ class Objective {
     std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
 
-    ScoreCollector getCollector(FeatureStore *storage) const;
+    ScoreCollector GetCollector(FeatureStore *storage) const;
 };
 
 } // namespace decode

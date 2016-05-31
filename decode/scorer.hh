@@ -42,7 +42,7 @@ class Scorer {
     float Passthrough() const { return -100.0; }
 
     // TODO: distortion and apply hypothesis's share of the lexro.
-    float Transition(const Hypothesis &hypothesis, const TargetPhrases &phrases, std::size_t source_begin, std::size_t source_end);
+    float Transition(const Hypothesis *&hypothesis, const TargetPhrases &phrases, std::size_t source_begin, std::size_t source_end);
 
   private:
     lm::WordIndex Convert(ID from);
