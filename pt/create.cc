@@ -15,6 +15,7 @@
 #include "util/murmur_hash.hh"
 #include "util/tokenize_piece.hh"
 
+#include <cmath>
 #include <algorithm>
 
 namespace pt {
