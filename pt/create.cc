@@ -88,7 +88,8 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
   StringPiece &source = parsed_line[columns.source];
 #define BIND_COLUMN(name) \
   UTIL_THROW_IF2(FieldConfig::Present(config.name) && columns.name >= have_fields, "Text file has " << have_fields << " columns, but " #name  " is supposed to be in column " << columns.name); \
-  StringPiece &name = FieldConfig::Present(config.name) ? parsed_line[config.name] : parsed_line[0];
+  StringPiece &name = parsed_line[FieldConfig::Present(config.name) ? columns.name : 0];
+
   BIND_COLUMN(target);
   BIND_COLUMN(dense_features);
   BIND_COLUMN(sparse_features);
