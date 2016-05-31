@@ -20,10 +20,12 @@ namespace {
 // The final parameter is an output param which will get populated.
 // This function is highly specific to this particular phrasal search strategy -- e.g., it assumes
 // that we are always appending to a hypothesis on the right side.
-void AddHypothesisToVertex(const Hypothesis *hypothesis, float score_delta, search::Vertex &vertex) {
+void AddHypothesisToVertex(
+    const Hypothesis *hypothesis, float score_delta,
+    search::Vertex &vertex, FeatureInit &feature_init) {
   search::HypoState add;
   add.history.cvp = hypothesis;
-  add.state.right = hypothesis->Layout().lm_state(hypothesis);
+  add.state.right = feature_init.LMStateField()(hypothesis);
   add.state.left.length = 0;
   add.state.left.full = true;
   add.score = hypothesis->Score() + score_delta;
@@ -56,11 +58,13 @@ struct IntPairHash : public std::unary_function<const search::IntPair &, std::si
 
 class Vertices {
   public:
+    explicit Vertices(FeatureInit &feature_init) : feature_init_(feature_init) {}
+
     void Add(const Hypothesis *hypothesis, uint32_t source_begin, uint32_t source_end, float score_delta) {
       search::IntPair key;
       key.first = source_begin;
       key.second = source_end;
-      AddHypothesisToVertex(hypothesis, score_delta, map_[key]);
+      AddHypothesisToVertex(hypothesis, score_delta, map_[key], feature_init_);
     }
 
     void Apply(Chart &chart, search::EdgeGenerator &out) {
@@ -73,38 +77,36 @@ class Vertices {
     }
 
   private:
+    FeatureInit &feature_init_;
     // TODO: dense as 2D array?
     // Key is start and end
     typedef boost::unordered_map<search::IntPair, search::Vertex, IntPairHash> Map;
     Map map_;
 };
 
-void AppendToStack(search::PartialEdge complete, Stack &out, util::Pool &pool) {
+void AppendToStack(search::PartialEdge complete, Stack &out, HypothesisBuilder &hypo_builder) {
   assert(complete.Valid());
   const search::IntPair &source_range = complete.GetNote().ints;
   // The note for the first NT is the hypothesis.  The note for the second
   // NT is the target phrase.
-  const Hypothesis* prev_hypo = static_cast<const Hypothesis*>(complete.NT()[0].End().cvp);
-  util::Layout &hypo_layout = prev_hypo->Layout();
-  Hypothesis* hypo = reinterpret_cast<Hypothesis*>(hypo_layout.Allocate(pool));
-  hypo_layout.hypothesis(hypo) = Hypothesis(
-        complete.GetScore(), // TODO: call scorer to adjust for last of lexro?
-        prev_hypo,
-        (std::size_t)source_range.first,
-        (std::size_t)source_range.second,
-        Phrase(complete.NT()[1].End().cvp));
-  hypo_layout.lm_state(hypo) = complete.CompletedState().right;
+  Hypothesis* hypo = hypo_builder.BuildHypothesis(
+      complete.CompletedState().right,
+      complete.GetScore(), // TODO: call scorer to adjust for last of lexro?
+      reinterpret_cast<const Hypothesis*>(complete.NT()[0].End().cvp),
+      (std::size_t)source_range.first,
+      (std::size_t)source_range.second,
+      Phrase(complete.NT()[1].End().cvp));
   out.push_back(hypo);
 }
 
 // TODO n-best lists.
 class EdgeOutput {
   public:
-    EdgeOutput(Stack &stack, util::Pool &pool)
-      : stack_(stack), pool_(pool) {}
+    EdgeOutput(Stack &stack, HypothesisBuilder &hypo_builder)
+      : stack_(stack), hypothesis_builder_(hypo_builder) {}
 
     void NewHypothesis(search::PartialEdge complete) {
-      AppendToStack(complete, stack_, pool_);
+      AppendToStack(complete, stack_, hypothesis_builder_);
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(stack_.back()));
       if (!res.second) {
@@ -136,13 +138,14 @@ class EdgeOutput {
 
     Stack &stack_;
 
-    util::Pool &pool_;
+    HypothesisBuilder &hypothesis_builder_;
 };
 
 // Pick only the best hypothesis for end of sentence.
 class PickBest {
   public:
-    PickBest(Stack &stack, util::Pool &pool) : stack_(stack), pool_(pool) {
+    PickBest(Stack &stack, HypothesisBuilder &hypo_builder) :
+      stack_(stack), hypothesis_builder_(hypo_builder) {
       stack_.clear();
       stack_.reserve(1);
     }
@@ -155,31 +158,30 @@ class PickBest {
 
     void FinishedSearch() {
       if (best_.Valid())
-        AppendToStack(best_, stack_, pool_);
+        AppendToStack(best_, stack_, hypothesis_builder_);
     }
 
   private:
     Stack &stack_;
-    util::Pool &pool_;
+    HypothesisBuilder &hypothesis_builder_;
     search::PartialEdge best_;
 };
 
 } // namespace
 
-Stacks::Stacks(Context &context, Chart &chart) {
+Stacks::Stacks(Context &context, Chart &chart) :
+  hypothesis_builder_(hypothesis_pool_, context.GetObjective().GetFeatureInit()) {
   Future future(chart);
   // Reservation is critical because pointers to Hypothesis objects are retained as history.
   stacks_.reserve(chart.SentenceLength() + 2 /* begin/end of sentence */);
   stacks_.resize(1);
   // Initialize root hypothesis with <s> context and future cost for everything.
-  util::Layout &hypo_layout = context.GetObjective().GetFeatureInit().GetHypothesisLayout();
-  Hypothesis *hypothesis = reinterpret_cast<Hypothesis*>(hypo_layout.Allocate(hypothesis_pool_));
-  hypo_layout.hypothesis(hypothesis) = Hypothesis(hypo_layout, future.Full());
-  hypo_layout.lm_state(hypothesis) = context.GetScorer().LanguageModel().BeginSentenceState();
-  stacks_[0].push_back(hypothesis);
+  stacks_[0].push_back(hypothesis_builder_.BuildHypothesis(
+        context.GetScorer().LanguageModel().BeginSentenceState(), // TODO scorer -> objective
+        future.Full()));
   // Decode with increasing numbers of source words.
   for (std::size_t source_words = 1; source_words <= chart.SentenceLength(); ++source_words) {
-    Vertices vertices;
+    Vertices vertices(context.GetObjective().GetFeatureInit());
     // Iterate over stacks to continue from.
     for (std::size_t from = source_words - std::min(source_words, chart.MaxSourcePhraseLength());
          from < source_words;
@@ -209,7 +211,7 @@ Stacks::Stacks(Context &context, Chart &chart) {
     vertices.Apply(chart, gen);
     stacks_.resize(stacks_.size() + 1);
     stacks_.back().reserve(context.SearchContext().PopLimit());
-    EdgeOutput output(stacks_.back(), hypothesis_pool_);
+    EdgeOutput output(stacks_.back(), hypothesis_builder_);
     gen.Search(context.SearchContext(), output);
   }
   PopulateLastStack(context, chart);
@@ -222,7 +224,7 @@ void Stacks::PopulateLastStack(Context &context, Chart &chart) {
     assert(chart.SentenceLength() == (*ant)->GetCoverage().FirstZero());
     // TODO: the zero in the following line assumes that EOS is not scored for distortion. 
     // This assumption might need to be revisited.
-    AddHypothesisToVertex(*ant, 0, all_hyps);
+    AddHypothesisToVertex(*ant, 0, all_hyps, context.GetObjective().GetFeatureInit());
   }
   
   // Next, make Vertex which consists of a single EOS phrase.
@@ -245,7 +247,7 @@ void Stacks::PopulateLastStack(Context &context, Chart &chart) {
   AddEdge(all_hyps, eos_vertex, note, gen);
 
   stacks_.resize(stacks_.size() + 1);
-  PickBest output(stacks_.back(), hypothesis_pool_);
+  PickBest output(stacks_.back(), hypothesis_builder_);
   gen.Search(context.SearchContext(), output);
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];

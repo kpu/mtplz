@@ -1,3 +1,4 @@
+#include "decode/system.hh"
 #include "decode/chart.hh"
 #include "decode/context.hh"
 #include "decode/output.hh"
@@ -57,8 +58,8 @@ int main(int argc, char *argv[]) {
     if(vm.count("verbose")) {
         verbose = true;
     }
-    System system(config);
-    decode::Context context(lm.c_str(), weights_file, system);
+    decode::System sys(config);
+    decode::Context context(lm.c_str(), weights_file, sys.GetConfig(), sys.GetObjective());
     decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);

@@ -12,7 +12,7 @@ class Objective {
   public:
     std::vector<float> weights = std::vector<float>();
 
-    explicit Objective(FeatureInit feature_init);
+    explicit Objective();
 
     void AddFeature(Feature &feature);
 

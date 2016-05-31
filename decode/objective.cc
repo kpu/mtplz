@@ -2,9 +2,10 @@
 
 namespace decode {
 
-Objective::Objective(FeatureInit feature_init)
-  : feature_init_(feature_init), feature_offsets_() {
+Objective::Objective()
+  : feature_init_(), feature_offsets_() {
   feature_offsets_.push_back(0);
+  util::PODField<Hypothesis> hypothesis(feature_init_.HypothesisLayout());
 }
 
 void Objective::AddFeature(Feature &feature) {

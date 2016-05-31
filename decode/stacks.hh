@@ -1,7 +1,7 @@
 #ifndef DECODE_STACKS__
 #define DECODE_STACKS__
 #include "decode/hypothesis.hh"
-#include "util/pool.hh"
+#include "decode/hypothesis_builder.hh"
 
 #include <vector>
 
@@ -30,6 +30,8 @@ class Stacks {
     util::Pool eos_phrase_pool_;
 
     util::Pool hypothesis_pool_;
+
+    HypothesisBuilder hypothesis_builder_;
 
     const Hypothesis *end_;
 };

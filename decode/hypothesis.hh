@@ -6,7 +6,6 @@
 #include "decode/phrase.hh"
 #include "lm/state.hh"
 #include "util/murmur_hash.hh"
-#include "util/layout.hh"
 
 #include <boost/utility.hpp>
 
@@ -19,13 +18,10 @@ namespace util { class Pool; }
 
 namespace decode {
 
-// TODO for now, re-added lm state to hypothesis.
-// later move to the hypothesis layout
-// (requires implementation of lm as Feature)
 class Hypothesis {
   public:
     // STL default constructor.
-    Hypothesis() : layout_(Layout()), target_(NULL) {}
+    Hypothesis() : target_(NULL) {}
 
     // Extend a previous hypothesis.
     Hypothesis(
@@ -34,7 +30,6 @@ class Hypothesis {
         std::size_t source_begin,
         std::size_t source_end,
         Phrase target) :
-      layout_(previous->Layout()),
       score_(score),
       pre_(previous),
       end_index_(source_end),
@@ -44,8 +39,7 @@ class Hypothesis {
     }
 
     // Initialize root hypothesis.
-    Hypothesis(util::Layout &layout, float score) :
-      layout_(layout),
+    explicit Hypothesis(float score) :
       score_(score),
       pre_(NULL),
       end_index_(0),
@@ -62,8 +56,6 @@ class Hypothesis {
 
     const Phrase &Target() const { return target_; }
 
-    util::Layout &Layout() const { return layout_; }
-
   private:
     float score_;
 
@@ -75,9 +67,6 @@ class Hypothesis {
     Phrase target_;
 
     Coverage coverage_;
-
-    // layout of hypothesis
-    util::Layout &layout_;
 };
 
 struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> {

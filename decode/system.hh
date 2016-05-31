@@ -7,15 +7,12 @@ namespace decode {
 
 class System {
   public:
-    System(Config config) : feature_init_(), config_(config) {
-      objective_ = Objective(feature_init_);
-    }
+    System(Config config) : objective_(), config_(config) {}
 
-    const Config &Config() { return config_; }
-    Objective &Objective() { return objective_; }
+    const Config &GetConfig() { return config_; }
+    Objective &GetObjective() { return objective_; }
   private:
     Objective objective_;
-    FeatureInit feature_init_;
     Config config_;
 };
   
