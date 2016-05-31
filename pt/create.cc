@@ -2,6 +2,7 @@
 
 #include "pt/access.hh"
 #include "pt/format.hh"
+#include "pt/hash.hh"
 #include "pt/hash_table_region.hh"
 #include "pt/record_writer.hh"
 #include "pt/word_array.hh"
@@ -34,7 +35,7 @@ class SourceHasher {
       for (util::TokenIter<util::BoolCharacter, true> i(source); i; ++i) {
         reuse_.push_back(vocab_.FindOrInsert(*i));
       }
-      uint64_t ret = util::MurmurHash64A(&*reuse_.begin(), sizeof(WordIndex) * reuse_.size());
+      uint64_t ret = HashSource(&*reuse_.begin(), &*reuse_.begin() + reuse_.size());
       reuse_.clear();
       return ret;
     }

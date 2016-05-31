@@ -16,4 +16,7 @@ struct SparseFeature {
 // to pass around.  See Access on how to interpret a const Row *.
 class Row;
 
+// Number of target phrases per source phrase.
+typedef uint16_t RowCount;
+
 } // namespace pt
