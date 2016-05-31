@@ -12,6 +12,7 @@ set(DECODE_SOURCE
   weights.cc)
 add_library(mtplz_decode ${DECODE_SOURCE})
 target_link_libraries(mtplz_decode mtplz_search kenlm kenlm_util ${Boost_LIBRARIES})
+target_compile_features(mtplz_decode PUBLIC cxx_range_for)
 
 set(DECODE_LIBS mtplz_decode mtplz_search kenlm kenlm_util ${Boost_LIBRARIES})
 
