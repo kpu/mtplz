@@ -41,7 +41,7 @@ class MutableVocab {
 
     MutableVocab();
     
-    uint32_t Find(const StringPiece &str) const;
+    ID Find(const StringPiece &str) const;
 
     ID FindOrInsert(const StringPiece &str);
 
