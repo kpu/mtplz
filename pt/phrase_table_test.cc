@@ -3,6 +3,7 @@
 
 #include "pt/access.hh"
 #include "pt/create.hh"
+#include "pt/query.hh"
 #include "util/file.hh"
 
 namespace pt { namespace {
@@ -22,8 +23,10 @@ BOOST_AUTO_TEST_CASE(CreateAndQuery) {
   TextColumns columns;
   FieldConfig fields;
   fields.dense_features = 1;
-  CreateTable(MakeFile().release(), binary.release(), columns, fields);
+  CreateTable(MakeFile().release(), util::DupOrThrow(binary.get()), columns, fields);
   BOOST_CHECK_EQUAL(5, fields.dense_features);
+  util::SeekOrThrow(binary.get(), 0);
+  Table table(binary.release(), util::READ);
 }
 
 } } // namespaces

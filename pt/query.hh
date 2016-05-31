@@ -67,6 +67,7 @@ class RowIterator : public std::iterator<std::forward_iterator_tag, const Row> {
 
 class Table {
   public:
+    // Takes ownership of fd.
     Table(int fd, util::LoadMethod load_method);
 
     Table(const char *file, util::LoadMethod load_method);
