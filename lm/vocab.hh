@@ -5,7 +5,7 @@
 #include "lm/lm_exception.hh"
 #include "lm/virtual_interface.hh"
 #include "util/file_stream.hh"
-#include "util/murmur_hash.hh"
+#include "util/mutable_vocab.hh"
 #include "util/pool.hh"
 #include "util/probing_hash_table.hh"
 #include "util/sorted_uniform.hh"
@@ -23,10 +23,6 @@ namespace ngram {
 struct Config;
 
 namespace detail {
-uint64_t HashForVocab(const char *str, std::size_t len);
-inline uint64_t HashForVocab(const StringPiece &str) {
-  return HashForVocab(str.data(), str.length());
-}
 struct ProbingVocabularyHeader;
 } // namespace detail
 
@@ -74,7 +70,7 @@ class SortedVocabulary : public base::Vocabulary {
             util::IdentityAccessor<uint64_t>(),
             begin_ - 1, 0,
             end_, std::numeric_limits<uint64_t>::max(),
-            detail::HashForVocab(str), found)) {
+            util::HashForVocab(str), found)) {
         return found - begin_ + 1; // +1 because <unk> is 0 and does not appear in the lookup table.
       } else {
         return 0;
@@ -133,25 +129,6 @@ class SortedVocabulary : public base::Vocabulary {
     std::vector<StringPiece> strings_to_enumerate_;
 };
 
-#pragma pack(push)
-#pragma pack(4)
-struct ProbingVocabularyEntry {
-  uint64_t key;
-  WordIndex value;
-
-  typedef uint64_t Key;
-  uint64_t GetKey() const { return key; }
-  void SetKey(uint64_t to) { key = to; }
-
-  static ProbingVocabularyEntry Make(uint64_t key, WordIndex value) {
-    ProbingVocabularyEntry ret;
-    ret.key = key;
-    ret.value = value;
-    return ret;
-  }
-};
-#pragma pack(pop)
-
 // Vocabulary storing a map from uint64_t to WordIndex.
 class ProbingVocabulary : public base::Vocabulary {
   public:
@@ -159,7 +136,7 @@ class ProbingVocabulary : public base::Vocabulary {
 
     WordIndex Index(const StringPiece &str) const {
       Lookup::ConstIterator i;
-      return lookup_.Find(detail::HashForVocab(str), i) ? i->value : 0;
+      return lookup_.Find(util::HashForVocab(str), i) ? i->value : 0;
     }
 
     static uint64_t Size(uint64_t entries, float probing_multiplier);
@@ -194,7 +171,7 @@ class ProbingVocabulary : public base::Vocabulary {
   private:
     void InternalFinishedLoading();
 
-    typedef util::ProbingHashTable<ProbingVocabularyEntry, util::IdentityHash> Lookup;
+    typedef util::ProbingHashTable<util::ProbingVocabularyEntry, util::IdentityHash> Lookup;
 
     Lookup lookup_;
 
@@ -226,50 +203,6 @@ class WriteUniqueWords {
 
   private:
     util::FileStream word_list_;
-};
-
-class NoOpUniqueWords {
-  public:
-    NoOpUniqueWords() {}
-    void operator()(const StringPiece &word) {}
-};
-
-template <class NewWordAction = NoOpUniqueWords> class GrowableVocab {
-  public:
-    static std::size_t MemUsage(WordIndex content) {
-      return Lookup::MemUsage(content > 2 ? content : 2);
-    }
-
-    template <class NewWordConstruct> GrowableVocab(WordIndex initial_size, const NewWordConstruct &new_word_construct = NewWordAction())
-      : lookup_(initial_size), new_word_(new_word_construct) {
-      FindOrInsert("<unk>"); // Force 0
-      FindOrInsert("<s>"); // Force 1
-      FindOrInsert("</s>"); // Force 2
-    }
-
-    WordIndex Index(const StringPiece &str) const {
-      Lookup::ConstIterator i;
-      return lookup_.Find(detail::HashForVocab(str), i) ? i->value : 0;
-    }
-
-    WordIndex FindOrInsert(const StringPiece &word) {
-      ProbingVocabularyEntry entry = ProbingVocabularyEntry::Make(util::MurmurHashNative(word.data(), word.size()), Size());
-      Lookup::MutableIterator it;
-      if (!lookup_.FindOrInsert(entry, it)) {
-        new_word_(word);
-        UTIL_THROW_IF(Size() >= std::numeric_limits<lm::WordIndex>::max(), VocabLoadException, "Too many vocabulary words.  Change WordIndex to uint64_t in lm/word_index.hh");
-      }
-      return it->value;
-    }
-
-    WordIndex Size() const { return lookup_.Size(); }
-
-  private:
-    typedef util::AutoProbing<ProbingVocabularyEntry, util::IdentityHash> Lookup;
-
-    Lookup lookup_;
-
-    NewWordAction new_word_;
 };
 
 } // namespace ngram

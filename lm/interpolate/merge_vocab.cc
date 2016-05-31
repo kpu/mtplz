@@ -60,7 +60,7 @@ VocabFileReader &VocabFileReader::operator++() {
     return *this;
   }
   uint64_t prev_hash_value = hash_value_;
-  hash_value_ = ngram::detail::HashForVocab(word_.data(), word_.size());
+  hash_value_ = util::HashForVocab(word_.data(), word_.size());
 
   // hash values should be monotonically increasing
   UTIL_THROW_IF(hash_value_ < prev_hash_value, FormatLoadException,

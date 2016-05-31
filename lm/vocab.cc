@@ -18,19 +18,11 @@
 namespace lm {
 namespace ngram {
 
-namespace detail {
-uint64_t HashForVocab(const char *str, std::size_t len) {
-  // This proved faster than Boost's hash in speed trials: total load time Murmur 67090000, Boost 72210000
-  // Chose to use 64A instead of native so binary format will be portable across 64 and 32 bit.
-  return util::MurmurHash64A(str, len, 0);
-}
-} // namespace detail
-
 namespace {
 // Normally static initialization is a bad idea but MurmurHash is pure arithmetic, so this is ok.
-const uint64_t kUnknownHash = detail::HashForVocab("<unk>", 5);
+const uint64_t kUnknownHash = util::HashForVocab("<unk>", 5);
 // Sadly some LMs have <UNK>.
-const uint64_t kUnknownCapHash = detail::HashForVocab("<UNK>", 5);
+const uint64_t kUnknownCapHash = util::HashForVocab("<UNK>", 5);
 
 // TODO: replace with FilePiece.
 void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint64_t offset) {
@@ -127,7 +119,7 @@ void SortedVocabulary::ConfigureEnumerate(EnumerateVocab *to, std::size_t max_en
 }
 
 WordIndex SortedVocabulary::Insert(const StringPiece &str) {
-  uint64_t hashed = detail::HashForVocab(str);
+  uint64_t hashed = util::HashForVocab(str);
   if (hashed == kUnknownHash || hashed == kUnknownCapHash) {
     saw_unk_ = true;
     return 0;
@@ -174,7 +166,7 @@ void SortedVocabulary::ComputeRenumbering(WordIndex types, int from_words, int t
   entry.old = 1;
   for (entry.str = start + 6 /* skip <unk>\0 */; entry.str < start + file_size; ++entry.old) {
     StringPiece str(entry.str, strlen(entry.str));
-    entry.hash = detail::HashForVocab(str);
+    entry.hash = util::HashForVocab(str);
     entries.push_back(entry);
     entry.str += str.size() + 1;
   }
@@ -275,14 +267,14 @@ void ProbingVocabulary::ConfigureEnumerate(EnumerateVocab *to, std::size_t /*max
 }
 
 WordIndex ProbingVocabulary::Insert(const StringPiece &str) {
-  uint64_t hashed = detail::HashForVocab(str);
+  uint64_t hashed = util::HashForVocab(str);
   // Prevent unknown from going into the table.
   if (hashed == kUnknownHash || hashed == kUnknownCapHash) {
     saw_unk_ = true;
     return 0;
   } else {
     if (enumerate_) enumerate_->Add(bound_, str);
-    lookup_.Insert(ProbingVocabularyEntry::Make(hashed, bound_));
+    lookup_.Insert(util::ProbingVocabularyEntry::Make(hashed, bound_));
     return bound_++;
   }
 }

@@ -7,8 +7,7 @@
 #include "pt/record_writer.hh"
 #include "pt/word_array.hh"
 
-// TODO move out of lm
-#include "lm/vocab.hh"
+#include "util/mutable_vocab.hh"
 
 #include "util/double-conversion/double-conversion.h"
 #include "util/file_piece.hh"
@@ -29,7 +28,7 @@ void CountColumns(StringPiece part, std::size_t &count) {
 
 class SourceHasher {
   public:
-    explicit SourceHasher(lm::ngram::GrowableVocab<WordArray> &vocab) : vocab_(vocab) {}
+    explicit SourceHasher(util::GrowableVocab<WordArray> &vocab) : vocab_(vocab) {}
 
     uint64_t operator()(StringPiece source) {
       for (util::TokenIter<util::BoolCharacter, true> i(source); i; ++i) {
@@ -41,7 +40,7 @@ class SourceHasher {
     }
 
   private:
-    lm::ngram::GrowableVocab<WordArray> &vocab_;
+    util::GrowableVocab<WordArray> &vocab_;
     std::vector<WordIndex> reuse_;
 };
 
@@ -105,7 +104,7 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
   config.Save(file.Attach());
   HashTableRegion<uint64_t> offsets(file);
   WordArray words(file);
-  lm::ngram::GrowableVocab<WordArray> vocab(100, words);
+  util::GrowableVocab<WordArray> vocab(100, words);
   SourceHasher source_hasher(vocab);
   Access access(config);
 
