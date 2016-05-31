@@ -62,7 +62,7 @@ class TargetBundleWriter {
     }
 
     bool Continue(void *&base, std::ptrdiff_t additional) {
-      assert(base > Buffer().get() && base < BufferEnd());
+      assert(base >= Buffer().get() && base < BufferEnd());
       if (UTIL_LIKELY(current_ + additional <= BufferEnd())) {
         current_ += additional;
         return false;
