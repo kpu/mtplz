@@ -34,8 +34,11 @@ bool ConsumeLabel(FieldLabel label, const char *&ptr, const char *end) {
   uint32_t value = *reinterpret_cast<const uint32_t*>(ptr);
   UTIL_THROW_IF2(value >= LastLabel, "This code doesn't know what to do with field labeled " << value << ". Was the phrase table built with a newer version?");
   UTIL_THROW_IF2(value < label, "Field labels not in order with " << value);
+  if (value != label) {
+    return false;
+  }
   ptr += sizeof(uint32_t);
-  return value == label;
+  return true;
 }
 
 void Consume(FieldLabel label, const char *&ptr, const char *end, std::size_t &out) {
@@ -53,7 +56,7 @@ void Consume(FieldLabel label, const char *&ptr, const char *end, bool &out) {
 
 } // namespace
 
-void FieldConfig::Save(util::scoped_memory &mem) {
+void FieldConfig::Save(util::scoped_memory &mem) const {
   Append(Target, target, mem);
   Append(DenseFeatures, dense_features, mem);
   Append(SparseFeatures, sparse_features, mem);

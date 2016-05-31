@@ -14,7 +14,7 @@ namespace pt {
 
 class FieldConfig {
   public:
-    void Save(util::scoped_memory &mem);
+    void Save(util::scoped_memory &mem) const;
     void Restore(const util::scoped_memory &mem);
 
     static constexpr std::size_t kNotPresent = std::numeric_limits<std::size_t>::max();
