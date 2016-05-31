@@ -105,8 +105,7 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
   TargetWriter target_write(file);
   config.Save(file.Attach());
   HashTableRegion<uint64_t> offsets(file);
-  WordArray words(file);
-  util::GrowableVocab<WordArray> vocab(100, words);
+  util::GrowableVocab<WordArray> vocab(100, file);
   SourceHasher source_hasher(vocab);
   Access access(config);
 
@@ -132,7 +131,7 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
     source_hash = new_source_hash;
   }
 
-  words.Finish();
+  vocab.Action().Finish();
   file.Write();
 }
 
