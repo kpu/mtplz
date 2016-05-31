@@ -19,10 +19,15 @@ void SaveRestore(const FieldConfig config) {
 
 BOOST_AUTO_TEST_CASE(SaveFieldConfig) {
   FieldConfig config;
+  config.target = false;
   SaveRestore(config);
   config.dense_features = 3;
   SaveRestore(config);
   config.lexical_reordering = 10;
+  SaveRestore(config);
+  config.sparse_features = true;
+  SaveRestore(config);
+  config.target = true;
   SaveRestore(config);
 }
 

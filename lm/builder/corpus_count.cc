@@ -155,7 +155,7 @@ float CorpusCount::DedupeMultiplier(std::size_t order) {
 }
 
 std::size_t CorpusCount::VocabUsage(std::size_t vocab_estimate) {
-  return ngram::GrowableVocab<ngram::WriteUniqueWords>::MemUsage(vocab_estimate);
+  return util::GrowableVocab<ngram::WriteUniqueWords>::MemUsage(vocab_estimate);
 }
 
 CorpusCount::CorpusCount(util::FilePiece &from, int vocab_write, uint64_t &token_count, WordIndex &type_count, std::vector<bool> &prune_words, const std::string& prune_vocab_filename, std::size_t entries_per_block, WarningAction disallowed_symbol)
@@ -182,7 +182,7 @@ namespace {
 } // namespace
 
 void CorpusCount::Run(const util::stream::ChainPosition &position) {
-  ngram::GrowableVocab<ngram::WriteUniqueWords> vocab(type_count_, vocab_write_);
+  util::GrowableVocab<ngram::WriteUniqueWords> vocab(type_count_, vocab_write_);
   token_count_ = 0;
   type_count_ = 0;
   const WordIndex end_sentence = vocab.FindOrInsert("</s>");
