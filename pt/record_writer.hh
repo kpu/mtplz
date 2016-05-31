@@ -46,7 +46,10 @@ class TargetBundleWriter {
     explicit TargetBundleWriter(TargetWriter &master) :
       master_(master),
       current_(BufferBegin() + sizeof(RowCount)) // save space for count
-    {}
+    {
+      assert(current_ >= BufferBegin());
+      assert(current_ < BufferEnd());
+    }
 
     ~TargetBundleWriter() {
       *reinterpret_cast<RowCount*>(BufferBegin()) = count_;
@@ -62,7 +65,7 @@ class TargetBundleWriter {
     }
 
     bool Continue(void *&base, std::ptrdiff_t additional) {
-      assert(base >= Buffer().get() && base < BufferEnd());
+      assert(base >= BufferBegin() && base < BufferEnd());
       if (UTIL_LIKELY(current_ + additional <= BufferEnd())) {
         current_ += additional;
         return false;
@@ -77,7 +80,9 @@ class TargetBundleWriter {
   private:
     void *Increment(std::size_t size) {
       void *ret = current_;
+      assert(ret >= BufferBegin() && ret < BufferEnd());
       current_ += size;
+      assert(current_ >= BufferBegin() && current_ < BufferEnd());
       return ret;
     }
 
@@ -93,9 +98,9 @@ class TargetBundleWriter {
     char *BufferBegin() { return reinterpret_cast<char*>(Buffer().get()); }
     char *BufferEnd() { return master_.buffer_end_; }
 
+    TargetWriter &master_;
     char *current_;
     RowCount count_ = 0;
-    TargetWriter &master_;
 };
 
 } // namespace pt
