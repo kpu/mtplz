@@ -177,7 +177,7 @@ Stacks::Stacks(Context &context, Chart &chart) :
   stacks_.resize(1);
   // Initialize root hypothesis with <s> context and future cost for everything.
   stacks_[0].push_back(hypothesis_builder_.BuildHypothesis(
-        context.GetScorer().LanguageModel().BeginSentenceState(), // TODO scorer -> objective
+        *context.GetObjective().lm_begin_sentence_state,
         future.Full()));
   // Decode with increasing numbers of source words.
   for (std::size_t source_words = 1; source_words <= chart.SentenceLength(); ++source_words) {
@@ -198,8 +198,10 @@ Stacks::Stacks(Context &context, Chart &chart) :
           const TargetPhrases *phrases = chart.Range(begin, begin + phrase_length);
           if (!phrases || !coverage.Compatible(begin, begin + phrase_length)) continue;
           // distortion etc.
-          const Hypothesis *hypo = *ant;
-          float score_delta = context.GetScorer().Transition(hypo, *phrases, begin, begin + phrase_length);
+          const Hypothesis *ant_hypo = *ant;
+          float score_delta = context.GetObjective().ScoreHypothesisWithSourcePhrase(
+              HypothesisAndSourcePhrase{*ant_hypo, Span(begin, begin + phrase_length), Phrase(eos_phrase_pool_, 0)}, NULL);
+          // TODO don't null source phrase, what about TargetPhrases *phrases? do we pass that somewhere?
           // Future costs: remove span to be filled.
           score_delta += future.Change(coverage, begin, begin + phrase_length);
           vertices.Add(*ant, begin, begin + phrase_length, score_delta);

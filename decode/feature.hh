@@ -11,7 +11,7 @@
 
 namespace decode {
 
-typedef std::pair<ID,ID> Span;
+typedef std::pair<std::size_t,std::size_t> Span; // TODO size_t -> ID*
 
 // Layouts:
 struct TargetPhrase;
@@ -24,7 +24,6 @@ struct PhrasePair {
 };
 
 struct HypothesisAndSourcePhrase {
-  // TODO add constructors
   const Hypothesis &hypothesis;
   const Span source_span;
   const Phrase &phrase;
@@ -41,6 +40,8 @@ class Feature {
     // recommended constructor: Feature(const std::string &config);
 
     virtual ~Feature(){};
+
+    virtual const StringPiece Name() const = 0;
 
     virtual void Init(FeatureInit &feature_init) = 0;
 
