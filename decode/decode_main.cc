@@ -7,6 +7,9 @@
 #include "util/file_stream.hh"
 #include "util/usage.hh"
 
+// features
+#include "decode/distortion.hh"
+
 #include <boost/program_options.hpp>
 
 #include <string>
@@ -58,9 +61,12 @@ int main(int argc, char *argv[]) {
     if(vm.count("verbose")) {
         verbose = true;
     }
-    decode::System sys(config);
+    decode::System sys(config, weights_file);
     decode::Context context(lm.c_str(), weights_file, sys.GetConfig(), sys.GetObjective());
+    decode::Distortion distortion;
+    sys.GetObjective().AddFeature(distortion);
     decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
+    sys.GetObjective().lm_begin_sentence_state = &context.GetScorer().LanguageModel().BeginSentenceState();
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
     decode::ScoreHistoryMap map;

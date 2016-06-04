@@ -26,11 +26,11 @@ class FeatureInit {
       return word_layout_;
     }
 
-    util::PODField<Hypothesis> HypothesisField() const {
+    const util::PODField<Hypothesis> &HypothesisField() const {
       return hypothesis_field_;
     }
 
-    util::PODField<LMState> LMStateField() const {
+    const util::PODField<LMState> &LMStateField() const {
       return lm_state_field_;
     }
 

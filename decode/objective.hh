@@ -4,9 +4,10 @@
 
 #include <assert.h>
 #include <vector>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace decode {
+
+class Weights;
 
 class Objective {
   public:
@@ -19,6 +20,8 @@ class Objective {
     // cannot be const because it contains layouts,
     // which are modified on alloc
     FeatureInit &GetFeatureInit() { return feature_init_; }
+
+    void LoadWeights(Weights &weights);
 
     // storage can be null
     float ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const;
@@ -39,8 +42,9 @@ class Objective {
 
     std::string FeatureDescription(std::size_t index) const;
 
+    const lm::ngram::State *lm_begin_sentence_state = NULL;
   private:
-    boost::ptr_vector<Feature> features_;
+    std::vector<Feature*> features_;
     std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
 
