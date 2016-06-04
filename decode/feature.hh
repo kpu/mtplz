@@ -11,7 +11,7 @@
 
 namespace decode {
 
-typedef std::pair<std::size_t,std::size_t> Span; // TODO size_t -> ID*
+typedef std::pair<std::size_t,std::size_t> Span; // TODO size_t -> ID*, problem with coverage in hypo
 
 // Layouts:
 struct TargetPhrase;
@@ -38,10 +38,11 @@ struct HypothesisAndPhrasePair {
 class Feature {
   public:
     // recommended constructor: Feature(const std::string &config);
+    Feature(const StringPiece feature_name) : name(feature_name) {}
 
     virtual ~Feature(){};
-
-    virtual const StringPiece Name() const = 0;
+    
+    const StringPiece name;
 
     virtual void Init(FeatureInit &feature_init) = 0;
 

@@ -21,7 +21,7 @@ void Objective::AddFeature(Feature &feature) {
 void Objective::LoadWeights(Weights &loaded_weights) {
   weights.resize(DenseFeatureCount());
   for (std::size_t i=0; i < features_.size(); i++) {
-    std::vector<float> feature_weights = loaded_weights.GetWeights(features_[i]->Name());
+    std::vector<float> feature_weights = loaded_weights.GetWeights(features_[i]->name);
     assert(feature_weights.size() == features_[i]->DenseFeatureCount());
     for (std::size_t j=0; j < feature_weights.size(); j++) {
       weights[feature_offsets_[i] + j] = feature_weights[j];

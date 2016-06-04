@@ -4,14 +4,12 @@
 
 namespace decode {
 
-LM::LM(const char *model, util::MutableVocab &vocab) : model_(model), vocab_(vocab) {}
+LM::LM(const char *model, util::MutableVocab &vocab) :
+  Feature("lm"), model_(model), vocab_(vocab) {}
 
 void LM::Init(FeatureInit &feature_init) {
   lm_state_field_ = &feature_init.LMStateField();
 }
-
-const StringPiece LM::Name() const { return "lm"; }
-
 
 std::size_t LM::DenseFeatureCount() const { return 1; }
 

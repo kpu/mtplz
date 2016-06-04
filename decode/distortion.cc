@@ -2,8 +2,7 @@
 
 namespace decode {
 
-// TODO const expr // static
-const StringPiece Distortion::Name() const { return "distortion"; }
+Distortion::Distortion() : Feature("distortion") {}
 
 void Distortion::ScoreHypothesisWithSourcePhrase(
         HypothesisAndSourcePhrase combination, ScoreCollector &collector) const {

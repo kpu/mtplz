@@ -6,7 +6,7 @@ namespace decode {
 
 class Distortion : public Feature {
   public:
-    const StringPiece Name() const override;
+    Distortion();
 
     void Init(FeatureInit &feature_init) override {}
 

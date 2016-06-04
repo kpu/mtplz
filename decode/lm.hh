@@ -15,7 +15,7 @@ class LM : Feature {
 
     void Init(FeatureInit &feature_init) override;
 
-    const StringPiece Name() const override;
+    static const StringPiece Name();
 
     void NewWord(StringPiece string_rep, VocabWord *word) const override;
 
