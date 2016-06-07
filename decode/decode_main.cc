@@ -9,6 +9,7 @@
 
 // features
 #include "decode/distortion.hh"
+#include "decode/lm.hh"
 
 #include <boost/program_options.hpp>
 
@@ -38,15 +39,15 @@ int main(int argc, char *argv[]) {
   try {
     namespace po = boost::program_options;
     po::options_description options("Decoder options");
-    std::string lm, phrase;
+    std::string lm_file, phrase_file;
     std::string weights_file;
     decode::Config config;
     bool verbose = false;
 
     options.add_options()
       ("verbose,v", "Produce verbose output")
-      ("lm,l", po::value<std::string>(&lm)->required(), "Language model file")
-      ("phrase,p", po::value<std::string>(&phrase)->required(), "Phrase table")
+      ("lm,l", po::value<std::string>(&lm_file)->required(), "Language model file")
+      ("phrase,p", po::value<std::string>(&phrase_file)->required(), "Phrase table")
       ("weights_file,W", po::value<std::string>(&weights_file)->required(), "Weights file")
       ("beam,K", po::value<unsigned int>(&config.pop_limit)->required(), "Beam size")
       ("reordering,R", po::value<std::size_t>(&config.reordering_limit)->required(), "Reordering limit");
@@ -62,10 +63,12 @@ int main(int argc, char *argv[]) {
         verbose = true;
     }
     decode::System sys(config, weights_file);
-    decode::Context context(lm.c_str(), weights_file, sys.GetConfig(), sys.GetObjective());
+    decode::Context context(lm_file.c_str(), weights_file, sys.GetConfig(), sys.GetObjective());
     decode::Distortion distortion;
     sys.GetObjective().AddFeature(distortion);
-    decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
+    decode::LM lm(phrase_file.c_str(), context.GetVocab());
+    sys.GetObjective().AddFeature(lm);
+    decode::PhraseTable table(phrase_file.c_str(), context.GetVocab(), context.GetScorer());
     sys.GetObjective().lm_begin_sentence_state = &context.GetScorer().LanguageModel().BeginSentenceState();
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);

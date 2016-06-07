@@ -9,7 +9,7 @@ namespace util { class MutableVocab; }
 
 namespace decode {
 
-class LM : Feature {
+class LM : public Feature {
   public:
     LM(const char *model, util::MutableVocab &vocab);
 
@@ -17,18 +17,18 @@ class LM : Feature {
 
     static const StringPiece Name();
 
-    void NewWord(StringPiece string_rep, VocabWord *word) const override;
+    void NewWord(StringPiece string_rep, VocabWord *word) const override {}
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override;
+    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const override;
+        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithPhrasePair(
         HypothesisAndPhrasePair combination, ScoreCollector &collector) const override;
 
     void RescoreHypothesis(
-        const Hypothesis &hypothesis, ScoreCollector &collector) const override;
+        const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
 
     std::size_t DenseFeatureCount() const override;
 

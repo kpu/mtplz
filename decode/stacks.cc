@@ -84,19 +84,18 @@ class Vertices {
     Map map_;
 };
 
-void AppendToStack(search::PartialEdge complete, Stack &out, HypothesisBuilder &hypo_builder) {
+Hypothesis *HypothesisFromEdge(search::PartialEdge complete, HypothesisBuilder &hypo_builder) {
   assert(complete.Valid());
   const search::IntPair &source_range = complete.GetNote().ints;
   // The note for the first NT is the hypothesis.  The note for the second
   // NT is the target phrase.
-  Hypothesis* hypo = hypo_builder.BuildHypothesis(
+  return hypo_builder.BuildHypothesis(
       complete.CompletedState().right,
-      complete.GetScore(), // TODO: call scorer to adjust for last of lexro?
+      complete.GetScore(),
       reinterpret_cast<const Hypothesis*>(complete.NT()[0].End().cvp),
       (std::size_t)source_range.first,
       (std::size_t)source_range.second,
       Phrase(complete.NT()[1].End().cvp));
-  out.push_back(hypo);
 }
 
 // TODO n-best lists.
@@ -106,7 +105,7 @@ class EdgeOutput {
       : stack_(stack), hypothesis_builder_(hypo_builder) {}
 
     void NewHypothesis(search::PartialEdge complete) {
-      AppendToStack(complete, stack_, hypothesis_builder_);
+      stack_.push_back(HypothesisFromEdge(complete, hypothesis_builder_));
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(stack_.back()));
       if (!res.second) {
@@ -144,27 +143,29 @@ class EdgeOutput {
 // Pick only the best hypothesis for end of sentence.
 class PickBest {
   public:
-    PickBest(Stack &stack, HypothesisBuilder &hypo_builder) :
-      stack_(stack), hypothesis_builder_(hypo_builder) {
+    PickBest(Stack &stack, Objective &objective, HypothesisBuilder &hypo_builder) :
+      stack_(stack), objective_(objective), hypothesis_builder_(hypo_builder) {
       stack_.clear();
       stack_.reserve(1);
     }
 
     void NewHypothesis(search::PartialEdge complete) {
-      if (!best_.Valid() || complete > best_) {
-        best_ = complete;
+      Hypothesis *new_hypo = HypothesisFromEdge(complete, hypothesis_builder_);
+      if (best_ == NULL || new_hypo->Score() > best_->Score()) {
+        best_ = new_hypo;
       }
     }
 
     void FinishedSearch() {
-      if (best_.Valid())
-        AppendToStack(best_, stack_, hypothesis_builder_);
+      if (best_ != NULL)
+        stack_.push_back(best_);
     }
 
   private:
     Stack &stack_;
+    const Objective &objective_;
     HypothesisBuilder &hypothesis_builder_;
-    search::PartialEdge best_;
+    Hypothesis *best_;
 };
 
 } // namespace
@@ -249,7 +250,7 @@ void Stacks::PopulateLastStack(Context &context, Chart &chart) {
   AddEdge(all_hyps, eos_vertex, note, gen);
 
   stacks_.resize(stacks_.size() + 1);
-  PickBest output(stacks_.back(), hypothesis_builder_);
+  PickBest output(stacks_.back(), context.GetObjective(), hypothesis_builder_);
   gen.Search(context.SearchContext(), output);
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];
