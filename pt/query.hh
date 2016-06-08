@@ -76,6 +76,8 @@ class Table {
       return boost::iterator_range<RowIterator>(Begin(source_begin, source_end), RowIterator(nullptr, &access_, 0));
     }
 
+    const Access &GetAccess() { return access_; }
+
   private:
     RowIterator Begin(const WordIndex *source_begin, const WordIndex *source_end) const {
       const uint64_t *found;
