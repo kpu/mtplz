@@ -14,10 +14,10 @@ set(DECODE_SOURCE
   distortion.cc
   lm.cc)
 add_library(mtplz_decode ${DECODE_SOURCE})
-target_link_libraries(mtplz_decode mtplz_search kenlm kenlm_util ${Boost_LIBRARIES})
+target_link_libraries(mtplz_decode mtplz_search mtplz_pt kenlm kenlm_util ${Boost_LIBRARIES})
 target_compile_features(mtplz_decode PUBLIC cxx_range_for)
 
-set(DECODE_LIBS mtplz_decode mtplz_search kenlm kenlm_util ${Boost_LIBRARIES})
+set(DECODE_LIBS mtplz_decode mtplz_search mtplz_pt kenlm kenlm_util ${Boost_LIBRARIES})
 
 AddExes(EXES decode LIBRARIES ${DECODE_LIBS})
 

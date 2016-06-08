@@ -81,5 +81,5 @@ include_directories(
 add_subdirectory(util)
 add_subdirectory(lm)
 add_subdirectory(search)
-add_subdirectory(decode)
 add_subdirectory(pt)
+add_subdirectory(decode)
