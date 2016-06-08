@@ -48,6 +48,7 @@ class Hypothesis {
 
     const Coverage &GetCoverage() const { return coverage_; }
 
+    void SetScore(float score) { score_ = score; }
     float Score() const { return score_; }
 
     std::size_t SourceEndIndex() const { return end_index_; }

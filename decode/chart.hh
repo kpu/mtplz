@@ -1,6 +1,7 @@
 #ifndef DECODE_CHART__
 #define DECODE_CHART__
 
+#include "pt/query.hh"
 #include "util/pool.hh"
 #include "util/string_piece.hh"
 
@@ -14,12 +15,12 @@ namespace decode {
 
 struct TargetPhrases;
 class PhraseTable;
-class Scorer;
 
 // Target phrases that correspond to each source span
 class Chart {
   public:
-    Chart(const PhraseTable &table, StringPiece input, util::MutableVocab &vocab, Scorer &scorer);
+    Chart(const PhraseTable &table, const pt::Table &table2,
+        StringPiece input, util::MutableVocab &vocab);
 
     std::size_t SentenceLength() const { return sentence_length_; }
 

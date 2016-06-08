@@ -4,6 +4,9 @@
 #include "decode/output.hh"
 #include "decode/phrase_table.hh"
 #include "decode/stacks.hh"
+#include "pt/query.hh"
+#include "pt/access.hh"
+#include "pt/create.hh"
 #include "util/file_stream.hh"
 #include "util/usage.hh"
 
@@ -17,8 +20,10 @@
 #include <vector>
 
 namespace decode {
-void Decode(Context &context, const PhraseTable &table, const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  Chart chart(table, in, context.GetVocab(), context.GetScorer());
+void Decode(Context &context, // TODO replace old with new table
+    const PhraseTable &table, const pt::Table &table2,
+    const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
+  Chart chart(table, table2, in, context.GetVocab());
   Stacks stacks(context, chart);
   const Hypothesis *hyp = stacks.End();
 	
@@ -62,13 +67,20 @@ int main(int argc, char *argv[]) {
     if(vm.count("verbose")) {
         verbose = true;
     }
-    decode::System sys(config, weights_file);
+
+    // TODO make new phrase table work
+    pt::Table table2(phrase_file.c_str(), util::READ);
+
+    decode::System sys(config, table2.GetAccess(), weights_file);
     decode::Context context(lm_file.c_str(), weights_file, sys.GetConfig(), sys.GetObjective());
     decode::Distortion distortion;
     sys.GetObjective().AddFeature(distortion);
-    decode::LM lm(phrase_file.c_str(), context.GetVocab());
+    decode::LM lm(lm_file.c_str(), context.GetVocab());
     sys.GetObjective().AddFeature(lm);
+
+    // TODO replace with new phrase table
     decode::PhraseTable table(phrase_file.c_str(), context.GetVocab(), context.GetScorer());
+
     sys.GetObjective().lm_begin_sentence_state = &context.GetScorer().LanguageModel().BeginSentenceState();
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
@@ -78,7 +90,7 @@ int main(int argc, char *argv[]) {
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
-      decode::Decode(context, table, line, map, verbose, out);
+      decode::Decode(context, table, table2, line, map, verbose, out);
       out.flush();
       f.UpdateProgress();
     }

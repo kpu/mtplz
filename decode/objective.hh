@@ -13,7 +13,7 @@ class Objective {
   public:
     std::vector<float> weights = std::vector<float>();
 
-    explicit Objective();
+    explicit Objective(const pt::Access phrase_access);
 
     void AddFeature(Feature &feature);
 

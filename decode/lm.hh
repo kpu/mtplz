@@ -34,9 +34,13 @@ class LM : public Feature {
 
     std::string FeatureDescription(std::size_t index) const override;
   private:
+    lm::WordIndex Convert(ID from) const;
+
     lm::ngram::Model model_;
     std::vector<lm::WordIndex> vocab_mapping_;
-    const util::PODField<lm::ngram::Right> *lm_state_field_;
+    const pt::Access *phrase_access_;
+    util::PODField<lm::ngram::Right> lm_state_field_; // TODO why two state objects?
+    util::PODField<lm::ngram::ChartState> chart_state_field_;
     util::MutableVocab &vocab_;
 };
 

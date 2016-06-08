@@ -9,18 +9,21 @@
 #include <utility> // for std::pair
 #include <string>
 
+namespace pt { class Row; }
+
 namespace decode {
 
 typedef std::pair<std::size_t,std::size_t> Span; // TODO size_t -> ID*, problem with coverage in hypo
 
 // Layouts:
-struct TargetPhrase;
+typedef pt::Row TargetPhrase;
 struct Hypothesis;
 struct VocabWord;
  
 struct PhrasePair {
-  const Phrase *phrase;
-  TargetPhrase *targetPhrase;
+  const ID *source_start;
+  const ID *source_end;
+  TargetPhrase *target_phrase;
 };
 
 struct HypothesisAndSourcePhrase {
@@ -42,7 +45,7 @@ class Feature {
 
     virtual ~Feature(){};
     
-    const StringPiece name;
+    StringPiece name;
 
     virtual void Init(FeatureInit &feature_init) = 0;
 

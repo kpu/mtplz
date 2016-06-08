@@ -4,8 +4,8 @@
 
 namespace decode {
 
-Objective::Objective()
-  : feature_init_(), feature_offsets_() {
+Objective::Objective(const pt::Access phrase_access)
+  : feature_init_(phrase_access), feature_offsets_() {
   feature_offsets_.push_back(0);
 }
 

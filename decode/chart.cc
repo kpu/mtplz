@@ -7,7 +7,8 @@
 
 namespace decode {
 
-Chart::Chart(const PhraseTable &table, StringPiece input, util::MutableVocab &vocab, Scorer &scorer) 
+Chart::Chart(const PhraseTable &table, const pt::Table &table2,
+    StringPiece input, util::MutableVocab &vocab) 
   : max_source_phrase_length_(table.MaxSourcePhraseLength()) {
   std::vector<ID> words;
   for (util::TokenIter<util::BoolCharacter, true> word(input, util::kSpaces); word; ++word) {
@@ -24,7 +25,8 @@ Chart::Chart(const PhraseTable &table, StringPiece input, util::MutableVocab &vo
     if (!Range(begin, begin + 1)) {
       // Add passthrough for words not known to the phrase table.
       TargetPhrases *pass = passthrough_.construct();
-      pass->MakePassthrough(passthrough_phrases_, scorer, words[begin]);
+      // TODO: replace following by something in the new phrase table!
+      // pass->MakePassthrough(passthrough_phrases_, scorer, words[begin]);
       SetRange(begin, begin + 1, pass);
     }
   }

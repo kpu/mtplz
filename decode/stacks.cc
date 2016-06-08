@@ -105,6 +105,7 @@ class EdgeOutput {
       : stack_(stack), hypothesis_builder_(hypo_builder) {}
 
     void NewHypothesis(search::PartialEdge complete) {
+      // TODO score hypo + phrase pair
       stack_.push_back(HypothesisFromEdge(complete, hypothesis_builder_));
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(stack_.back()));
@@ -151,6 +152,7 @@ class PickBest {
 
     void NewHypothesis(search::PartialEdge complete) {
       Hypothesis *new_hypo = HypothesisFromEdge(complete, hypothesis_builder_);
+      new_hypo->SetScore(objective_.RescoreHypothesis(complete, NULL));
       if (best_ == NULL || new_hypo->Score() > best_->Score()) {
         best_ = new_hypo;
       }
@@ -239,6 +241,9 @@ void Stacks::PopulateLastStack(Context &context, Chart &chart) {
 
   eos_hypo.history.cvp = eos_phrase.Base();
   eos_hypo.score = context.GetScorer().LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state);
+  /* eos_hypo.score = context.GetObjective().ScoreHypothesisWithPhrasePair( */
+  /*     PhrasePair{eos_phrase.begin(), eos_phrase.end(), NULL}, S */
+  /*     ); */
   eos_vertex.Root().AppendHypothesis(eos_hypo);
   eos_vertex.Root().FinishRoot(search::kPolicyLeft);
 

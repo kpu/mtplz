@@ -8,7 +8,8 @@ namespace decode {
 
 class System {
   public:
-    System(const Config config, const StringPiece &weights_file) : objective_(), config_(config) {
+    System(const Config config, const pt::Access phrase_access, const StringPiece &weights_file)
+      : objective_(phrase_access), config_(config) {
       weights_.ReadFromFile(weights_file);
     }
 
