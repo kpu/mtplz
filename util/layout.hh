@@ -104,6 +104,9 @@ class Layout {
  */
 template <class T> class PODField {
   public:
+    /**Placeholder PODField object */
+    PODField() : offset_(0) {}
+
     /**Add this field to the layout */
     explicit PODField(Layout &layout) : offset_(layout.ReserveFixed(sizeof(T))) {}
 
@@ -129,6 +132,9 @@ template <class T> class PODField {
  */
 template <class T> class ArrayField {
   public:
+    /**Placeholder ArrayField object */
+    ArrayField() : begin_(0), end_(0) {}
+
     /* Attach to a layout, making space for the array storing @length elements */
     ArrayField(Layout &layout, std::size_t length)
       : begin_(layout.ReserveFixed(length * sizeof(T))), end_(begin_ + length * sizeof(T)) {}
@@ -236,6 +242,9 @@ template <class T, class Size = std::size_t> class VectorField {
 
         Allocator &allocator_;
     };
+
+    /**Placeholder VectorField object */
+    VectorField() : layout_(NULL), index_(0) {}
 
     /** Attach a variable-length field to a layout. */
     explicit VectorField(Layout &layout) : layout_(&layout), index_(layout.ReserveVariable<Size>()) {}
