@@ -25,6 +25,7 @@ public:
 	 float DistortionWeight() const { return distortion_weight_; }
 	 float TargetWordInsertionWeight() const { return target_word_insertion_weight_; }
 	 
+	 std::vector<float> GetWeights(const StringPiece name) const;
 private:
 
 	 // MRK: TODO: this class is a bit confused right now.
@@ -33,7 +34,6 @@ private:
 	 // Another possibility would be to use hardcoded names for weights while allowing a "sentinel" value
 	 // e.g. NULL.
 	 void PopulateWeights();
-	 std::vector<float> GetWeights(const StringPiece name) const;
 	 float GetSingleWeight(const StringPiece name) const;
 
 	 typedef boost::unordered_map<std::string, std::vector<float> > WeightsMap;
