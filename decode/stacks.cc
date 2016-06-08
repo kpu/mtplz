@@ -28,7 +28,7 @@ void AddHypothesisToVertex(
   add.state.right = feature_init.LMStateField()(hypothesis);
   add.state.left.length = 0;
   add.state.left.full = true;
-  add.score = hypothesis->Score() + score_delta;
+  add.score = hypothesis->GetScore() + score_delta;
   vertex.Root().AppendHypothesis(add);
 }
 
@@ -112,7 +112,7 @@ class EdgeOutput {
       if (!res.second) {
         // Already present.  Keep the top-scoring one.
         Hypothesis *already = *res.first;
-        if (already->Score() < stack_.back()->Score()) {
+        if (already->GetScore() < stack_.back()->GetScore()) {
           already = stack_.back();
         }
         stack_.resize(stack_.size() - 1);
@@ -152,8 +152,8 @@ class PickBest {
 
     void NewHypothesis(search::PartialEdge complete) {
       Hypothesis *new_hypo = HypothesisFromEdge(complete, hypothesis_builder_);
-      new_hypo->SetScore(objective_.RescoreHypothesis(complete, NULL));
-      if (best_ == NULL || new_hypo->Score() > best_->Score()) {
+      new_hypo->SetScore(objective_.RescoreHypothesis(*new_hypo, NULL));
+      if (best_ == NULL || new_hypo->GetScore() > best_->GetScore()) {
         best_ = new_hypo;
       }
     }

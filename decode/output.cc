@@ -15,7 +15,7 @@ void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FileS
     if (!h->Target().Valid()) continue;
     hypos.push_back(h);
   }
-  to << hypo.Score();
+  to << hypo.GetScore();
   for (std::vector<const Hypothesis*>::const_reverse_iterator i = hypos.rbegin(); i != hypos.rend() - 1 /* skip EOS */; ++i) {
     for (const ID *id = (*i)->Target().begin(); id != (*i)->Target().end(); ++id) {
       to << ' ' << vocab.String(*id);
@@ -40,7 +40,7 @@ void OutputVerbose(const Hypothesis &hypo, const util::MutableVocab &vocab, Scor
       StringPiece str(vocab.String(*id));
       out << str << ' ';
     }
-		float this_score = (*i)->Score();
+		float this_score = (*i)->GetScore();
 		float score_delta = this_score - previous_score;
 		previous_score = this_score;
 
