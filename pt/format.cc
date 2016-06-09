@@ -42,7 +42,7 @@ util::scoped_memory &FileFormat::Attach() {
   if (writing_) {
     regions_.emplace_back();
   } else {
-    char *base = regions_.empty() ? full_backing_.begin() : regions_.back().end();
+    char *base = regions_.empty() ? (full_backing_.begin() + header_offset_) : regions_.back().end();
     const uint64_t &size = *reinterpret_cast<const uint64_t*>(base);
     UTIL_THROW_IF2(base + sizeof(uint64_t) + size > full_backing_.end(), "File size header " << size << " goes off end of file.");
     regions_.emplace_back(base + sizeof(uint64_t), size, util::scoped_memory::NONE_ALLOCATED);
@@ -52,18 +52,21 @@ util::scoped_memory &FileFormat::Attach() {
 
 void FileFormat::Write() {
   SizeHeader head;
-  head.total = direct_write_size_;
+  head.total = sizeof(uint64_t) + direct_write_size_;
   for (util::scoped_memory &r : regions_) {
-    head.total += r.size();
+    // Include size headers.
+    head.total += sizeof(uint64_t) + r.size();
   }
   // Exclude the vocabulary from the mapped region.
   assert(!regions_.empty());
-  head.map = head.total - regions_.back().size();
+  head.map = head.total - (regions_.back().size() + sizeof(uint64_t));
   // Write the total file size header.
   util::SeekOrThrow(file_.get(), header_offset_ - sizeof(SizeHeader));
   util::WriteOrThrow(file_.get(), &head, sizeof(SizeHeader));
   // Write the size of the direct-write region (its header), for which we had earlier reserved space.
   util::WriteOrThrow(file_.get(), &direct_write_size_, sizeof(uint64_t));
+  // Skip over the direct-write region.
+  util::SeekOrThrow(file_.get(), header_offset_ + sizeof(uint64_t) + direct_write_size_);
   // Write the regions with their own size headers.  This includes vocab.
   for (util::scoped_memory &r : regions_) {
     uint64_t size = r.size();
