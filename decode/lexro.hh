@@ -15,10 +15,10 @@ class LexicalizedReordering : public Feature {
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const override;
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override;
 
     void ScoreHypothesisWithPhrasePair(
-        HypothesisAndPhrasePair combination, ScoreCollector &collector) const override;
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override;
 
     void RescoreHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override;

@@ -4,9 +4,6 @@ set(DECODE_SOURCE
   filter.cc
   future.cc
   output.cc
-  phrase.cc
-  phrase_table.cc
-  scorer.cc
   objective.cc
   score_collector.cc
   stacks.cc

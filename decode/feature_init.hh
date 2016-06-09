@@ -11,13 +11,17 @@ class FeatureInit {
   public:
     typedef lm::ngram::State LMState;
 
-    explicit FeatureInit(const pt::Access phrase_access) :
+    explicit FeatureInit(const pt::Access &phrase_access) :
       phrase_access_(phrase_access),
       hypothesis_field_(hypothesis_layout_),
       lm_state_field_(hypothesis_layout_) {}
 
     util::Layout &HypothesisLayout() {
       return hypothesis_layout_;
+    }
+
+    util::Layout &TargetPhraseLayout() {
+      return target_phrase_layout_;
     }
 
     util::Layout &WordLayout() {
@@ -38,8 +42,9 @@ class FeatureInit {
 
   private:
     util::Layout hypothesis_layout_;
+    util::Layout target_phrase_layout_;
     util::Layout word_layout_;
-    const pt::Access phrase_access_;
+    const pt::Access &phrase_access_;
     const util::PODField<Hypothesis> hypothesis_field_;
     const util::PODField<LMState> lm_state_field_;
 };

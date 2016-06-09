@@ -1,15 +1,14 @@
 #include "decode/stacks.hh"
 
-#include "decode/context.hh"
 #include "decode/chart.hh"
 #include "decode/future.hh"
 #include "decode/hypothesis.hh"
-#include "decode/phrase_table.hh"
 #include "search/edge_generator.hh"
 #include "util/murmur_hash.hh"
 #include "util/mutable_vocab.hh"
 
 #include <iostream>
+#include <boost/unordered_map.hpp>
 
 namespace decode {
 
@@ -101,11 +100,11 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, HypothesisBuilder &
 // TODO n-best lists.
 class EdgeOutput {
   public:
-    EdgeOutput(Stack &stack, HypothesisBuilder &hypo_builder)
-      : stack_(stack), hypothesis_builder_(hypo_builder) {}
+    EdgeOutput(Stack &stack, HypothesisBuilder &hypo_builder, const std::vector<ID> &sentence)
+      : stack_(stack), hypothesis_builder_(hypo_builder), sentence_(sentence) {}
 
     void NewHypothesis(search::PartialEdge complete) {
-      // TODO score hypo + phrase pair
+      // TODO score hypo + PhrasePair{SourcePhrase(sentence_, from, to), targetphrase}
       stack_.push_back(HypothesisFromEdge(complete, hypothesis_builder_));
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(stack_.back()));
@@ -139,6 +138,8 @@ class EdgeOutput {
     Stack &stack_;
 
     HypothesisBuilder &hypothesis_builder_;
+
+    const std::vector<ID> &sentence_;
 };
 
 // Pick only the best hypothesis for end of sentence.
@@ -172,19 +173,19 @@ class PickBest {
 
 } // namespace
 
-Stacks::Stacks(Context &context, Chart &chart) :
-  hypothesis_builder_(hypothesis_pool_, context.GetObjective().GetFeatureInit()) {
+Stacks::Stacks(System &system, Chart &chart) :
+  hypothesis_builder_(hypothesis_pool_, system.GetObjective().GetFeatureInit()) {
   Future future(chart);
   // Reservation is critical because pointers to Hypothesis objects are retained as history.
   stacks_.reserve(chart.SentenceLength() + 2 /* begin/end of sentence */);
   stacks_.resize(1);
   // Initialize root hypothesis with <s> context and future cost for everything.
   stacks_[0].push_back(hypothesis_builder_.BuildHypothesis(
-        *context.GetObjective().lm_begin_sentence_state,
+        system.GetObjective().BeginSentenceState(),
         future.Full()));
   // Decode with increasing numbers of source words.
   for (std::size_t source_words = 1; source_words <= chart.SentenceLength(); ++source_words) {
-    Vertices vertices(context.GetObjective().GetFeatureInit());
+    Vertices vertices(system.GetObjective().GetFeatureInit());
     // Iterate over stacks to continue from.
     for (std::size_t from = source_words - std::min(source_words, chart.MaxSourcePhraseLength());
          from < source_words;
@@ -194,7 +195,7 @@ Stacks::Stacks(Context &context, Chart &chart) :
       for (Stack::const_iterator ant = stacks_[from].begin(); ant != stacks_[from].end(); ++ant) {
         const Coverage &coverage = (*ant)->GetCoverage();
         std::size_t begin = coverage.FirstZero();
-        const std::size_t last_end = std::min(coverage.FirstZero() + context.GetConfig().reordering_limit, chart.SentenceLength());
+        const std::size_t last_end = std::min(coverage.FirstZero() + system.GetConfig().reordering_limit, chart.SentenceLength());
         const std::size_t last_begin = (last_end > phrase_length) ? (last_end - phrase_length) : 0;
         // We can always go from first_zero because it doesn't create a reordering gap.
         do {
@@ -202,9 +203,8 @@ Stacks::Stacks(Context &context, Chart &chart) :
           if (!phrases || !coverage.Compatible(begin, begin + phrase_length)) continue;
           // distortion etc.
           const Hypothesis *ant_hypo = *ant;
-          float score_delta = context.GetObjective().ScoreHypothesisWithSourcePhrase(
-              HypothesisAndSourcePhrase{*ant_hypo, Span(begin, begin + phrase_length), Phrase(eos_phrase_pool_, 0)}, NULL);
-          // TODO don't null source phrase, what about TargetPhrases *phrases? do we pass that somewhere?
+          float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
+              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), NULL);
           // Future costs: remove span to be filled.
           score_delta += future.Change(coverage, begin, begin + phrase_length);
           vertices.Add(*ant, begin, begin + phrase_length, score_delta);
@@ -215,48 +215,50 @@ Stacks::Stacks(Context &context, Chart &chart) :
     search::EdgeGenerator gen;
     vertices.Apply(chart, gen);
     stacks_.resize(stacks_.size() + 1);
-    stacks_.back().reserve(context.SearchContext().PopLimit());
-    EdgeOutput output(stacks_.back(), hypothesis_builder_);
-    gen.Search(context.SearchContext(), output);
+    stacks_.back().reserve(system.SearchContext().PopLimit());
+    EdgeOutput output(stacks_.back(), hypothesis_builder_, chart.Sentence());
+    gen.Search(system.SearchContext(), output);
   }
-  PopulateLastStack(context, chart);
+  PopulateLastStack(system, chart);
 }
 
-void Stacks::PopulateLastStack(Context &context, Chart &chart) {
+void Stacks::PopulateLastStack(System &system, Chart &chart) {
   // First, make Vertex of all hypotheses
   search::Vertex all_hyps;
   for (Stack::const_iterator ant = stacks_[chart.SentenceLength()].begin(); ant != stacks_[chart.SentenceLength()].end(); ++ant) {
     assert(chart.SentenceLength() == (*ant)->GetCoverage().FirstZero());
     // TODO: the zero in the following line assumes that EOS is not scored for distortion. 
     // This assumption might need to be revisited.
-    AddHypothesisToVertex(*ant, 0, all_hyps, context.GetObjective().GetFeatureInit());
+    AddHypothesisToVertex(*ant, 0, all_hyps, system.GetObjective().GetFeatureInit());
   }
   
   // Next, make Vertex which consists of a single EOS phrase.
   // The seach algorithm will attempt to find the best hypotheses in the "cross product" of these two sets.
   // TODO: Maybe this should belong to the phrase table.  It's constant.
-  search::Vertex eos_vertex;
-  search::HypoState eos_hypo;
-  Phrase eos_phrase(eos_phrase_pool_, context.GetVocab(), "</s>");
+  // TODO: rewrite with new table
+  /* search::Vertex eos_vertex; */
+  /* search::HypoState eos_hypo; */
+  /* Phrase eos_phrase(eos_phrase_pool_, context.GetVocab(), "</s>"); */
 
-  eos_hypo.history.cvp = eos_phrase.Base();
-  eos_hypo.score = context.GetScorer().LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state);
+  /* eos_hypo.history.cvp = eos_phrase.Base(); */
+  // TODO !!!!!!!!!
+  /* eos_hypo.score = context.GetScorer().LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state); */
   /* eos_hypo.score = context.GetObjective().ScoreHypothesisWithPhrasePair( */
   /*     PhrasePair{eos_phrase.begin(), eos_phrase.end(), NULL}, S */
   /*     ); */
-  eos_vertex.Root().AppendHypothesis(eos_hypo);
-  eos_vertex.Root().FinishRoot(search::kPolicyLeft);
+  /* eos_vertex.Root().AppendHypothesis(eos_hypo); */
+  /* eos_vertex.Root().FinishRoot(search::kPolicyLeft); */
 
-  // Add edge that tacks </s> on
-  search::EdgeGenerator gen;
-  search::Note note;
-  note.ints.first = chart.SentenceLength();
-  note.ints.second = chart.SentenceLength();
-  AddEdge(all_hyps, eos_vertex, note, gen);
+  /* // Add edge that tacks </s> on */
+  /* search::EdgeGenerator gen; */
+  /* search::Note note; */
+  /* note.ints.first = chart.SentenceLength(); */
+  /* note.ints.second = chart.SentenceLength(); */
+  /* AddEdge(all_hyps, eos_vertex, note, gen); */
 
-  stacks_.resize(stacks_.size() + 1);
-  PickBest output(stacks_.back(), context.GetObjective(), hypothesis_builder_);
-  gen.Search(context.SearchContext(), output);
+  /* stacks_.resize(stacks_.size() + 1); */
+  /* PickBest output(stacks_.back(), system.GetObjective(), hypothesis_builder_); */
+  /* gen.Search(system.SearchContext(), output); */
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];
 }

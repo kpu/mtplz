@@ -1,11 +1,14 @@
 #ifndef DECODE_CHART__
 #define DECODE_CHART__
 
+#include "decode/id.hh"
 #include "pt/query.hh"
+#include "search/vertex.hh"
 #include "util/pool.hh"
 #include "util/string_piece.hh"
 
 #include <boost/pool/object_pool.hpp>
+#include <boost/utility.hpp>
 
 #include <vector>
 
@@ -13,16 +16,20 @@ namespace util { class MutableVocab; }
 
 namespace decode {
 
-struct TargetPhrases;
-class PhraseTable;
+struct TargetPhrases : boost::noncopyable {
+  // Mutable for lazy evaluation.
+  // Each entry in this vertex has a history pointer to the phrase.
+  mutable search::Vertex vertex;
+};
 
 // Target phrases that correspond to each source span
 class Chart {
   public:
-    Chart(const PhraseTable &table, const pt::Table &table2,
-        StringPiece input, util::MutableVocab &vocab);
+    Chart(const pt::Table &table, StringPiece input, util::MutableVocab &vocab);
 
-    std::size_t SentenceLength() const { return sentence_length_; }
+    std::size_t SentenceLength() const { return words_.size(); }
+
+    const std::vector<ID> &Sentence() const { return words_; }
 
     // TODO: make this reflect the longent source phrase for this sentence.
     std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
@@ -41,14 +48,14 @@ class Chart {
       entries_[begin * max_source_phrase_length_ + end - begin - 1] = to;
     }
 
+    std::vector<ID> words_;
+
     // These back any oov words that are passed through.  
     util::Pool passthrough_phrases_;
     boost::object_pool<TargetPhrases> passthrough_;
 
     // Banded array: different source lengths are next to each other.
     std::vector<const TargetPhrases*> entries_;
-
-    std::size_t sentence_length_;
 
     const std::size_t max_source_phrase_length_;
 };

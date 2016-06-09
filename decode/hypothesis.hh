@@ -3,8 +3,8 @@
 
 #include "decode/coverage.hh"
 #include "decode/id.hh"
-#include "decode/phrase.hh"
 #include "lm/state.hh"
+#include "pt/query.hh" // TODO save TargetPhrase differently?
 #include "util/murmur_hash.hh"
 
 #include <boost/utility.hpp>
@@ -18,6 +18,8 @@ namespace util { class Pool; }
 
 namespace decode {
 
+typedef pt::Row TargetPhrase;
+
 class Hypothesis {
   public:
     // STL default constructor.
@@ -26,10 +28,10 @@ class Hypothesis {
     // Extend a previous hypothesis.
     Hypothesis(
         float score,
-        const Hypothesis *&previous,
+        const Hypothesis *previous,
         std::size_t source_begin,
         std::size_t source_end,
-        Phrase target) :
+        TargetPhrase *target) :
       score_(score),
       pre_(previous),
       end_index_(source_end),
@@ -55,7 +57,7 @@ class Hypothesis {
 
     const Hypothesis *Previous() const { return pre_; }
 
-    const Phrase &Target() const { return target_; }
+    const TargetPhrase *Target() const { return target_; }
 
   private:
     float score_;
@@ -65,7 +67,7 @@ class Hypothesis {
 	// one past the last source index of the hypothesis extension
     std::size_t end_index_;
     // Null for base hypothesis.
-    Phrase target_;
+    TargetPhrase *target_;
 
     Coverage coverage_;
 };

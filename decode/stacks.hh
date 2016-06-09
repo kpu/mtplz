@@ -1,6 +1,6 @@
-#ifndef DECODE_STACKS__
-#define DECODE_STACKS__
-#include "decode/hypothesis.hh"
+#pragma once
+
+#include "decode/system.hh"
 #include "decode/hypothesis_builder.hh"
 
 #include <vector>
@@ -9,20 +9,19 @@ namespace search { class EdgeGenerator; }
 
 namespace decode {
 
-class Context;
 class Chart;
 
 typedef std::vector<Hypothesis*> Stack;
 
 class Stacks {
   public:
-    Stacks(Context &context, Chart &chart);
+    Stacks(System &system, Chart &chart);
 
     // NULL if no hypothesis.
     const Hypothesis *End() const { return end_; }
 
   private:
-    void PopulateLastStack(Context &context, Chart &chart);
+    void PopulateLastStack(System &system, Chart &chart);
     std::vector<Stack> stacks_;
 
     // this is needed to provide backing for an end-of-sentence phrase
@@ -37,5 +36,3 @@ class Stacks {
 };
 
 } // namespace decode
-
-#endif // DECODE_STACKS__

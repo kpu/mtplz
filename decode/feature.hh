@@ -1,41 +1,21 @@
 #pragma once
 
-#include "decode/id.hh"
-#include "decode/phrase.hh"
+#include "decode/source_phrase.hh"
 #include "decode/feature_init.hh"
 #include "decode/score_collector.hh"
 
 #include <cstddef>
-#include <utility> // for std::pair
 #include <string>
-
-namespace pt { class Row; }
 
 namespace decode {
 
-typedef std::pair<std::size_t,std::size_t> Span; // TODO size_t -> ID*, problem with coverage in hypo
-
 // Layouts:
-typedef pt::Row TargetPhrase;
 struct Hypothesis;
 struct VocabWord;
  
 struct PhrasePair {
-  const ID *source_start;
-  const ID *source_end;
-  TargetPhrase *target_phrase;
-};
-
-struct HypothesisAndSourcePhrase {
-  const Hypothesis &hypothesis;
-  const Span source_span;
-  const Phrase &phrase;
-};
-
-struct HypothesisAndPhrasePair {
-  const Hypothesis &hypothesis;
-  const Span source_span;
-  PhrasePair phrase_pair;
+  const SourcePhrase source_phrase;
+  const TargetPhrase &target_phrase; // TODO make non-const once replaced with chart wrapper for row
 };
 
 class Feature {
@@ -54,10 +34,10 @@ class Feature {
     virtual void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
     virtual void ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const = 0;
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const = 0;
 
     virtual void ScoreHypothesisWithPhrasePair(
-        HypothesisAndPhrasePair combination, ScoreCollector &collector) const = 0;
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
     virtual void RescoreHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const = 0;

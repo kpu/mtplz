@@ -1,13 +1,13 @@
 #include "decode/system.hh"
 #include "decode/chart.hh"
-#include "decode/context.hh"
 #include "decode/output.hh"
-#include "decode/phrase_table.hh"
 #include "decode/stacks.hh"
+#include "decode/weights.hh"
 #include "pt/query.hh"
 #include "pt/access.hh"
 #include "pt/create.hh"
 #include "util/file_stream.hh"
+#include "util/mutable_vocab.hh"
 #include "util/usage.hh"
 
 // features
@@ -20,20 +20,19 @@
 #include <vector>
 
 namespace decode {
-void Decode(Context &context, // TODO replace old with new table
-    const PhraseTable &table, const pt::Table &table2,
+void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
     const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  Chart chart(table, table2, in, context.GetVocab());
-  Stacks stacks(context, chart);
+  Chart chart(table, in, vocab);
+  Stacks stacks(system, chart);
   const Hypothesis *hyp = stacks.End();
 	
 	history_map.clear();
 	
   if (hyp) {
     if(verbose) {
-      OutputVerbose(*hyp, context.GetVocab(), history_map, out);
+      OutputVerbose(*hyp, vocab, history_map, out);
     } else {
-	  	Output(*hyp, context.GetVocab(), out);
+	  	Output(*hyp, vocab, out);
 	  }
   }
   out << '\n';
@@ -68,20 +67,17 @@ int main(int argc, char *argv[]) {
         verbose = true;
     }
 
-    // TODO make new phrase table work
-    pt::Table table2(phrase_file.c_str(), util::READ);
+    pt::Table table(phrase_file.c_str(), util::READ);
+    util::MutableVocab vocab; // TODO replace with something from Chart / pt::Table
 
-    decode::System sys(config, table2.GetAccess(), weights_file);
-    decode::Context context(lm_file.c_str(), weights_file, sys.GetConfig(), sys.GetObjective());
+    decode::Weights weights;
+    weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
+    decode::LM lm(lm_file.c_str(), vocab);
+    decode::System sys(config, table.GetAccess(), weights, lm.Model());
     sys.GetObjective().AddFeature(distortion);
-    decode::LM lm(lm_file.c_str(), context.GetVocab());
     sys.GetObjective().AddFeature(lm);
 
-    // TODO replace with new phrase table
-    decode::PhraseTable table(phrase_file.c_str(), context.GetVocab(), context.GetScorer());
-
-    sys.GetObjective().lm_begin_sentence_state = &context.GetScorer().LanguageModel().BeginSentenceState();
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
     decode::ScoreHistoryMap map;
@@ -90,7 +86,7 @@ int main(int argc, char *argv[]) {
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
-      decode::Decode(context, table, table2, line, map, verbose, out);
+      decode::Decode(sys, table, vocab, line, map, verbose, out);
       out.flush();
       f.UpdateProgress();
     }

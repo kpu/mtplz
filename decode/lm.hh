@@ -22,10 +22,10 @@ class LM : public Feature {
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const override {}
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithPhrasePair(
-        HypothesisAndPhrasePair combination, ScoreCollector &collector) const override;
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override;
 
     void RescoreHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
@@ -33,6 +33,8 @@ class LM : public Feature {
     std::size_t DenseFeatureCount() const override;
 
     std::string FeatureDescription(std::size_t index) const override;
+
+    const lm::ngram::Model &Model() const { return model_; }
   private:
     lm::WordIndex Convert(ID from) const;
 

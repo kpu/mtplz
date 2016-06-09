@@ -13,7 +13,8 @@ class Objective {
   public:
     std::vector<float> weights = std::vector<float>();
 
-    explicit Objective(const pt::Access phrase_access);
+    explicit Objective(const pt::Access &phrase_access,
+        const lm::ngram::State &lm_begin_sentence_state);
 
     void AddFeature(Feature &feature);
 
@@ -21,18 +22,18 @@ class Objective {
     // which are modified on alloc
     FeatureInit &GetFeatureInit() { return feature_init_; }
 
-    void LoadWeights(Weights &weights);
+    void LoadWeights(const Weights &weights);
 
     // storage can be null
     float ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const;
 
     // storage can be null
     float ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, FeatureStore *storage) const;
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase, FeatureStore *storage) const;
 
     // storage can be null
     float ScoreHypothesisWithPhrasePair(
-        HypothesisAndPhrasePair combination, FeatureStore *storage) const;
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, FeatureStore *storage) const;
 
     // storage can be null
     float RescoreHypothesis(
@@ -42,12 +43,16 @@ class Objective {
 
     std::string FeatureDescription(std::size_t index) const;
 
-    const lm::ngram::State *lm_begin_sentence_state = NULL;
+    const lm::ngram::State &BeginSentenceState() const {
+      return lm_begin_sentence_state_;
+    }
+
   private:
     std::vector<Feature*> features_;
     std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
 
+    const lm::ngram::State &lm_begin_sentence_state_;
     ScoreCollector GetCollector(FeatureStore *storage) const;
 };
 

@@ -4,8 +4,11 @@
 
 namespace decode {
 
-Objective::Objective(const pt::Access phrase_access)
-  : feature_init_(phrase_access), feature_offsets_() {
+Objective::Objective(
+    const pt::Access &phrase_access,
+    const lm::ngram::State &lm_begin_sentence_state)
+  : feature_init_(phrase_access), feature_offsets_(),
+    lm_begin_sentence_state_(lm_begin_sentence_state) {
   feature_offsets_.push_back(0);
 }
 
@@ -17,7 +20,7 @@ void Objective::AddFeature(Feature &feature) {
   weights.resize(dense_feature_count, 1);
 }
 
-void Objective::LoadWeights(Weights &loaded_weights) {
+void Objective::LoadWeights(const Weights &loaded_weights) {
   weights.resize(DenseFeatureCount());
   for (std::size_t i=0; i < features_.size(); i++) {
     std::vector<float> feature_weights = loaded_weights.GetWeights(features_[i]->name);
@@ -38,21 +41,21 @@ float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) cons
 }
 
 float Objective::ScoreHypothesisWithSourcePhrase(
-    HypothesisAndSourcePhrase combination, FeatureStore *storage) const {
+    const Hypothesis &hypothesis, const SourcePhrase source_phrase, FeatureStore *storage) const {
   auto collector = GetCollector(storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
-    features_[i]->ScoreHypothesisWithSourcePhrase(combination, collector);
+    features_[i]->ScoreHypothesisWithSourcePhrase(hypothesis, source_phrase, collector);
   }
   return collector.Score();
 }
 
 float Objective::ScoreHypothesisWithPhrasePair(
-    HypothesisAndPhrasePair combination, FeatureStore *storage) const {
+    const Hypothesis &hypothesis, PhrasePair phrase_pair, FeatureStore *storage) const {
   auto collector = GetCollector(storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
-    features_[i]->ScoreHypothesisWithPhrasePair(combination, collector);
+    features_[i]->ScoreHypothesisWithPhrasePair(hypothesis, phrase_pair, collector);
   }
   return collector.Score();
 }

@@ -10,12 +10,12 @@ void LexicalizedReordering::Init(FeatureInit &feature_init) {
 }
 
 void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
-    HypothesisAndSourcePhrase combination, ScoreCollector &collector) const {
+    const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const {
   // TODO calculate
 }
 
 void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
-    HypothesisAndPhrasePair combination, ScoreCollector &collector) const {
+    const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
   // TODO store for next
 }
 

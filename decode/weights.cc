@@ -1,6 +1,5 @@
-#include "decode/phrase_table.hh"
+#include "decode/weights.hh"
 
-#include "decode/scorer.hh"
 #include "util/double-conversion/double-conversion.h"
 #include "util/exception.hh"
 #include "util/file_piece.hh"

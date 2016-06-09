@@ -18,11 +18,10 @@ void LM::Init(FeatureInit &feature_init) {
 }
 
 void LM::ScoreHypothesisWithPhrasePair(
-    HypothesisAndPhrasePair combination,
-    ScoreCollector &collector) const {
-  auto state = chart_state_field_(&combination.hypothesis);
+    const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
+  auto state = chart_state_field_(&hypothesis);
   lm::ngram::RuleScore<lm::ngram::Model> scorer(model_, state);
-  for (const ID i : phrase_access_->target(combination.phrase_pair.target_phrase)) {
+  for (const ID i : phrase_access_->target(&phrase_pair.target_phrase)) {
     scorer.Terminal(Convert(i));
   }
   collector.AddDense(0, scorer.Finish());
