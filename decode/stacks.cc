@@ -83,29 +83,41 @@ class Vertices {
     Map map_;
 };
 
-Hypothesis *HypothesisFromEdge(search::PartialEdge complete, HypothesisBuilder &hypo_builder) {
+struct MergeInfo {
+  const Objective &objective;
+  HypothesisBuilder &hypo_builder;
+  const std::vector<ID> &sentence;
+};
+
+Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {
   assert(complete.Valid());
   const search::IntPair &source_range = complete.GetNote().ints;
   // The note for the first NT is the hypothesis.  The note for the second
   // NT is the target phrase.
-  return hypo_builder.BuildHypothesis(
+  const Hypothesis *prev_hypo = reinterpret_cast<const Hypothesis*>(complete.NT()[0].End().cvp);
+  const TargetPhrase *target_phrase = reinterpret_cast<const TargetPhrase*>(complete.NT()[1].End().cvp);
+  SourcePhrase source_phrase(merge_info.sentence, source_range.first, source_range.second);
+  search::Score score = complete.GetScore() + merge_info.objective.ScoreHypothesisWithPhrasePair(
+      *prev_hypo, PhrasePair{source_phrase, *target_phrase}, NULL);
+
+  return merge_info.hypo_builder.BuildHypothesis(
       complete.CompletedState().right,
-      complete.GetScore(),
-      reinterpret_cast<const Hypothesis*>(complete.NT()[0].End().cvp),
+      score,
+      prev_hypo,
       (std::size_t)source_range.first,
       (std::size_t)source_range.second,
-      Phrase(complete.NT()[1].End().cvp));
+      target_phrase);
 }
 
 // TODO n-best lists.
 class EdgeOutput {
   public:
-    EdgeOutput(Stack &stack, HypothesisBuilder &hypo_builder, const std::vector<ID> &sentence)
-      : stack_(stack), hypothesis_builder_(hypo_builder), sentence_(sentence) {}
+    EdgeOutput(Stack &stack, MergeInfo merge_info)
+      : stack_(stack), merge_info_(merge_info) {}
 
     void NewHypothesis(search::PartialEdge complete) {
       // TODO score hypo + PhrasePair{SourcePhrase(sentence_, from, to), targetphrase}
-      stack_.push_back(HypothesisFromEdge(complete, hypothesis_builder_));
+      stack_.push_back(HypothesisFromEdge(complete, merge_info_));
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(stack_.back()));
       if (!res.second) {
@@ -137,23 +149,20 @@ class EdgeOutput {
 
     Stack &stack_;
 
-    HypothesisBuilder &hypothesis_builder_;
-
-    const std::vector<ID> &sentence_;
+    MergeInfo merge_info_;
 };
 
 // Pick only the best hypothesis for end of sentence.
 class PickBest {
   public:
-    PickBest(Stack &stack, Objective &objective, HypothesisBuilder &hypo_builder) :
-      stack_(stack), objective_(objective), hypothesis_builder_(hypo_builder) {
+    PickBest(Stack &stack, MergeInfo merge_info) : stack_(stack), merge_info_(merge_info) {
       stack_.clear();
       stack_.reserve(1);
     }
 
     void NewHypothesis(search::PartialEdge complete) {
-      Hypothesis *new_hypo = HypothesisFromEdge(complete, hypothesis_builder_);
-      new_hypo->SetScore(objective_.RescoreHypothesis(*new_hypo, NULL));
+      Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
+      new_hypo->SetScore(merge_info_.objective.RescoreHypothesis(*new_hypo, NULL));
       if (best_ == NULL || new_hypo->GetScore() > best_->GetScore()) {
         best_ = new_hypo;
       }
@@ -166,8 +175,7 @@ class PickBest {
 
   private:
     Stack &stack_;
-    const Objective &objective_;
-    HypothesisBuilder &hypothesis_builder_;
+    MergeInfo merge_info_;
     Hypothesis *best_;
 };
 
@@ -216,7 +224,7 @@ Stacks::Stacks(System &system, Chart &chart) :
     vertices.Apply(chart, gen);
     stacks_.resize(stacks_.size() + 1);
     stacks_.back().reserve(system.SearchContext().PopLimit());
-    EdgeOutput output(stacks_.back(), hypothesis_builder_, chart.Sentence());
+    EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()});
     gen.Search(system.SearchContext(), output);
   }
   PopulateLastStack(system, chart);

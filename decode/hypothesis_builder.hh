@@ -24,7 +24,7 @@ class HypothesisBuilder {
         const Hypothesis *previous,
         std::size_t source_begin,
         std::size_t source_end,
-        TargetPhrase *target) {
+        const TargetPhrase *target) {
       void *hypo = feature_init_.HypothesisLayout().Allocate(pool_);
       feature_init_.HypothesisField()(hypo) = Hypothesis(score, previous, source_begin, source_end, target);
       feature_init_.LMStateField()(hypo) = state;

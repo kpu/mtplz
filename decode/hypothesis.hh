@@ -31,7 +31,7 @@ class Hypothesis {
         const Hypothesis *previous,
         std::size_t source_begin,
         std::size_t source_end,
-        TargetPhrase *target) :
+        const TargetPhrase *target) :
       score_(score),
       pre_(previous),
       end_index_(source_end),
@@ -67,7 +67,7 @@ class Hypothesis {
 	// one past the last source index of the hypothesis extension
     std::size_t end_index_;
     // Null for base hypothesis.
-    TargetPhrase *target_;
+    const TargetPhrase *target_;
 
     Coverage coverage_;
 };
