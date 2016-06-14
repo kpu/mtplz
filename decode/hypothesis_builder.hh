@@ -11,27 +11,22 @@ class HypothesisBuilder {
       : pool_(pool), feature_init_(feature_init) {}
 
     // root hypothesis
-    Hypothesis *BuildHypothesis(const lm::ngram::Right &state, float score) {
-      void *hypo = feature_init_.HypothesisLayout().Allocate(pool_);
-      feature_init_.HypothesisField()(hypo) = Hypothesis(score);
-      feature_init_.LMStateField()(hypo) = state;
-      return reinterpret_cast<Hypothesis*>(hypo);
-    }
+    Hypothesis *BuildHypothesis(const lm::ngram::Right &state, float score);
 
     Hypothesis *BuildHypothesis(
+        Hypothesis *base,
         const lm::ngram::Right &state,
         float score,
         const Hypothesis *previous,
         std::size_t source_begin,
         std::size_t source_end,
-        const TargetPhrase *target) {
-      void *hypo = feature_init_.HypothesisLayout().Allocate(pool_);
-      feature_init_.HypothesisField()(hypo) = Hypothesis(score, previous, source_begin, source_end, target);
-      feature_init_.LMStateField()(hypo) = state;
-      return reinterpret_cast<Hypothesis*>(hypo);
-    }
+        const TargetPhrase *target);
+
+    inline Hypothesis *NextHypothesis();
 
   private:
+    std::size_t HypothesisSize(Hypothesis *hypo) const;
+
     FeatureInit &feature_init_;
 
     util::Pool &pool_;

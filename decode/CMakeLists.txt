@@ -6,6 +6,7 @@ set(DECODE_SOURCE
   output.cc
   objective.cc
   score_collector.cc
+  hypothesis_builder.cc
   stacks.cc
   weights.cc
   distortion.cc

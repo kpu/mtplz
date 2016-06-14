@@ -22,6 +22,7 @@ struct IntPair {
 union Note {
   void *vp;
   const void *cvp;
+  void *next;
   IntPair ints;
 };
 

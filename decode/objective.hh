@@ -29,11 +29,13 @@ class Objective {
 
     // storage can be null
     float ScoreHypothesisWithSourcePhrase(
-        const Hypothesis &hypothesis, const SourcePhrase source_phrase, FeatureStore *storage) const;
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase,
+        Hypothesis &new_hypothesis, FeatureStore *storage) const;
 
     // storage can be null
     float ScoreHypothesisWithPhrasePair(
-        const Hypothesis &hypothesis, PhrasePair phrase_pair, FeatureStore *storage) const;
+        const Hypothesis &hypothesis, PhrasePair phrase_pair,
+        Hypothesis &new_hypothesis, FeatureStore *storage) const;
 
     // storage can be null
     float RescoreHypothesis(
@@ -53,7 +55,7 @@ class Objective {
     FeatureInit feature_init_;
 
     const lm::ngram::State &lm_begin_sentence_state_;
-    ScoreCollector GetCollector(FeatureStore *storage) const;
+    ScoreCollector GetCollector(Hypothesis *new_hypothesis, FeatureStore *storage) const;
 };
 
 } // namespace decode

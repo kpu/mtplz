@@ -6,10 +6,10 @@
 
 namespace decode {
 
+typedef std::pair<std::size_t,std::size_t> SourceSpan;
+
 class SourcePhrase {
   public:
-    typedef std::pair<std::size_t,std::size_t> SourceSpan;
-
     SourcePhrase(const std::vector<ID> &base, std::size_t begin, std::size_t end)
       : base_(base), span_(begin, end) {}
 

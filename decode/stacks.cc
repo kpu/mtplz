@@ -20,10 +20,11 @@ namespace {
 // This function is highly specific to this particular phrasal search strategy -- e.g., it assumes
 // that we are always appending to a hypothesis on the right side.
 void AddHypothesisToVertex(
-    const Hypothesis *hypothesis, float score_delta,
+    const Hypothesis *hypothesis, float score_delta, Hypothesis *next_hypothesis,
     search::Vertex &vertex, FeatureInit &feature_init) {
   search::HypoState add;
   add.history.cvp = hypothesis;
+  add.history.next = next_hypothesis;
   add.state.right = feature_init.LMStateField()(hypothesis);
   add.state.left.length = 0;
   add.state.left.full = true;
@@ -59,11 +60,12 @@ class Vertices {
   public:
     explicit Vertices(FeatureInit &feature_init) : feature_init_(feature_init) {}
 
-    void Add(const Hypothesis *hypothesis, uint32_t source_begin, uint32_t source_end, float score_delta) {
+    void Add(const Hypothesis *hypothesis, uint32_t source_begin, uint32_t source_end,
+        Hypothesis *next_hypothesis, float score_delta) {
       search::IntPair key;
       key.first = source_begin;
       key.second = source_end;
-      AddHypothesisToVertex(hypothesis, score_delta, map_[key], feature_init_);
+      AddHypothesisToVertex(hypothesis, score_delta, next_hypothesis, map_[key], feature_init_);
     }
 
     void Apply(Chart &chart, search::EdgeGenerator &out) {
@@ -95,12 +97,14 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   // The note for the first NT is the hypothesis.  The note for the second
   // NT is the target phrase.
   const Hypothesis *prev_hypo = reinterpret_cast<const Hypothesis*>(complete.NT()[0].End().cvp);
+  Hypothesis *sourcephrase_hypo = reinterpret_cast<Hypothesis*>(complete.NT()[0].End().next);
   const TargetPhrase *target_phrase = reinterpret_cast<const TargetPhrase*>(complete.NT()[1].End().cvp);
   SourcePhrase source_phrase(merge_info.sentence, source_range.first, source_range.second);
   search::Score score = complete.GetScore() + merge_info.objective.ScoreHypothesisWithPhrasePair(
       *prev_hypo, PhrasePair{source_phrase, *target_phrase}, NULL);
 
   return merge_info.hypo_builder.BuildHypothesis(
+      sourcephrase_hypo,
       complete.CompletedState().right,
       score,
       prev_hypo,
@@ -116,7 +120,6 @@ class EdgeOutput {
       : stack_(stack), merge_info_(merge_info) {}
 
     void NewHypothesis(search::PartialEdge complete) {
-      // TODO score hypo + PhrasePair{SourcePhrase(sentence_, from, to), targetphrase}
       stack_.push_back(HypothesisFromEdge(complete, merge_info_));
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(stack_.back()));
@@ -211,11 +214,12 @@ Stacks::Stacks(System &system, Chart &chart) :
           if (!phrases || !coverage.Compatible(begin, begin + phrase_length)) continue;
           // distortion etc.
           const Hypothesis *ant_hypo = *ant;
+          Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis();
           float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
-              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), NULL);
+              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), next_hypo, NULL);
           // Future costs: remove span to be filled.
           score_delta += future.Change(coverage, begin, begin + phrase_length);
-          vertices.Add(*ant, begin, begin + phrase_length, score_delta);
+          vertices.Add(*ant, begin, begin + phrase_length, next_hypo, score_delta);
         // Enforce the reordering limit on later iterations.
         } while (++begin <= last_begin);
       }
@@ -237,7 +241,7 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
     assert(chart.SentenceLength() == (*ant)->GetCoverage().FirstZero());
     // TODO: the zero in the following line assumes that EOS is not scored for distortion. 
     // This assumption might need to be revisited.
-    AddHypothesisToVertex(*ant, 0, all_hyps, system.GetObjective().GetFeatureInit());
+    /* AddHypothesisToVertex(*ant, 0, all_hyps, system.GetObjective().GetFeatureInit()); */
   }
   
   // Next, make Vertex which consists of a single EOS phrase.
