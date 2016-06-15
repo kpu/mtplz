@@ -25,8 +25,6 @@ class HypothesisBuilder {
     inline Hypothesis *NextHypothesis();
 
   private:
-    std::size_t HypothesisSize(Hypothesis *hypo) const;
-
     FeatureInit &feature_init_;
 
     util::Pool &pool_;

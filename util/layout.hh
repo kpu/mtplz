@@ -60,6 +60,21 @@ class Layout {
       return ret;
     }
 
+    std::size_t Size(const void *layout) const {
+      do {
+        std::size_t offset_index = offsets_end_;
+        // TODO do I have to multiply by sizeof(T)? -> new var layoutsize
+        // TODO vectorfields init must be done in order,
+        // what if some features don't know vector size in hypo+source and
+        // some do?
+        std::size_t offset = *(std::size_t*) ((std::size_t)layout + offset_index);
+        if (offset != 0) {
+          return offsets_end_ + offset;
+        }
+      } while (offset_index >= offsets_begin_);
+      return offsets_end_;
+    }
+
     // Add a fixed-length field and return its beginning offset.
     // Intended to be called by PODField and ArrayField, not end-users.
     std::size_t ReserveFixed(std::size_t amount) {
