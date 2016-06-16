@@ -6,6 +6,8 @@
 
 namespace decode {
 
+class Hypothesis;
+
 typedef std::vector<float> FeatureStore;
 
 class ScoreCollector {

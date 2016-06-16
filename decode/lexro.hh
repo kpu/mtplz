@@ -7,11 +7,11 @@ namespace decode {
 class LexicalizedReordering : public Feature {
   public:
     typedef std::size_t Relation;
-    constexpr static const std::size_t FORWARD = 0;
-    constexpr static const std::size_t BACKWARD = 3;
-    constexpr static const Relation MONOTONE = 0;
-    constexpr static const Relation SWAP = 1;
-    constexpr static const Relation DISCONTINUOUS = 2;
+    static constexpr std::size_t FORWARD = 0;
+    static constexpr std::size_t BACKWARD = 3;
+    static constexpr Relation MONOTONE = 0;
+    static constexpr Relation SWAP = 1;
+    static constexpr Relation DISCONTINUOUS = 2;
 
     LexicalizedReordering() : Feature("lexro") {}
 

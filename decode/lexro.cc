@@ -25,10 +25,14 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
 void LexicalizedReordering::RescoreHypothesis(
     const Hypothesis &hypothesis, ScoreCollector &collector) const {
   float score = 0;
-  while (const Hypothesis *prev_hypo = hypothesis.Previous()) {
+  const Hypothesis *current_hypo = &hypothesis;
+  const Hypothesis *prev_hypo = current_hypo->Previous();
+  while (prev_hypo->Previous()) {
     SourceSpan phrase_span = SourceSpan(phrase_start_(&hypothesis), hypothesis.SourceEndIndex());
     std::size_t index = BACKWARD + PhraseRelation(*prev_hypo, phrase_span);
     score += phrase_access_->lexical_reordering(hypothesis.Target())[index];
+    current_hypo = prev_hypo;
+    prev_hypo = prev_hypo->Previous();
   }
   collector.AddDense(1, score);
 }
@@ -49,6 +53,8 @@ std::string LexicalizedReordering::FeatureDescription(std::size_t index) const {
   switch(index) {
     case 0: return "forward lexicalized reordering";
     case 1: return "backward lexicalized reordering";
+    default: return "no such feature!";
   }
 }
+
 } // namespace decode

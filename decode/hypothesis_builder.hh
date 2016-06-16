@@ -22,8 +22,9 @@ class HypothesisBuilder {
         std::size_t source_end,
         const TargetPhrase *target);
 
-    inline Hypothesis *NextHypothesis();
+    Hypothesis *NextHypothesis();
 
+    Hypothesis *CopyHypothesis(Hypothesis *hypothesis) const;
   private:
     FeatureInit &feature_init_;
 

@@ -6,6 +6,9 @@ paper/acl2014.aux
 paper/acl2014.pdf
 doc/
 build/
+bin/
+lib/
+tests/
 ._*
 windows/Win32
 windows/x64
