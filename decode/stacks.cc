@@ -167,7 +167,7 @@ class PickBest {
 
     void NewHypothesis(search::PartialEdge complete) {
       Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
-      new_hypo->SetScore(merge_info_.objective.RescoreHypothesis(*new_hypo, NULL));
+      new_hypo->SetScore(new_hypo->GetScore() + merge_info_.objective.RescoreHypothesis(*new_hypo, NULL));
       if (best_ == NULL || new_hypo->GetScore() > best_->GetScore()) {
         best_ = new_hypo;
       }
