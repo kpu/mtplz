@@ -100,8 +100,10 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   Hypothesis *sourcephrase_hypo = reinterpret_cast<Hypothesis*>(complete.NT()[0].End().next);
   const TargetPhrase *target_phrase = reinterpret_cast<const TargetPhrase*>(complete.NT()[1].End().cvp);
   SourcePhrase source_phrase(merge_info.sentence, source_range.first, source_range.second);
+  Hypothesis *next_hypo = merge_info.hypo_builder.CopyHypothesis(sourcephrase_hypo);
+
   search::Score score = complete.GetScore() + merge_info.objective.ScoreHypothesisWithPhrasePair(
-      *prev_hypo, PhrasePair{source_phrase, *target_phrase}, NULL);
+      *prev_hypo, PhrasePair{source_phrase, *target_phrase}, *next_hypo, NULL);
 
   return merge_info.hypo_builder.BuildHypothesis(
       sourcephrase_hypo,
@@ -216,7 +218,7 @@ Stacks::Stacks(System &system, Chart &chart) :
           const Hypothesis *ant_hypo = *ant;
           Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis();
           float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
-              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), next_hypo, NULL);
+              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), *next_hypo, NULL);
           // Future costs: remove span to be filled.
           score_delta += future.Change(coverage, begin, begin + phrase_length);
           vertices.Add(*ant, begin, begin + phrase_length, next_hypo, score_delta);

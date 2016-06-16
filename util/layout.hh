@@ -61,8 +61,9 @@ class Layout {
     }
 
     std::size_t Size(const void *layout) const {
+      std::size_t offset_index;
       do {
-        std::size_t offset_index = offsets_end_;
+        offset_index = offsets_end_;
         // TODO do I have to multiply by sizeof(T)? -> new var layoutsize
         // TODO vectorfields init must be done in order,
         // what if some features don't know vector size in hypo+source and
