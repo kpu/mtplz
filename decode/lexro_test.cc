@@ -42,12 +42,15 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   ScoreCollector collector(weights, next, &store);
   collector.SetDenseOffset(0);
   lexro.ScoreHypothesisWithSourcePhrase(*hypo, source_phrase, collector);
-  BOOST_CHECK_EQUAL(0, collector.Score());
+  BOOST_CHECK_EQUAL(0, collector.Score()); // no lexro info based on source only
+  // pairing with phrase pair allows for forward scoring
+  // TODO we could score backwards for the previous pairing
   lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair{source_phrase, *row}, collector);
   BOOST_CHECK_EQUAL(3, collector.Score());
   BOOST_CHECK_EQUAL(3, store[0]);
   BOOST_CHECK_EQUAL(0, store[1]);
 
+  // on a final hypothesis, we can get a final score
   init.HypothesisField()(next) = Hypothesis(3,hypo,5,6,row);
   lexro.RescoreHypothesis(*next, collector);
   BOOST_CHECK_EQUAL(9, collector.Score());

@@ -20,12 +20,21 @@ namespace decode {
 
 typedef pt::Row TargetPhrase;
 
+/** Hypothesis
+ * Stores the overall score of the current hypothesis along with its
+ * coverage, the most recently added target phrase, and a pointer to the
+ * previous hypothesis.
+ *
+ * The hypothesis object stores only the most basic attributes,
+ * all other attributes are stored in the hypothesis layout
+ * (see FeatureInit).
+ */
 class Hypothesis {
   public:
-    // STL default constructor.
+    /** STL default constructor. */
     Hypothesis() : target_(NULL) {}
 
-    // Extend a previous hypothesis.
+    /** Extend a previous hypothesis. */
     Hypothesis(
         float score,
         const Hypothesis *previous,
@@ -40,7 +49,7 @@ class Hypothesis {
       coverage_.Set(source_begin, source_end);
     }
 
-    // Initialize root hypothesis.
+    /** Initialize root hypothesis. */
     explicit Hypothesis(float score) :
       score_(score),
       pre_(NULL),

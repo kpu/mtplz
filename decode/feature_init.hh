@@ -7,6 +7,10 @@
 
 namespace decode {
 
+/** A FeatureInit instance is owned by the Objective and is passed to each
+ * Feature on Init. Features can add new fields to the provided layouts or
+ * memorize already provided accessors.
+ */
 class FeatureInit {
   public:
     typedef lm::ngram::State LMState;
@@ -16,6 +20,12 @@ class FeatureInit {
       hypothesis_field_(hypothesis_layout_),
       lm_state_field_(hypothesis_layout_) {}
 
+    /** The first field of a hypothesis layout is always the Hypothesis
+     * object, which stores the most important attributes of a hypothesis.
+     * This way, we can pass around a Hypothesis*, have easy access to
+     * attributes which are always present, and can use the layout accessors
+     * to access additional information.
+     */
     util::Layout &HypothesisLayout() {
       return hypothesis_layout_;
     }
@@ -28,6 +38,7 @@ class FeatureInit {
       return word_layout_;
     }
 
+    /** Acess to target phrase layout */
     const pt::Access &PhraseAccess() {
       return phrase_access_;
     }

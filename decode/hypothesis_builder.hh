@@ -5,14 +5,18 @@
 
 namespace decode {
 
+/**HypothesisBuilder:
+ * Allocates and initializes new hypotheses in a pool.
+ */
 class HypothesisBuilder {
   public:
     HypothesisBuilder(util::Pool &pool, FeatureInit &feature_init)
       : pool_(pool), feature_init_(feature_init) {}
 
-    // root hypothesis
+    /** Build root hypothesis */
     Hypothesis *BuildHypothesis(const lm::ngram::Right &state, float score);
 
+    /** Initializes an instance of Hypothesis on the layout at *base */
     Hypothesis *BuildHypothesis(
         Hypothesis *base,
         const lm::ngram::Right &state,
@@ -22,8 +26,10 @@ class HypothesisBuilder {
         std::size_t source_end,
         const TargetPhrase *target);
 
+    /** Allocates a new hypothesis */
     Hypothesis *NextHypothesis();
 
+    /** Allocates a copy of hypothesis */
     Hypothesis *CopyHypothesis(Hypothesis *hypothesis) const;
   private:
     FeatureInit &feature_init_;
