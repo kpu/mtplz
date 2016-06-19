@@ -62,12 +62,12 @@ float Objective::ScoreHypothesisWithPhrasePair(
   return collector.Score();
 }
 
-float Objective::RescoreHypothesis(
+float Objective::ScoreFinalHypothesis(
     const Hypothesis &hypothesis, FeatureStore *storage) const {
   auto collector = GetCollector(NULL, storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
-    features_[i]->RescoreHypothesis(hypothesis, collector);
+    features_[i]->ScoreFinalHypothesis(hypothesis, collector);
   }
   return collector.Score();
 }

@@ -39,7 +39,7 @@ class Feature {
     virtual void ScoreHypothesisWithPhrasePair(
         const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
-    virtual void RescoreHypothesis(
+    virtual void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const = 0;
 
     virtual std::size_t DenseFeatureCount() const = 0;

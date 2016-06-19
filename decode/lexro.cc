@@ -22,7 +22,7 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
   collector.AddDense(0, score);
 }
 
-void LexicalizedReordering::RescoreHypothesis(
+void LexicalizedReordering::ScoreFinalHypothesis(
     const Hypothesis &hypothesis, ScoreCollector &collector) const {
   float score = 0;
   const Hypothesis *current_hypo = &hypothesis;

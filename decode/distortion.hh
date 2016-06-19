@@ -20,7 +20,7 @@ class Distortion : public Feature {
     void ScoreHypothesisWithPhrasePair(
         const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
-    void RescoreHypothesis(
+    void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
 
     std::size_t DenseFeatureCount() const override;

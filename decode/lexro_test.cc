@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
 
   // on a final hypothesis, we can get a final score
   init.HypothesisField()(next) = Hypothesis(3,hypo,5,6,row);
-  lexro.RescoreHypothesis(*next, collector);
+  lexro.ScoreFinalHypothesis(*next, collector);
   BOOST_CHECK_EQUAL(9, collector.Score());
   BOOST_CHECK_EQUAL(6, store[1]);
 }

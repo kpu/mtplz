@@ -38,7 +38,7 @@ class Objective {
         Hypothesis &new_hypothesis, FeatureStore *storage) const;
 
     // storage can be null
-    float RescoreHypothesis(
+    float ScoreFinalHypothesis(
         const Hypothesis &hypothesis, FeatureStore *storage) const;
 
     std::size_t DenseFeatureCount() const;
