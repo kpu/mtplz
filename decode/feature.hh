@@ -21,24 +21,32 @@ struct PhrasePair {
 class Feature {
   public:
     // recommended constructor: Feature(const std::string &config);
+
     Feature(const StringPiece feature_name) : name(feature_name) {}
 
     virtual ~Feature(){};
     
     StringPiece name;
 
+    /** Add state fields to the layouts in init */
     virtual void Init(FeatureInit &feature_init) = 0;
 
     virtual void NewWord(StringPiece string_rep, VocabWord *word) const = 0;
 
+    /** Score isolated pair of source phrase and target phrase */
     virtual void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
+    /** collects score and allows to save constant-length data in
+     * the hypothesis layout for the next hypothesis (collector.NewHypothesis()) */
     virtual void ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const = 0;
 
+    /** collects score and allows to save arbitrary data in the hypothesis
+     * layout for the next hypothesis (collector.NewHypothesis()) */
     virtual void ScoreHypothesisWithPhrasePair(
         const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
+    /** collects score for a completed hypothesis */
     virtual void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const = 0;
 

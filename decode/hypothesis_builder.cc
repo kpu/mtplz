@@ -29,8 +29,8 @@ Hypothesis *HypothesisBuilder::NextHypothesis(const Hypothesis *previous_hypothe
 }
 
 Hypothesis *HypothesisBuilder::CopyHypothesis(Hypothesis *hypothesis) const {
-  std::size_t hypothesis_size = feature_init_.HypothesisLayout().Size(hypothesis);
-  void *copy = pool_.Allocate(hypothesis_size);
+  std::size_t hypothesis_size = feature_init_.HypothesisLayout().OffsetsBegin();
+  void *copy = feature_init_.HypothesisLayout().Allocate(pool_);
   std::memcpy(copy, hypothesis, hypothesis_size);
   return reinterpret_cast<Hypothesis*>(copy);
 }
