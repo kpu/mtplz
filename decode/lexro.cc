@@ -12,7 +12,13 @@ void LexicalizedReordering::Init(FeatureInit &feature_init) {
 
 void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
     const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const {
+  // store phrase start index in layout; phrase end is already stored in the hypothesis
   phrase_start_(collector.NewHypothesis()) = source_phrase.Span().first;
+  // score with backward lexro
+  if (hypothesis.Previous()) {
+    std::size_t index = BACKWARD + PhraseRelation(hypothesis, source_phrase.Span());
+    collector.AddDense(1, phrase_access_->lexical_reordering(hypothesis.Target())[index]);
+  }
 }
 
 void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
@@ -24,17 +30,8 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
 
 void LexicalizedReordering::ScoreFinalHypothesis(
     const Hypothesis &hypothesis, ScoreCollector &collector) const {
-  float score = 0;
-  const Hypothesis *current_hypo = &hypothesis;
-  const Hypothesis *prev_hypo = current_hypo->Previous();
-  while (prev_hypo->Previous()) {
-    SourceSpan phrase_span = SourceSpan(phrase_start_(&hypothesis), hypothesis.SourceEndIndex());
-    std::size_t index = BACKWARD + PhraseRelation(*prev_hypo, phrase_span);
-    score += phrase_access_->lexical_reordering(hypothesis.Target())[index];
-    current_hypo = prev_hypo;
-    prev_hypo = prev_hypo->Previous();
-  }
-  collector.AddDense(1, score);
+  std::size_t index = BACKWARD + MONOTONE;
+  collector.AddDense(1, phrase_access_->lexical_reordering(hypothesis.Target())[index]);
 }
 
 LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(

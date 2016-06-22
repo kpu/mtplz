@@ -6,9 +6,8 @@
 namespace decode {
 namespace {
 
-pt::Row *Row(pt::Access &access, util::Pool &pool) {
+pt::Row *Row(pt::Access &access, util::Pool &pool, int value) {
   pt::Row *row = access.Allocate(pool);
-  int value = 3;
   // 3 4 5  6 7 8
   for (unsigned i = 0; i < 6; ++i) {
     access.lexical_reordering(row)[i] = (float)value++;
@@ -22,8 +21,10 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   config.lexical_reordering = 6;
   pt::Access access(config);
   FeatureInit init(access);
-  
-  pt::Row *row = Row(access, pool);
+                                       //  forward  backward
+                                       //  M  S  D   M  S  D
+  pt::Row *row1 = Row(access,pool,11); // 11 12 13  14 15 16
+  pt::Row *row2 = Row(access, pool,3); //  3  4  5   6  7  8
   LexicalizedReordering lexro_obj = LexicalizedReordering();
   Feature &lexro = lexro_obj;
   lexro.Init(init);
@@ -32,28 +33,44 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   Hypothesis *zero_hypo = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
   init.HypothesisField()(zero_hypo) = Hypothesis(0);
   Hypothesis *hypo = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
-  init.HypothesisField()(hypo) = Hypothesis(0,zero_hypo,3,5,NULL);
+  init.HypothesisField()(hypo) = Hypothesis(0,zero_hypo,3,5,row1);
   Hypothesis *next = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
+  init.HypothesisField()(next) = Hypothesis(500,next,5,6,row1);
+  Hypothesis *snd_next = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
 
+  // setup scoring
   std::vector<float> weights({1,1});
   FeatureStore store({0,0});
   std::vector<ID> sentence;
-  SourcePhrase source_phrase = SourcePhrase(sentence, 5,6);
+  SourcePhrase source_phrase(sentence, 5,6);
   ScoreCollector collector(weights, next, &store);
   collector.SetDenseOffset(0);
+
+  // monotone source, forward scoring
   lexro.ScoreHypothesisWithSourcePhrase(*hypo, source_phrase, collector);
-  BOOST_CHECK_EQUAL(0, collector.Score()); // no lexro info based on source only
-  // pairing with phrase pair allows for forward scoring
-  // TODO we could score backwards for the previous pairing
-  lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair{source_phrase, *row}, collector);
-  BOOST_CHECK_EQUAL(3, collector.Score());
+  BOOST_CHECK_EQUAL(14, collector.Score());
+  BOOST_CHECK_EQUAL(0, store[0]);
+  BOOST_CHECK_EQUAL(14, store[1]);
+  lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair{source_phrase, *row2}, collector);
+  BOOST_CHECK_EQUAL(14+3, collector.Score());
   BOOST_CHECK_EQUAL(3, store[0]);
-  BOOST_CHECK_EQUAL(0, store[1]);
+  BOOST_CHECK_EQUAL(14, store[1]);
+
+  // for next source phrase we can use backwards reordering score
+  SourcePhrase swap_source(sentence,1,5);
+  FeatureStore store2({0,0});
+  ScoreCollector collector2(weights, snd_next, &store2);
+  collector2.SetDenseOffset(0);
+  lexro.ScoreHypothesisWithSourcePhrase(*next, swap_source, collector2);
+  BOOST_CHECK_EQUAL(15, collector2.Score());
+  BOOST_CHECK_EQUAL(0, store2[0]);
+  BOOST_CHECK_EQUAL(15, store2[1]);
 
   // on a final hypothesis, we can get a final score
-  init.HypothesisField()(next) = Hypothesis(3,hypo,5,6,row);
+  init.HypothesisField()(next) = Hypothesis(3,hypo,5,6,row2);
   lexro.ScoreFinalHypothesis(*next, collector);
-  BOOST_CHECK_EQUAL(9, collector.Score());
+  BOOST_CHECK_EQUAL(14+3+6, collector.Score());
+  BOOST_CHECK_EQUAL(3, store[0]);
   BOOST_CHECK_EQUAL(6, store[1]);
 }
 
