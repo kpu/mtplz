@@ -57,6 +57,14 @@ class Hypothesis {
       target_(NULL),
       coverage_() {}
 
+    /** Initialize hypothesis extension for source phrase pairing */
+    explicit Hypothesis(const Hypothesis *previous) :
+      score_(0),
+      pre_(previous),
+      end_index_(0),
+      target_(NULL),
+      coverage_() {}
+
     const Coverage &GetCoverage() const { return coverage_; }
 
     void SetScore(float score) { score_ = score; }

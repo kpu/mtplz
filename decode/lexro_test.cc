@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
 
   // init hypothesis
   Hypothesis *zero_hypo = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
-  init.HypothesisField()(zero_hypo) = Hypothesis(0);
+  init.HypothesisField()(zero_hypo) = Hypothesis((int)0);
   Hypothesis *hypo = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
   init.HypothesisField()(hypo) = Hypothesis(0,zero_hypo,3,5,row1);
   Hypothesis *next = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));

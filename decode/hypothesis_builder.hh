@@ -27,7 +27,7 @@ class HypothesisBuilder {
         const TargetPhrase *target);
 
     /** Allocates a new hypothesis */
-    Hypothesis *NextHypothesis();
+    Hypothesis *NextHypothesis(const Hypothesis *previous_hypothesis);
 
     /** Allocates a copy of hypothesis */
     Hypothesis *CopyHypothesis(Hypothesis *hypothesis) const;

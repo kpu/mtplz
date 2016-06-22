@@ -22,8 +22,9 @@ Hypothesis *HypothesisBuilder::BuildHypothesis(
   return base;
 }
 
-Hypothesis *HypothesisBuilder::NextHypothesis() {
+Hypothesis *HypothesisBuilder::NextHypothesis(const Hypothesis *previous_hypothesis) {
   void *hypo = feature_init_.HypothesisLayout().Allocate(pool_);
+  feature_init_.HypothesisField()(hypo) = Hypothesis(previous_hypothesis);
   return reinterpret_cast<Hypothesis*>(hypo);
 }
 
