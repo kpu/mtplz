@@ -31,6 +31,12 @@ void Objective::LoadWeights(const Weights &loaded_weights) {
   }
 }
 
+void Objective::NewWord(StringPiece string_rep, VocabWord *word) const {
+  for (auto feature : features_) {
+    feature->NewWord(string_rep, word);
+  }
+}
+
 float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const {
   auto collector = GetCollector(NULL, storage);
   for (std::size_t i=0; i<features_.size(); i++) {

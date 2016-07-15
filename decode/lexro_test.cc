@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   // setup scoring
   std::vector<float> weights({1,1});
   FeatureStore store({0,0});
-  std::vector<ID> sentence;
+  std::vector<VocabWord*> sentence;
   SourcePhrase source_phrase(sentence, 5,6);
   ScoreCollector collector(weights, next, &store);
   collector.SetDenseOffset(0);

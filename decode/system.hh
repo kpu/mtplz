@@ -15,16 +15,14 @@ struct Config {
 class System {
   public:
     System(const Config config, const pt::Access &phrase_access,
-        const Weights &weights, const lm::ngram::Model &lm)
-      : config_(config), weights_(weights),
-        objective_(phrase_access, lm.BeginSentenceState()),
-        search_context_(search::Config(
-              weights.LMWeight(),
-              config.pop_limit,
-              search::NBestConfig(1)), lm) {}
+        const Weights &weights, const lm::ngram::Model &lm);
 
-    void LoadWeights() {
-      objective_.LoadWeights(weights_);
+    void LoadWeights();
+
+    void LoadVocab(const util::MutableVocab &vocab);
+
+    const std::vector<VocabWord*> GetVocabMapping() const {
+      return vocab_mapping_;
     }
 
     const Config &GetConfig() const { return config_; }
@@ -38,6 +36,10 @@ class System {
   private:
     Objective objective_;
     const Config config_;
+
+    std::vector<VocabWord*> vocab_mapping_;
+    util::Pool word_pool_;
+
     search::Context<lm::ngram::Model> search_context_;
     const Weights &weights_;
 };

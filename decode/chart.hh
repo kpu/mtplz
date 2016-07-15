@@ -16,6 +16,9 @@ namespace util { class MutableVocab; }
 
 namespace decode {
 
+class System;
+struct VocabWord; // conforms to FeatureInit WordLayout
+
 struct TargetPhrases : boost::noncopyable {
   // Mutable for lazy evaluation.
   // Each entry in this vertex has a history pointer to the phrase.
@@ -25,11 +28,12 @@ struct TargetPhrases : boost::noncopyable {
 // Target phrases that correspond to each source span
 class Chart {
   public:
-    Chart(const pt::Table &table, StringPiece input, util::MutableVocab &vocab);
+    // TODO pass system for local vocab mapping and objective
+    Chart(const pt::Table &table, StringPiece input, util::MutableVocab &vocab, System &system);
 
-    std::size_t SentenceLength() const { return words_.size(); }
+    std::size_t SentenceLength() const { return sentence_.size(); }
 
-    const std::vector<ID> &Sentence() const { return words_; }
+    const std::vector<VocabWord*> &Sentence() const { return sentence_; }
 
     // TODO: make this reflect the longent source phrase for this sentence.
     std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
@@ -42,13 +46,19 @@ class Chart {
       return entries_[begin * max_source_phrase_length_ + end - begin - 1];
     }
 
+    // TODO get end of sentence marker phrase
+
   private:
     void SetRange(std::size_t begin, std::size_t end, const TargetPhrases *to) {
       assert(end - begin <= max_source_phrase_length_);
       entries_[begin * max_source_phrase_length_ + end - begin - 1] = to;
     }
 
-    std::vector<ID> words_;
+    VocabWord *MapToLocalWord(const ID global_word);
+
+    System &system_;
+
+    std::vector<VocabWord*> sentence_;
 
     // These back any oov words that are passed through.  
     util::Pool passthrough_phrases_;

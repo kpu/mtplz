@@ -6,18 +6,20 @@
 
 namespace decode {
 
+struct VocabWord;
+
 typedef std::pair<std::size_t,std::size_t> SourceSpan;
 
 class SourcePhrase {
   public:
-    SourcePhrase(const std::vector<ID> &base, std::size_t begin, std::size_t end)
+    SourcePhrase(const std::vector<VocabWord*> &base, std::size_t begin, std::size_t end)
       : base_(base), span_(begin, end) {}
 
-    std::vector<ID>::const_iterator Begin() const {
+    std::vector<VocabWord*>::const_iterator Begin() const {
       return base_.cbegin() + span_.first;
     }
 
-    std::vector<ID>::const_iterator End() const {
+    std::vector<VocabWord*>::const_iterator End() const {
       return base_.cbegin() + span_.second;
     }
 
@@ -30,7 +32,7 @@ class SourcePhrase {
     }
 
   private:
-    const std::vector<ID> &base_;
+    const std::vector<VocabWord*> &base_;
     const SourceSpan span_;
 };
 

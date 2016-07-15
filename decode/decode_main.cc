@@ -22,7 +22,7 @@
 namespace decode {
 void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
     const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  Chart chart(table, in, vocab);
+  Chart chart(table, in, vocab, system);
   Stacks stacks(system, chart);
   const Hypothesis *hyp = stacks.End();
 	
@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
     decode::Distortion distortion;
     decode::LM lm(lm_file.c_str(), vocab);
     decode::System sys(config, table.GetAccess(), weights, lm.Model());
+    sys.LoadVocab(vocab);
     sys.GetObjective().AddFeature(distortion);
     sys.GetObjective().AddFeature(lm);
 

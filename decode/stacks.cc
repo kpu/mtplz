@@ -87,7 +87,7 @@ class Vertices {
 struct MergeInfo {
   const Objective &objective;
   HypothesisBuilder &hypo_builder;
-  const std::vector<ID> &sentence;
+  const std::vector<VocabWord*> &sentence;
 };
 
 Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {

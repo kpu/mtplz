@@ -31,6 +31,7 @@ class Feature {
     /** Add state fields to the layouts in init */
     virtual void Init(FeatureInit &feature_init) = 0;
 
+    /** allows to save constant-length data in the word's representation */
     virtual void NewWord(StringPiece string_rep, VocabWord *word) const = 0;
 
     /** Score isolated pair of source phrase and target phrase */

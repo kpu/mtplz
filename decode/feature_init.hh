@@ -18,7 +18,8 @@ class FeatureInit {
     explicit FeatureInit(const pt::Access &phrase_access) :
       phrase_access_(phrase_access),
       hypothesis_field_(hypothesis_layout_),
-      lm_state_field_(hypothesis_layout_) {}
+      lm_state_field_(hypothesis_layout_),
+      pt_id_field_(word_layout_) {}
 
     /** The first field of a hypothesis layout is always the Hypothesis
      * object, which stores the most important attributes of a hypothesis.
@@ -51,6 +52,10 @@ class FeatureInit {
       return lm_state_field_;
     }
 
+    const util::PODField<ID> PTIDField() const {
+      return pt_id_field_;
+    }
+
   private:
     util::Layout hypothesis_layout_;
     util::Layout target_phrase_layout_;
@@ -58,6 +63,7 @@ class FeatureInit {
     const pt::Access &phrase_access_;
     const util::PODField<Hypothesis> hypothesis_field_;
     const util::PODField<LMState> lm_state_field_;
+    const util::PODField<ID> pt_id_field_;
 };
 
 } // namespace decode

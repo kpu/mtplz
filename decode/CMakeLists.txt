@@ -5,6 +5,7 @@ set(DECODE_SOURCE
   future.cc
   output.cc
   objective.cc
+  system.cc
   score_collector.cc
   hypothesis_builder.cc
   stacks.cc
