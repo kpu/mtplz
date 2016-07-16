@@ -14,6 +14,7 @@ FieldConfig LoadFieldConfig(FileFormat &format) {
 
 Table::Table(int fd, util::LoadMethod load_method)
   : file_(fd, kFileHeader, false, load_method),
+    stats_(*reinterpret_cast<const Statistics*>(file_.Attach().get())),
     rows_(file_.Attach()),
     access_(LoadFieldConfig(file_)),
     offsets_(file_) {}
