@@ -1,6 +1,7 @@
 #include "decode/chart.hh"
 
 #include "decode/system.hh"
+#include "pt/statistics.hh"
 #include "util/file_piece.hh"
 #include "util/mutable_vocab.hh"
 #include "util/tokenize_piece.hh"
@@ -8,7 +9,7 @@
 namespace decode {
 
 Chart::Chart(const pt::Table &table, StringPiece input, util::MutableVocab &vocab, System &system)
-  : max_source_phrase_length_(/*TODO table.MaxSourcePhraseLength()*/ 16), system_(system) {
+  : max_source_phrase_length_(table.Stats().max_source_phrase_length), system_(system) {
   for (util::TokenIter<util::BoolCharacter, true> word(input, util::kSpaces); word; ++word) {
     sentence_.push_back(MapToLocalWord(vocab.FindOrInsert(*word)));
   }

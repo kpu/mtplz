@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
     decode::LM lm(lm_file.c_str(), vocab);
-    decode::System sys(config, table.GetAccess(), weights, lm.Model());
+    decode::System sys(config, table.Accessor(), weights, lm.Model());
     sys.LoadVocab(vocab);
     sys.GetObjective().AddFeature(distortion);
     sys.GetObjective().AddFeature(lm);
