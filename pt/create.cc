@@ -5,6 +5,7 @@
 #include "pt/hash.hh"
 #include "pt/hash_table_region.hh"
 #include "pt/record_writer.hh"
+#include "pt/statistics.hh"
 #include "pt/word_array.hh"
 
 #include "util/mutable_vocab.hh"
@@ -35,14 +36,18 @@ class SourceHasher {
       for (util::TokenIter<util::BoolCharacter, true> i(source); i; ++i) {
         reuse_.push_back(vocab_.FindOrInsert(*i));
       }
+      max_source_phrase_length_ = std::max<uint64_t>(max_source_phrase_length_, reuse_.size());
       uint64_t ret = HashSource(&*reuse_.begin(), &*reuse_.begin() + reuse_.size());
       reuse_.clear();
       return ret;
     }
 
+    uint64_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
+
   private:
     util::GrowableVocab<WordArray> &vocab_;
     std::vector<WordIndex> reuse_;
+    uint64_t max_source_phrase_length_ = 0;
 };
 
 void ExtractLine(StringPiece from, std::vector<StringPiece> &out) {
@@ -102,6 +107,9 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
   // Now we have a fully-configured set of columns.
 
   FileFormat file(to, kFileHeader, true, util::POPULATE_OR_READ /* does not matter since this is the reading method */);
+  util::scoped_memory &stats_mem = file.Attach();
+  util::HugeRealloc(sizeof(Statistics), false, stats_mem);
+  Statistics &stats = *reinterpret_cast<Statistics*>(stats_mem.get());
   TargetWriter target_write(file);
   config.Save(file.Attach());
   HashTableRegion<uint64_t> offsets(file);
@@ -130,6 +138,8 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
     } while ((new_source_hash = source_hasher(source)) == source_hash);
     source_hash = new_source_hash;
   }
+  stats.max_source_phrase_length = source_hasher.MaxSourcePhraseLength();
+  stats.vocab_size = vocab.Size();
 
   vocab.Action().Finish();
   file.Write();

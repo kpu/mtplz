@@ -10,6 +10,8 @@
 
 namespace pt {
 
+class Statistics;
+
 /*class CurriedRow {
   public:
     CurriedRow(const Row *row, const Access *access) : row_(row), access_(access) {}
@@ -76,7 +78,9 @@ class Table {
       return boost::iterator_range<RowIterator>(Begin(source_begin, source_end), RowIterator(nullptr, &access_, 0));
     }
 
-    const Access &GetAccess() { return access_; }
+    const Access &Accessor() { return access_; }
+
+    const Statistics &Stats() const { return stats_; }
 
   private:
     RowIterator Begin(const WordIndex *source_begin, const WordIndex *source_end) const {
@@ -89,6 +93,7 @@ class Table {
     }
 
     FileFormat file_;
+    const Statistics &stats_;
     util::scoped_memory &rows_;
     Access access_;
     HashTableRegion<uint64_t> offsets_;
