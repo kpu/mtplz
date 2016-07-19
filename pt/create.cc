@@ -90,10 +90,10 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
 
   const std::size_t have_fields = parsed_line.size();
 
-  UTIL_THROW_IF2(columns.source >= have_fields, "Text file has " << have_fields << " columns, but the source is supposed to be in column " << columns.source);
+  UTIL_THROW_IF2(columns.source >= have_fields, "Text file has columns [0, " << have_fields << ") but the source is supposed to be in column " << columns.source);
   StringPiece &source = parsed_line[columns.source];
 #define BIND_COLUMN(name) \
-  UTIL_THROW_IF2(FieldConfig::Present(config.name) && columns.name >= have_fields, "Text file has " << have_fields << " columns, but " #name  " is supposed to be in column " << columns.name); \
+  UTIL_THROW_IF2(FieldConfig::Present(config.name) && columns.name >= have_fields, "Text file has columns [0, " << have_fields << ") but " #name  " is supposed to be in column " << columns.name); \
   StringPiece &name = parsed_line[FieldConfig::Present(config.name) ? columns.name : 0];
 
   BIND_COLUMN(target);
