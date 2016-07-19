@@ -117,6 +117,8 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
   SourceHasher source_hasher(vocab);
   Access access(config);
 
+  UTIL_THROW_IF2(!access.target, "Refusing to create a phrase table without target words.");
+
   uint64_t source_hash = source_hasher(source), new_source_hash;
   while (line) {
     offsets.Insert(source_hash, target_write.Offset());

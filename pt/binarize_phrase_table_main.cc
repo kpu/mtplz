@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
         "Bad column name " << col);
       ++index;
     }
+    UTIL_THROW_IF2(!have_source, "Source is a required column.");
     CreateTable(0, 1, columns, fields);
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
