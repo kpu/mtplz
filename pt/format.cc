@@ -11,7 +11,7 @@ struct SizeHeader {
 };
 } // namespace
 
-const char kFileHeader[] = "mtplz phrase table version 0";
+const char kFileHeader[] = "mtplz phrase table version 0\n";
 
 FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::LoadMethod load_method)
   : file_(fd), writing_(writing), header_offset_(header.size() + sizeof(SizeHeader)) {
