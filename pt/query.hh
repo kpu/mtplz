@@ -82,6 +82,8 @@ class Table {
 
     const Statistics &Stats() const { return stats_; }
 
+    VocabRange Vocab() { return file_.Vocab(); }
+
   private:
     RowIterator Begin(const WordIndex *source_begin, const WordIndex *source_end) const {
       const uint64_t *found;

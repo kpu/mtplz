@@ -15,6 +15,7 @@ util::scoped_fd MakeFile() {
     "a b c ||| B A ||| 0.1 0.3 0.25 0.166667 2.718\n"
     "d e ||| D E F ||| 0.1 0.2 0.4 0.8 1.6\n";
   util::WriteOrThrow(file.get(), text, sizeof(text) - 1 /* no null at end */);
+  util::SeekOrThrow(file.get(), 0);
   return file;
 }
 
