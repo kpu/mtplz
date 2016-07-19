@@ -31,8 +31,12 @@ BOOST_AUTO_TEST_CASE(CreateAndQuery) {
 
   VocabRange range(table.Vocab());
   VocabRange::Iterator it(range.begin());
-  BOOST_CHECK(it);
-  BOOST_CHECK_EQUAL("a", *it);
+  BOOST_REQUIRE(it);
+  BOOST_CHECK_EQUAL("<unk>", *it);
+  BOOST_REQUIRE(++it);
+  BOOST_CHECK_EQUAL("<s>", *it);
+  BOOST_REQUIRE(++it);
+  BOOST_CHECK_EQUAL("</s>", *it);
 }
 
 } } // namespaces
