@@ -28,6 +28,11 @@ BOOST_AUTO_TEST_CASE(CreateAndQuery) {
   BOOST_CHECK_EQUAL(5, fields.dense_features);
   util::SeekOrThrow(binary.get(), 0);
   Table table(binary.release(), util::READ);
+
+  VocabRange range(table.Vocab());
+  VocabRange::Iterator it(range.begin());
+  BOOST_CHECK(it);
+  BOOST_CHECK_EQUAL("a", *it);
 }
 
 } } // namespaces
