@@ -37,7 +37,6 @@ FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::Lo
     util::MapRead(load_method, fd, 0 /* header is unlikely to be more than a page */, util::CheckOverflow((uint64_t)header_offset_ + h.map), full_backing_);
     // Setup reading for vocab.  TODO: support reading from pipe.
     vocab_offset_ = header_offset_ + h.map;
-    util::SeekOrThrow(fd, header_offset_ + h.map);
   }
 }
 
