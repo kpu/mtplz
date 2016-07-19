@@ -42,6 +42,7 @@ class RowIterator : public std::iterator<std::forward_iterator_tag, const Row> {
 
     const Row &operator*() { return *row_; }
     const Row *operator->() { return row_; }
+    operator const Row *() const { return row_; }
 
     // This is really only used to test for end of sequence.
     // The C++ standard only requires that equality and inequality be defined
