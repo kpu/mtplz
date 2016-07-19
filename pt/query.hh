@@ -96,8 +96,8 @@ class Table {
     }
 
     FileFormat file_;
-    const Statistics &stats_;
     util::scoped_memory &rows_;
+    const Statistics &stats_;
     Access access_;
     HashTableRegion<uint64_t> offsets_;
 };
