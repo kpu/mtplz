@@ -56,11 +56,11 @@ void Chart::AddTargetPhraseToVertex(
     bool passthrough) {
   FeatureInit feature_init = system_.GetObjective().GetFeatureInit();
   TargetPhrase *phrase_wrapper = reinterpret_cast<TargetPhrase*>(
-      feature_init.TargetPhraseLayout().Allocate(target_phrase_wrappers_));
-  feature_init.PTRowField()(phrase_wrapper) = &*phrase;
-  feature_init.PassthroughField()(phrase_wrapper) = passthrough;
+      feature_init.target_phrase_layout.Allocate(target_phrase_wrappers_));
+  feature_init.pt_row_field(phrase_wrapper) = &*phrase;
+  feature_init.passthrough_field(phrase_wrapper) = passthrough;
   float score = system_.GetObjective().ScorePhrase(PhrasePair{source_phrase, *phrase_wrapper}, NULL);
-  feature_init.PhraseScoreField()(phrase_wrapper) = score;
+  feature_init.phrase_score_field(phrase_wrapper) = score;
   search::HypoState hypo;
   hypo.history.cvp = phrase_wrapper;
   hypo.score = score;

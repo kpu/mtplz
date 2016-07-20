@@ -25,22 +25,22 @@ BOOST_AUTO_TEST_CASE(LexRo) {
                                           //  M  S  D   M  S  D
   pt::Row *pt_row1 = Row(access,pool,11); // 11 12 13  14 15 16
   pt::Row *pt_row2 = Row(access, pool,3); //  3  4  5   6  7  8
-  TargetPhrase *row1 = reinterpret_cast<TargetPhrase*>(init.TargetPhraseLayout().Allocate(pool));
-  TargetPhrase *row2 = reinterpret_cast<TargetPhrase*>(init.TargetPhraseLayout().Allocate(pool));
-  init.PTRowField()(row1) = pt_row1;
-  init.PTRowField()(row2) = pt_row2;
+  TargetPhrase *row1 = reinterpret_cast<TargetPhrase*>(init.target_phrase_layout.Allocate(pool));
+  TargetPhrase *row2 = reinterpret_cast<TargetPhrase*>(init.target_phrase_layout.Allocate(pool));
+  init.pt_row_field(row1) = pt_row1;
+  init.pt_row_field(row2) = pt_row2;
   LexicalizedReordering lexro_obj = LexicalizedReordering();
   Feature &lexro = lexro_obj;
   lexro.Init(init);
 
   // init hypothesis
-  Hypothesis *zero_hypo = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
-  init.HypothesisField()(zero_hypo) = Hypothesis((int)0);
-  Hypothesis *hypo = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
-  init.HypothesisField()(hypo) = Hypothesis(0,zero_hypo,3,5,row1);
-  Hypothesis *next = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
-  init.HypothesisField()(next) = Hypothesis(500,next,5,6,row1);
-  Hypothesis *snd_next = reinterpret_cast<Hypothesis*>(init.HypothesisLayout().Allocate(pool));
+  Hypothesis *zero_hypo = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
+  init.hypothesis_field(zero_hypo) = Hypothesis((int)0);
+  Hypothesis *hypo = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
+  init.hypothesis_field(hypo) = Hypothesis(0,zero_hypo,3,5,row1);
+  Hypothesis *next = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
+  init.hypothesis_field(next) = Hypothesis(500,next,5,6,row1);
+  Hypothesis *snd_next = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
 
   // setup scoring
   std::vector<float> weights({1,1});
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   BOOST_CHECK_EQUAL(15, store2[1]);
 
   // on a final hypothesis, we can get a final score
-  init.HypothesisField()(next) = Hypothesis(3,hypo,5,6,row2);
+  init.hypothesis_field(next) = Hypothesis(3,hypo,5,6,row2);
   lexro.ScoreFinalHypothesis(*next, collector);
   BOOST_CHECK_EQUAL(14+3+6, collector.Score());
   BOOST_CHECK_EQUAL(3, store[0]);

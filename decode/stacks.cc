@@ -24,7 +24,7 @@ void AddHypothesisToVertex(
     search::Vertex &vertex, FeatureInit &feature_init) {
   search::HypoState add;
   add.history.cvp = next_hypothesis;
-  add.state.right = feature_init.LMStateField()(hypothesis);
+  add.state.right = feature_init.lm_state_field(hypothesis);
   add.state.left.length = 0;
   add.state.left.full = true;
   add.score = hypothesis->GetScore() + score_delta;

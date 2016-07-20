@@ -16,13 +16,13 @@ class FeatureInit {
     typedef lm::ngram::State LMState;
 
     explicit FeatureInit(const pt::Access &phrase_access) :
-      phrase_access_(phrase_access),
-      hypothesis_field_(hypothesis_layout_),
-      lm_state_field_(hypothesis_layout_),
-      pt_id_field_(word_layout_),
-      pt_row_field_(target_phrase_layout_),
-      phrase_score_field_(target_phrase_layout_),
-      passthrough_field_(target_phrase_layout_) {}
+      phrase_access(phrase_access),
+      hypothesis_field(hypothesis_layout),
+      lm_state_field(hypothesis_layout),
+      pt_id_field(word_layout),
+      pt_row_field(target_phrase_layout),
+      phrase_score_field(target_phrase_layout),
+      passthrough_field(target_phrase_layout) {}
 
     /** The first field of a hypothesis layout is always the Hypothesis
      * object, which stores the most important attributes of a hypothesis.
@@ -34,74 +34,28 @@ class FeatureInit {
      * offers. However, VectorFields can only be updated when scoring with a
      * target phrase.
      */
-    util::Layout &HypothesisLayout() {
-      return hypothesis_layout_;
-    }
+    util::Layout hypothesis_layout;
+    const util::PODField<Hypothesis> hypothesis_field;
+    const util::PODField<LMState> lm_state_field;
 
     /** Use to store information about the target phrase when scoring in
      * isolation (ScorePhrase).
      * Only store fixed-length data, no VectorFields.
      */
-    util::Layout &TargetPhraseLayout() {
-      return target_phrase_layout_;
-    }
+    util::Layout target_phrase_layout;
+    const util::PODField<const pt::Row*> pt_row_field;
+    const util::PODField<float> phrase_score_field;
+    const util::PODField<bool> passthrough_field;
 
     /** Store info about a word when NewWord is called. This call happens
      * once in bulk for all known source words from training and later every
      * time a new word is encountered.
      * Only store fixed-length data, no VectorFields.
      */
-    util::Layout &WordLayout() {
-      return word_layout_;
-    }
+    util::Layout word_layout;
+    const util::PODField<ID> pt_id_field;
 
-    /** Acess to target phrase layout */
-    const pt::Access &PhraseAccess() {
-      return phrase_access_;
-    }
-
-    const util::PODField<Hypothesis> HypothesisField() const {
-      return hypothesis_field_;
-    }
-
-    const util::PODField<LMState> LMStateField() const {
-      return lm_state_field_;
-    }
-
-    const util::PODField<ID> PTIDField() const {
-      return pt_id_field_;
-    }
-
-    const util::PODField<const pt::Row*> PTRowField() const {
-      return pt_row_field_;
-    }
-
-    const util::PODField<float> PhraseScoreField() const {
-      return phrase_score_field_;
-    }
-
-    const util::PODField<bool> PassthroughField() const {
-      return passthrough_field_;
-    }
-
-  private:
-    util::Layout hypothesis_layout_;
-    util::Layout target_phrase_layout_;
-    util::Layout word_layout_;
-
-    const pt::Access &phrase_access_;
-
-    // hypothesis layout
-    const util::PODField<Hypothesis> hypothesis_field_;
-    const util::PODField<LMState> lm_state_field_;
-
-    // word layout
-    const util::PODField<ID> pt_id_field_;
-
-    // target phrase layout
-    const util::PODField<const pt::Row*> pt_row_field_;
-    const util::PODField<float> phrase_score_field_;
-    const util::PODField<bool> passthrough_field_;
+    const pt::Access &phrase_access;
 };
 
 } // namespace decode

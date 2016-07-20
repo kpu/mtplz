@@ -4,11 +4,11 @@
 namespace decode {
 
 void LexicalizedReordering::Init(FeatureInit &feature_init) {
-  pt_row_ = feature_init.PTRowField();
-  UTIL_THROW_IF(!feature_init.PhraseAccess().lexical_reordering, util::Exception,
+  pt_row_ = feature_init.pt_row_field;
+  UTIL_THROW_IF(!feature_init.phrase_access.lexical_reordering, util::Exception,
       "requested lexicalized reordering but feature values are missing in phrase access");
-  phrase_start_ = util::PODField<std::size_t>(feature_init.HypothesisLayout());
-  phrase_access_ = &feature_init.PhraseAccess();
+  phrase_start_ = util::PODField<std::size_t>(feature_init.hypothesis_layout);
+  phrase_access_ = &feature_init.phrase_access;
 }
 
 void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(

@@ -10,12 +10,12 @@ LM::LM(const char *model, util::MutableVocab &vocab) :
   Feature("lm"), model_(model), vocab_(vocab) {}
 
 void LM::Init(FeatureInit &feature_init) {
-  lm_state_field_ = feature_init.LMStateField();
-  pt_row_field_ = feature_init.PTRowField();
-  chart_state_field_ = util::PODField<lm::ngram::ChartState>(feature_init.HypothesisLayout());
-  UTIL_THROW_IF(feature_init.PhraseAccess().target, util::Exception,
+  lm_state_field_ = feature_init.lm_state_field;
+  pt_row_field_ = feature_init.pt_row_field;
+  chart_state_field_ = util::PODField<lm::ngram::ChartState>(feature_init.hypothesis_layout);
+  UTIL_THROW_IF(feature_init.phrase_access.target, util::Exception,
       "requested language model but target phrase text is missing in phrase access");
-  phrase_access_ = &feature_init.PhraseAccess();
+  phrase_access_ = &feature_init.phrase_access;
 }
 
 void LM::ScoreHypothesisWithPhrasePair(
