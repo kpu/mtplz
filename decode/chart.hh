@@ -2,6 +2,7 @@
 #define DECODE_CHART__
 
 #include "decode/id.hh"
+#include "decode/source_phrase.hh"
 #include "pt/query.hh"
 #include "search/vertex.hh"
 #include "util/pool.hh"
@@ -19,11 +20,7 @@ namespace decode {
 class System;
 struct VocabWord; // conforms to FeatureInit WordLayout
 
-struct TargetPhrases : boost::noncopyable {
-  // Mutable for lazy evaluation.
-  // Each entry in this vertex has a history pointer to the phrase.
-  mutable search::Vertex vertex;
-};
+typedef search::Vertex TargetPhrases;
 
 // Target phrases that correspond to each source span
 class Chart {
@@ -38,7 +35,7 @@ class Chart {
     // TODO: make this reflect the longent source phrase for this sentence.
     std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
 
-    const TargetPhrases *Range(std::size_t begin, std::size_t end) const {
+    TargetPhrases *Range(std::size_t begin, std::size_t end) const {
       assert(end > begin);
       assert(end - begin <= max_source_phrase_length_);
       assert(end <= SentenceLength());
@@ -49,12 +46,20 @@ class Chart {
     // TODO get end of sentence marker phrase
 
   private:
-    void SetRange(std::size_t begin, std::size_t end, const TargetPhrases *to) {
+    void SetRange(std::size_t begin, std::size_t end, TargetPhrases *to) {
       assert(end - begin <= max_source_phrase_length_);
       entries_[begin * max_source_phrase_length_ + end - begin - 1] = to;
     }
 
     VocabWord *MapToLocalWord(const ID global_word);
+
+    void AddTargetPhrasesToVertex(
+        const boost::iterator_range<pt::RowIterator> &phrases,
+        const SourcePhrase &source_phrase,
+        search::Vertex &vertex);
+
+    util::Pool target_phrase_wrappers_;
+    boost::object_pool<TargetPhrases> phrases_; // TODO name confuseable with entries_
 
     System &system_;
 
@@ -65,7 +70,7 @@ class Chart {
     boost::object_pool<TargetPhrases> passthrough_;
 
     // Banded array: different source lengths are next to each other.
-    std::vector<const TargetPhrases*> entries_;
+    std::vector<TargetPhrases*> entries_;
 
     const std::size_t max_source_phrase_length_;
 };

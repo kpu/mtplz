@@ -8,7 +8,7 @@
 
 namespace decode {
 
-bool Valid(const pt::Row *row) {
+bool Valid(const TargetPhrase *row) {
   // TODO replace with proper validity check, if there is such a thing for row
   // previous: row.Valid()
   return true;

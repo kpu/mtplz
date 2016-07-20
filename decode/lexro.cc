@@ -4,6 +4,7 @@
 namespace decode {
 
 void LexicalizedReordering::Init(FeatureInit &feature_init) {
+  pt_row_ = feature_init.PTRowField();
   UTIL_THROW_IF(!feature_init.PhraseAccess().lexical_reordering, util::Exception,
       "requested lexicalized reordering but feature values are missing in phrase access");
   phrase_start_ = util::PODField<std::size_t>(feature_init.HypothesisLayout());
@@ -17,21 +18,24 @@ void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
   // score with backward lexro
   if (hypothesis.Previous()) {
     std::size_t index = BACKWARD + PhraseRelation(hypothesis, source_phrase.Span());
-    collector.AddDense(1, phrase_access_->lexical_reordering(hypothesis.Target())[index]);
+    const pt::Row *target = pt_row_(hypothesis.Target());
+    collector.AddDense(1, phrase_access_->lexical_reordering(target)[index]);
   }
 }
 
 void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
   std::size_t index = FORWARD + PhraseRelation(hypothesis, phrase_pair.source_phrase.Span());
-  float score = phrase_access_->lexical_reordering(&phrase_pair.target_phrase)[index];
+  const pt::Row *target = pt_row_(&phrase_pair.target_phrase);
+  float score = phrase_access_->lexical_reordering(target)[index];
   collector.AddDense(0, score);
 }
 
 void LexicalizedReordering::ScoreFinalHypothesis(
     const Hypothesis &hypothesis, ScoreCollector &collector) const {
   std::size_t index = BACKWARD + MONOTONE;
-  collector.AddDense(1, phrase_access_->lexical_reordering(hypothesis.Target())[index]);
+  const pt::Row *target = pt_row_(hypothesis.Target());
+  collector.AddDense(1, phrase_access_->lexical_reordering(target)[index]);
 }
 
 LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(

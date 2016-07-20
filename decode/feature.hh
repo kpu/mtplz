@@ -15,7 +15,7 @@ struct VocabWord;
  
 struct PhrasePair {
   const SourcePhrase source_phrase;
-  const TargetPhrase &target_phrase; // TODO make non-const once replaced with chart wrapper for row
+  TargetPhrase &target_phrase;
 };
 
 class Feature {

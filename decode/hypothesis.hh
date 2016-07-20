@@ -18,7 +18,8 @@ namespace util { class Pool; }
 
 namespace decode {
 
-typedef pt::Row TargetPhrase;
+// instances of the target phrase layout (see FeatureInit)
+struct TargetPhrase;
 
 /** Hypothesis
  * Stores the overall score of the current hypothesis along with its

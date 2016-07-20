@@ -43,6 +43,7 @@ class LM : public Feature {
     const pt::Access *phrase_access_;
     util::PODField<lm::ngram::Right> lm_state_field_; // TODO why two state objects?
     util::PODField<lm::ngram::ChartState> chart_state_field_;
+    util::PODField<const pt::Row*> pt_row_field_;
     util::MutableVocab &vocab_;
 };
 

@@ -74,6 +74,10 @@ int main(int argc, char *argv[]) {
     weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
     decode::LM lm(lm_file.c_str(), vocab);
+    /* TODO add word insertion feature with a scorePhrase function similar
+     * to previous Scorer function. e.g.:
+     * float TargetWordCount(std::size_t num_words) { return num_words; }
+     */
     decode::System sys(config, table.Accessor(), weights, lm.Model());
     sys.LoadVocab(vocab);
     sys.GetObjective().AddFeature(distortion);

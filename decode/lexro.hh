@@ -36,6 +36,7 @@ class LexicalizedReordering : public Feature {
   private:
     Relation PhraseRelation(const Hypothesis &hypothesis, SourceSpan span) const;
 
+    util::PODField<const pt::Row*> pt_row_;
     util::PODField<std::size_t> phrase_start_;
     const pt::Access *phrase_access_;
 };

@@ -21,10 +21,14 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   config.lexical_reordering = 6;
   pt::Access access(config);
   FeatureInit init(access);
-                                       //  forward  backward
-                                       //  M  S  D   M  S  D
-  pt::Row *row1 = Row(access,pool,11); // 11 12 13  14 15 16
-  pt::Row *row2 = Row(access, pool,3); //  3  4  5   6  7  8
+                                          //  forward  backward
+                                          //  M  S  D   M  S  D
+  pt::Row *pt_row1 = Row(access,pool,11); // 11 12 13  14 15 16
+  pt::Row *pt_row2 = Row(access, pool,3); //  3  4  5   6  7  8
+  TargetPhrase *row1 = reinterpret_cast<TargetPhrase*>(init.TargetPhraseLayout().Allocate(pool));
+  TargetPhrase *row2 = reinterpret_cast<TargetPhrase*>(init.TargetPhraseLayout().Allocate(pool));
+  init.PTRowField()(row1) = pt_row1;
+  init.PTRowField()(row2) = pt_row2;
   LexicalizedReordering lexro_obj = LexicalizedReordering();
   Feature &lexro = lexro_obj;
   lexro.Init(init);

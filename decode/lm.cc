@@ -11,6 +11,7 @@ LM::LM(const char *model, util::MutableVocab &vocab) :
 
 void LM::Init(FeatureInit &feature_init) {
   lm_state_field_ = feature_init.LMStateField();
+  pt_row_field_ = feature_init.PTRowField();
   chart_state_field_ = util::PODField<lm::ngram::ChartState>(feature_init.HypothesisLayout());
   UTIL_THROW_IF(feature_init.PhraseAccess().target, util::Exception,
       "requested language model but target phrase text is missing in phrase access");
@@ -21,7 +22,8 @@ void LM::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
   auto state = chart_state_field_(&hypothesis);
   lm::ngram::RuleScore<lm::ngram::Model> scorer(model_, state);
-  for (const ID i : phrase_access_->target(&phrase_pair.target_phrase)) {
+  const pt::Row *pt_target_phrase = pt_row_field_(&phrase_pair.target_phrase);
+  for (const ID i : phrase_access_->target(pt_target_phrase)) {
     scorer.Terminal(Convert(i));
   }
   collector.AddDense(0, scorer.Finish());

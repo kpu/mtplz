@@ -72,7 +72,7 @@ class Vertices {
         // Record source range in the note for the edge.
         search::Note note;
         note.ints = i->first;
-        AddEdge(i->second, chart.Range(i->first.first, i->first.second)->vertex, note, out);
+        AddEdge(i->second, *chart.Range(i->first.first, i->first.second), note, out);
       }
     }
 
@@ -97,7 +97,7 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   // NT is the target phrase.
   Hypothesis *sourcephrase_hypo = reinterpret_cast<Hypothesis*>(complete.NT()[0].End().cvp);
   const Hypothesis *prev_hypo = sourcephrase_hypo->Previous();
-  const TargetPhrase *target_phrase = reinterpret_cast<const TargetPhrase*>(complete.NT()[1].End().cvp);
+  TargetPhrase *target_phrase = reinterpret_cast<TargetPhrase*>(complete.NT()[1].End().cvp);
   SourcePhrase source_phrase(merge_info.sentence, source_range.first, source_range.second);
   Hypothesis *next_hypo = merge_info.hypo_builder.CopyHypothesis(sourcephrase_hypo);
 
