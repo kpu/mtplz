@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   Hypothesis *hypo = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
   init.hypothesis_field(hypo) = Hypothesis(0,zero_hypo,3,5,row1);
   Hypothesis *next = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
-  init.hypothesis_field(next) = Hypothesis(500,next,5,6,row1);
+  init.hypothesis_field(next) = Hypothesis(500,hypo,5,6,row1);
   Hypothesis *snd_next = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
 
   // setup scoring
