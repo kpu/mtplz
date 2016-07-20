@@ -41,7 +41,7 @@ class Chart {
       return entries_[begin * max_source_phrase_length_ + end - begin - 1];
     }
 
-    // TODO get end of sentence marker phrase
+    TargetPhrases &EndOfSentence();
 
   private:
     void SetRange(std::size_t begin, std::size_t end, TargetPhrases *to) {
@@ -59,7 +59,7 @@ class Chart {
 
     void AddPassthrough(std::size_t position);
 
-    util::Pool target_phrase_wrappers_;
+    util::Pool target_phrase_wrappers_; // TODO rename?
     boost::object_pool<TargetPhrases> phrases_; // TODO name confuseable with entries_
 
     System &system_;

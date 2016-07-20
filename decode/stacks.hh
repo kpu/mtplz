@@ -24,10 +24,6 @@ class Stacks {
     void PopulateLastStack(System &system, Chart &chart);
     std::vector<Stack> stacks_;
 
-    // this is needed to provide backing for an end-of-sentence phrase
-    // TODO: consider refactoring
-    util::Pool eos_phrase_pool_;
-
     util::Pool hypothesis_pool_;
 
     HypothesisBuilder hypothesis_builder_;

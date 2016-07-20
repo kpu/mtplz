@@ -247,31 +247,17 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
   
   // Next, make Vertex which consists of a single EOS phrase.
   // The seach algorithm will attempt to find the best hypotheses in the "cross product" of these two sets.
-  // TODO: Maybe this should belong to the phrase table.  It's constant.
-  // TODO: rewrite with new table
-  /* search::Vertex eos_vertex; */
-  /* search::HypoState eos_hypo; */
-  /* Phrase eos_phrase(eos_phrase_pool_, context.GetVocab(), "</s>"); */
+  search::Vertex &eos_vertex = chart.EndOfSentence();
+  // Add edge that tacks </s> on
+  search::EdgeGenerator gen;
+  search::Note note;
+  note.ints.first = chart.SentenceLength();
+  note.ints.second = chart.SentenceLength();
+  AddEdge(all_hyps, eos_vertex, note, gen);
 
-  /* eos_hypo.history.cvp = eos_phrase.Base(); */
-  /* eos_hypo.score = context.GetScorer().LM(eos_phrase.begin(), eos_phrase.end(), eos_hypo.state); */
-  // TODO withPhrasePair or ScorePhrase ?
-  /* eos_hypo.score = context.GetObjective().ScoreHypothesisWithPhrasePair( */
-  /*     PhrasePair{eos_phrase, NULL}, S */
-  /*     ); */
-  /* eos_vertex.Root().AppendHypothesis(eos_hypo); */
-  /* eos_vertex.Root().FinishRoot(search::kPolicyLeft); */
-
-  /* // Add edge that tacks </s> on */
-  /* search::EdgeGenerator gen; */
-  /* search::Note note; */
-  /* note.ints.first = chart.SentenceLength(); */
-  /* note.ints.second = chart.SentenceLength(); */
-  /* AddEdge(all_hyps, eos_vertex, note, gen); */
-
-  /* stacks_.resize(stacks_.size() + 1); */
-  /* PickBest output(stacks_.back(), system.GetObjective(), hypothesis_builder_); */
-  /* gen.Search(system.SearchContext(), output); */
+  stacks_.resize(stacks_.size() + 1);
+  PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()});
+  gen.Search(system.SearchContext(), output);
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];
 }

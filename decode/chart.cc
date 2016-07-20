@@ -62,7 +62,7 @@ void Chart::AddTargetPhraseToVertex(
   FeatureInit feature_init = system_.GetObjective().GetFeatureInit();
   TargetPhrase *phrase_wrapper = reinterpret_cast<TargetPhrase*>(
       feature_init.target_phrase_layout.Allocate(target_phrase_wrappers_));
-  feature_init.pt_row_field(phrase_wrapper) = &*phrase;
+  feature_init.pt_row_field(phrase_wrapper) = phrase;
   feature_init.passthrough_field(phrase_wrapper) = passthrough;
   float score = system_.GetObjective().ScorePhrase(PhrasePair{source_phrase, *phrase_wrapper}, NULL);
   feature_init.phrase_score_field(phrase_wrapper) = score;
@@ -77,7 +77,26 @@ void Chart::AddPassthrough(std::size_t position) {
   pass.Root().InitRoot();
   AddTargetPhraseToVertex(nullptr, SourcePhrase(sentence_, position, position+1), pass, true);
   pass.Root().FinishRoot(search::kPolicyLeft);
-  SetRange(begin, position+1, &pass);
+  SetRange(position, position+1, &pass);
+}
+
+TargetPhrases &Chart::EndOfSentence() {
+  search::Vertex &eos = *phrases_.construct();
+  search::HypoState eos_hypo;
+  FeatureInit &feature_init = system_.GetObjective().GetFeatureInit();
+  TargetPhrase *eos_phrase = reinterpret_cast<TargetPhrase*>(
+      feature_init.target_phrase_layout.Allocate(
+        target_phrase_wrappers_));
+  feature_init.pt_id_field(eos_phrase) = 2; // </s> , see mutable vocab
+  feature_init.pt_row_field(eos_phrase) = nullptr;
+  feature_init.passthrough_field(eos_phrase) = false;
+
+  eos_hypo.history.cvp = eos_phrase;
+  SourcePhrase source_phrase(sentence_, SentenceLength(), SentenceLength());
+  eos_hypo.score = system_.GetObjective().ScorePhrase(PhrasePair{source_phrase,*eos_phrase},nullptr);
+  eos.Root().AppendHypothesis(eos_hypo);
+  eos.Root().FinishRoot(search::kPolicyLeft);
+  return eos;
 }
 
 } // namespace
