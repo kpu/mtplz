@@ -5,6 +5,7 @@
 #include "util/mutable_vocab.hh"
 #include "util/tokenize_piece.hh"
 
+#include <cmath>
 #include <math.h>
 
 namespace decode {
@@ -29,7 +30,10 @@ float Scorer::Parse(const StringPiece &features) const {
   for (util::TokenIter<util::SingleCharacter, true> token(features, ' '); token; ++token, ++w) {
     int length;
     float val = kConverter.StringToFloat(token->data(), token->size(), &length);
-    UTIL_THROW_IF(isnan(val), util::Exception, "Bad score " << *token);
+    {
+      using namespace std;
+      UTIL_THROW_IF(isnan(val), util::Exception, "Bad score " << *token);
+    }
     UTIL_THROW_IF(w == phrase_weights.end(), util::Exception, "Have " << phrase_weights.size() << " weights but was given feature vector " << features);
     ret += *w * val;
   }
