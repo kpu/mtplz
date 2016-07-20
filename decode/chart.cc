@@ -11,9 +11,17 @@ Chart::Chart(const pt::Table &table, StringPiece input, util::MutableVocab &voca
   : max_source_phrase_length_(table.Stats().max_source_phrase_length), system_(system) {
   std::vector<ID> ids;
   for (util::TokenIter<util::BoolCharacter, true> word(input, util::kSpaces); word; ++word) {
-    ID id = vocab.FindOrInsert(*word);
+    const ID id = vocab.FindOrInsert(*word);
     ids.push_back(id);
-    sentence_.push_back(MapToLocalWord(id));
+    if (id > system_.VocabSize()) {
+      FeatureInit &feature_init = system_.GetObjective().GetFeatureInit();
+      VocabWord *new_word = reinterpret_cast<VocabWord*>(feature_init.word_layout.Allocate(oov_words_));
+      feature_init.pt_id_field(new_word) = id;
+      system_.GetObjective().NewWord(*word, new_word);
+      sentence_.push_back(new_word); // TODO save new_word in mapping for reuse
+    } else {
+      sentence_.push_back(system_.GetVocabMapping(id));
+    }
   }
   // There's some unreachable ranges off the edge.  Meh.
   entries_.resize(sentence_.size() * max_source_phrase_length_);
@@ -37,15 +45,6 @@ Chart::Chart(const pt::Table &table, StringPiece input, util::MutableVocab &voca
       pass.Root().FinishRoot(search::kPolicyLeft);
       SetRange(begin, begin + 1, &pass);
     }
-  }
-}
-
-VocabWord *Chart::MapToLocalWord(const ID global_word) {
-  if (global_word < system_.VocabSize()) {
-    return system_.GetVocabMapping(global_word);
-  } else { // word not in dict, pass source word to target, oov words
-    // TODO
-    return NULL;
   }
 }
 
