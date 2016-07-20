@@ -15,7 +15,7 @@ Chart::Chart(const pt::Table &table, StringPiece input, util::MutableVocab &voca
     ids.push_back(id);
     sentence_.push_back(MapToVocabWord(*word, id));
   }
-  // There's some unreachable ranges off the edge.  Meh.
+  // There's some unreachable ranges off the edge. Meh.
   entries_.resize(sentence_.size() * max_source_phrase_length_);
   for (std::size_t begin = 0; begin != sentence_.size(); ++begin) {
     for (std::size_t end = begin + 1; (end != sentence_.size() + 1) && (end <= begin + max_source_phrase_length_); ++end) {
@@ -30,12 +30,7 @@ Chart::Chart(const pt::Table &table, StringPiece input, util::MutableVocab &voca
       SetRange(begin, end, &vertex);
     }
     if (!Range(begin, begin + 1)) {
-      // Add passthrough for words not known to the phrase table.
-      TargetPhrases &pass = *phrases_.construct();
-      pass.Root().InitRoot();
-      AddTargetPhraseToVertex(nullptr, SourcePhrase(sentence_, begin, begin+1), pass, true);
-      pass.Root().FinishRoot(search::kPolicyLeft);
-      SetRange(begin, begin + 1, &pass);
+      AddPassthrough(begin);
     }
   }
 }
@@ -75,6 +70,14 @@ void Chart::AddTargetPhraseToVertex(
   hypo.history.cvp = phrase_wrapper;
   hypo.score = score;
   vertex.Root().AppendHypothesis(hypo);
+}
+
+void Chart::AddPassthrough(std::size_t position) {
+  TargetPhrases &pass = *phrases_.construct();
+  pass.Root().InitRoot();
+  AddTargetPhraseToVertex(nullptr, SourcePhrase(sentence_, position, position+1), pass, true);
+  pass.Root().FinishRoot(search::kPolicyLeft);
+  SetRange(begin, position+1, &pass);
 }
 
 } // namespace

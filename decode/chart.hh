@@ -57,6 +57,8 @@ class Chart {
         search::Vertex &vertex,
         bool passthrough);
 
+    void AddPassthrough(std::size_t position);
+
     util::Pool target_phrase_wrappers_;
     boost::object_pool<TargetPhrases> phrases_; // TODO name confuseable with entries_
 
