@@ -17,7 +17,7 @@ class LM : public Feature {
 
     static const StringPiece Name();
 
-    void NewWord(StringPiece string_rep, VocabWord *word) const override {}
+    void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
 
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 

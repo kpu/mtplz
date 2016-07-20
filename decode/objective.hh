@@ -24,7 +24,7 @@ class Objective {
 
     void LoadWeights(const Weights &weights);
 
-    void NewWord(StringPiece string_rep, VocabWord *word) const;
+    void NewWord(const StringPiece string_rep, VocabWord *word) const;
 
     // storage can be null
     float ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const;

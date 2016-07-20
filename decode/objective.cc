@@ -31,7 +31,7 @@ void Objective::LoadWeights(const Weights &loaded_weights) {
   }
 }
 
-void Objective::NewWord(StringPiece string_rep, VocabWord *word) const {
+void Objective::NewWord(const StringPiece string_rep, VocabWord *word) const {
   for (auto feature : features_) {
     feature->NewWord(string_rep, word);
   }

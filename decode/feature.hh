@@ -32,7 +32,7 @@ class Feature {
     virtual void Init(FeatureInit &feature_init) = 0;
 
     /** allows to save constant-length data in the word's representation */
-    virtual void NewWord(StringPiece string_rep, VocabWord *word) const = 0;
+    virtual void NewWord(const StringPiece string_rep, VocabWord *word) const = 0;
 
     /** Score isolated pair of source phrase and target phrase */
     virtual void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const = 0;

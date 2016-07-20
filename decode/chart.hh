@@ -25,14 +25,12 @@ typedef search::Vertex TargetPhrases;
 // Target phrases that correspond to each source span
 class Chart {
   public:
-    // TODO pass system for local vocab mapping and objective
     Chart(const pt::Table &table, StringPiece input, util::MutableVocab &vocab, System &system);
 
     std::size_t SentenceLength() const { return sentence_.size(); }
 
     const std::vector<VocabWord*> &Sentence() const { return sentence_; }
 
-    // TODO: make this reflect the longent source phrase for this sentence.
     std::size_t MaxSourcePhraseLength() const { return max_source_phrase_length_; }
 
     TargetPhrases *Range(std::size_t begin, std::size_t end) const {
@@ -51,7 +49,7 @@ class Chart {
       entries_[begin * max_source_phrase_length_ + end - begin - 1] = to;
     }
 
-    VocabWord *MapToLocalWord(const ID global_word);
+    VocabWord *MapToVocabWord(const StringPiece word, const ID global_word);
 
     void AddTargetPhraseToVertex(
         const pt::Row *phrase,
@@ -67,7 +65,8 @@ class Chart {
     std::vector<VocabWord*> sentence_;
 
     // Backs any oov words that are passed through.  
-    util::Pool oov_words_;
+    util::Pool oov_pool_;
+    std::vector<VocabWord*> oov_words_;
 
     // Banded array: different source lengths are next to each other.
     std::vector<TargetPhrases*> entries_;
