@@ -8,8 +8,8 @@
 
 #include "util/string_piece_hash.hh"
 
+#include <cmath>
 #include <math.h>
-
 
 using namespace util;
 
@@ -43,7 +43,10 @@ void Weights::ReadFromFile(const StringPiece file_name) {
 			for (; token; ++token) {
 				int length;
 				weights.push_back(kConverter.StringToFloat(token->data(), token->size(), &length));
-				UTIL_THROW_IF(isnan(weights.back()), util::Exception, "Bad feature weight " << *token);
+        {
+          using namespace std;
+				  UTIL_THROW_IF(isnan(weights.back()), util::Exception, "Bad feature weight " << *token);
+        }
 			}
 			UTIL_THROW_IF(weights.empty(), util::Exception, "No weights found for weight type: " << name);
 			weights_map_[name.as_string()] = weights;
