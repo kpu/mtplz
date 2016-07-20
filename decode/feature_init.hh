@@ -21,7 +21,8 @@ class FeatureInit {
       lm_state_field_(hypothesis_layout_),
       pt_id_field_(word_layout_),
       pt_row_field_(target_phrase_layout_),
-      phrase_score_field_(target_phrase_layout_) {}
+      phrase_score_field_(target_phrase_layout_),
+      passthrough_field_(target_phrase_layout_) {}
 
     /** The first field of a hypothesis layout is always the Hypothesis
      * object, which stores the most important attributes of a hypothesis.
@@ -79,6 +80,10 @@ class FeatureInit {
       return phrase_score_field_;
     }
 
+    const util::PODField<bool> PassthroughField() const {
+      return passthrough_field_;
+    }
+
   private:
     util::Layout hypothesis_layout_;
     util::Layout target_phrase_layout_;
@@ -86,13 +91,17 @@ class FeatureInit {
 
     const pt::Access &phrase_access_;
 
+    // hypothesis layout
     const util::PODField<Hypothesis> hypothesis_field_;
     const util::PODField<LMState> lm_state_field_;
 
+    // word layout
     const util::PODField<ID> pt_id_field_;
 
+    // target phrase layout
     const util::PODField<const pt::Row*> pt_row_field_;
     const util::PODField<float> phrase_score_field_;
+    const util::PODField<bool> passthrough_field_;
 };
 
 } // namespace decode

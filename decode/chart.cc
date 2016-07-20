@@ -19,22 +19,23 @@ Chart::Chart(const pt::Table &table, StringPiece input, util::MutableVocab &voca
   entries_.resize(sentence_.size() * max_source_phrase_length_);
   for (std::size_t begin = 0; begin != sentence_.size(); ++begin) {
     for (std::size_t end = begin + 1; (end != sentence_.size() + 1) && (end <= begin + max_source_phrase_length_); ++end) {
-      search::Vertex *vertex = phrases_.construct();
-      vertex->Root().InitRoot();
+      search::Vertex &vertex = *phrases_.construct();
+      vertex.Root().InitRoot();
       auto phrases = table.Lookup(&ids[begin], &*ids.begin() + end);
       SourcePhrase source_phrase(sentence_, begin, end);
-      AddTargetPhrasesToVertex(phrases, source_phrase, *vertex);
-      vertex->Root().FinishRoot(search::kPolicyLeft);
-      SetRange(begin, end, vertex);
+      for (pt::RowIterator phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
+        AddTargetPhraseToVertex(&*phrase, source_phrase, vertex, false);
+      }
+      vertex.Root().FinishRoot(search::kPolicyLeft);
+      SetRange(begin, end, &vertex);
     }
-    // TODO check for passthrough, if there is one add a passthrough flag
-    // (would this be a dense feature?)
     if (!Range(begin, begin + 1)) {
       // Add passthrough for words not known to the phrase table.
-      TargetPhrases *pass = passthrough_.construct();
-      // TODO: replace following by something in the new phrase table!
-      // pass->MakePassthrough(passthrough_phrases_, scorer, words[begin]);
-      SetRange(begin, begin + 1, pass);
+      TargetPhrases &pass = *phrases_.construct();
+      pass.Root().InitRoot();
+      AddTargetPhraseToVertex(nullptr, SourcePhrase(sentence_, begin, begin+1), pass, true);
+      pass.Root().FinishRoot(search::kPolicyLeft);
+      SetRange(begin, begin + 1, &pass);
     }
   }
 }
@@ -42,29 +43,28 @@ Chart::Chart(const pt::Table &table, StringPiece input, util::MutableVocab &voca
 VocabWord *Chart::MapToLocalWord(const ID global_word) {
   if (global_word < system_.VocabSize()) {
     return system_.GetVocabMapping(global_word);
-  } else { // word not in dict, pass source word to target
+  } else { // word not in dict, pass source word to target, oov words
     // TODO
     return NULL;
   }
 }
 
-void Chart::AddTargetPhrasesToVertex(
-    const boost::iterator_range<pt::RowIterator> &phrases,
+void Chart::AddTargetPhraseToVertex(
+    const pt::Row *phrase,
     const SourcePhrase &source_phrase,
-    search::Vertex &vertex
-    ) {
+    search::Vertex &vertex,
+    bool passthrough) {
   FeatureInit feature_init = system_.GetObjective().GetFeatureInit();
-  for (pt::RowIterator phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
-    TargetPhrase *phrase_wrapper = reinterpret_cast<TargetPhrase*>(
-        feature_init.TargetPhraseLayout().Allocate(target_phrase_wrappers_));
-    feature_init.PTRowField()(phrase_wrapper) = &*phrase;
-    float score = system_.GetObjective().ScorePhrase(PhrasePair{source_phrase, *phrase_wrapper}, NULL);
-    feature_init.PhraseScoreField()(phrase_wrapper) = score;
-    search::HypoState hypo;
-    hypo.history.cvp = phrase_wrapper;
-    hypo.score = score;
-    vertex.Root().AppendHypothesis(hypo);
-  }
+  TargetPhrase *phrase_wrapper = reinterpret_cast<TargetPhrase*>(
+      feature_init.TargetPhraseLayout().Allocate(target_phrase_wrappers_));
+  feature_init.PTRowField()(phrase_wrapper) = &*phrase;
+  feature_init.PassthroughField()(phrase_wrapper) = passthrough;
+  float score = system_.GetObjective().ScorePhrase(PhrasePair{source_phrase, *phrase_wrapper}, NULL);
+  feature_init.PhraseScoreField()(phrase_wrapper) = score;
+  search::HypoState hypo;
+  hypo.history.cvp = phrase_wrapper;
+  hypo.score = score;
+  vertex.Root().AppendHypothesis(hypo);
 }
 
 } // namespace

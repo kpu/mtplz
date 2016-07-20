@@ -53,10 +53,11 @@ class Chart {
 
     VocabWord *MapToLocalWord(const ID global_word);
 
-    void AddTargetPhrasesToVertex(
-        const boost::iterator_range<pt::RowIterator> &phrases,
+    void AddTargetPhraseToVertex(
+        const pt::Row *phrase,
         const SourcePhrase &source_phrase,
-        search::Vertex &vertex);
+        search::Vertex &vertex,
+        bool passthrough);
 
     util::Pool target_phrase_wrappers_;
     boost::object_pool<TargetPhrases> phrases_; // TODO name confuseable with entries_
@@ -65,9 +66,8 @@ class Chart {
 
     std::vector<VocabWord*> sentence_;
 
-    // These back any oov words that are passed through.  
-    util::Pool passthrough_phrases_;
-    boost::object_pool<TargetPhrases> passthrough_;
+    // Backs any oov words that are passed through.  
+    util::Pool oov_words_;
 
     // Banded array: different source lengths are next to each other.
     std::vector<TargetPhrases*> entries_;
