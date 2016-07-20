@@ -27,18 +27,20 @@
 
 namespace util {
 
+namespace { const uint64_t kPageSize = SizePage(); }
+
 ParseNumberException::ParseNumberException(StringPiece value) throw() {
   *this << "Could not parse \"" << value << "\" into a ";
 }
 
 LineIterator &LineIterator::operator++() {
-  if (!backing_->ReadLineOrEOF(line_))
+  if (!backing_->ReadLineOrEOF(line_, delim_))
     backing_ = NULL;
   return *this;
 }
 
 FilePiece::FilePiece(const char *name, std::ostream *show_progress, std::size_t min_buffer) :
-  file_(OpenReadOrThrow(name)), total_size_(SizeFile(file_.get())), page_(SizePage()),
+  file_(OpenReadOrThrow(name)), total_size_(SizeFile(file_.get())),
   progress_(total_size_, total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name) {
   Initialize(name, show_progress, min_buffer);
 }
@@ -51,13 +53,13 @@ std::string NamePossiblyFind(int fd, const char *name) {
 } // namespace
 
 FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std::size_t min_buffer) :
-  file_(fd), total_size_(SizeFile(file_.get())), page_(SizePage()),
+  file_(fd), total_size_(SizeFile(file_.get())),
   progress_(total_size_, total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + NamePossiblyFind(fd, name)) {
   Initialize(NamePossiblyFind(fd, name).c_str(), show_progress, min_buffer);
 }
 
 FilePiece::FilePiece(std::istream &stream, const char *name, std::size_t min_buffer) :
-  total_size_(kBadSize), page_(SizePage()) {
+  total_size_(kBadSize) {
   InitializeNoRead("istream", min_buffer);
 
   fallback_to_read_ = true;
@@ -67,8 +69,6 @@ FilePiece::FilePiece(std::istream &stream, const char *name, std::size_t min_buf
 
   fell_back_.Reset(stream);
 }
-
-FilePiece::~FilePiece() {}
 
 StringPiece FilePiece::ReadLine(char delim, bool strip_cr) {
   std::size_t skip = 0;
@@ -120,7 +120,7 @@ unsigned long int FilePiece::ReadULong() {
 void FilePiece::InitializeNoRead(const char *name, std::size_t min_buffer) {
   file_name_ = name;
 
-  default_map_size_ = page_ * std::max<std::size_t>((min_buffer / page_ + 1), 2);
+  default_map_size_ = kPageSize * std::max<std::size_t>((min_buffer / kPageSize + 1), 2);
   position_ = NULL;
   position_end_ = NULL;
   mapped_offset_ = 0;
@@ -129,15 +129,24 @@ void FilePiece::InitializeNoRead(const char *name, std::size_t min_buffer) {
 
 void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer) {
   InitializeNoRead(name, min_buffer);
+  uint64_t current_offset;
+  bool valid_current_offset;
+  try {
+    current_offset = AdvanceOrThrow(file_, 0);
+    valid_current_offset = true;
+  } catch (const FDException &) {
+    current_offset = 0;
+    valid_current_offset = false;
+  }
 
-  if (total_size_ == kBadSize) {
-    // So the assertion passes.
-    fallback_to_read_ = false;
+  // So the assertion in TransitionToRead passes
+  fallback_to_read_ = false;
+  if (total_size_ == kBadSize || !valid_current_offset) {
     if (show_progress)
       *show_progress << "File " << name << " isn't normal.  Using slower read() instead of mmap().  No progress bar." << std::endl;
     TransitionToRead();
   } else {
-    fallback_to_read_ = false;
+    mapped_offset_ = current_offset;
   }
   Shift();
   // gzip detect.
@@ -255,7 +264,7 @@ void FilePiece::UpdateProgress() {
 
 void FilePiece::MMapShift(uint64_t desired_begin) {
   // Use mmap.
-  uint64_t ignore = desired_begin % page_;
+  uint64_t ignore = desired_begin % kPageSize;
   // Duplicate request for Shift means give more data.
   if (position_ == data_.begin() + ignore && position_) {
     default_map_size_ *= 2;

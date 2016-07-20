@@ -42,6 +42,7 @@ class RowIterator : public std::iterator<std::forward_iterator_tag, const Row> {
 
     const Row &operator*() { return *row_; }
     const Row *operator->() { return row_; }
+    operator const Row *() const { return row_; }
 
     // This is really only used to test for end of sequence.
     // The C++ standard only requires that equality and inequality be defined
@@ -82,6 +83,8 @@ class Table {
 
     const Statistics &Stats() const { return stats_; }
 
+    VocabRange Vocab() { return file_.Vocab(); }
+
   private:
     RowIterator Begin(const WordIndex *source_begin, const WordIndex *source_end) const {
       const uint64_t *found;
@@ -93,8 +96,8 @@ class Table {
     }
 
     FileFormat file_;
-    const Statistics &stats_;
     util::scoped_memory &rows_;
+    const Statistics &stats_;
     Access access_;
     HashTableRegion<uint64_t> offsets_;
 };

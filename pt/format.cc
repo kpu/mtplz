@@ -11,7 +11,7 @@ struct SizeHeader {
 };
 } // namespace
 
-const char kFileHeader[] = "mtplz phrase table version 0";
+const char kFileHeader[] = "mtplz phrase table version 0\n";
 
 FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::LoadMethod load_method)
   : file_(fd), writing_(writing), header_offset_(header.size() + sizeof(SizeHeader)) {
@@ -26,6 +26,8 @@ FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::Lo
     uint64_t direct_write_size = 0;
     util::WriteOrThrow(fd, &direct_write_size, sizeof(direct_write_size));
     // Note: seeked to direct write location.
+    // Shouldn't be reading vocab.
+    vocab_offset_ = (uint64_t)-1;
   } else {
     std::string buf(header.size() , 0);
     util::ReadOrThrow(fd, &buf[0], buf.size());
@@ -34,7 +36,7 @@ FileFormat::FileFormat(int fd, const std::string &header, bool writing, util::Lo
     UTIL_THROW_IF_ARG(h.map > h.total, util::FDException, (fd), "Binary file is incomplete or corrupt");
     util::MapRead(load_method, fd, 0 /* header is unlikely to be more than a page */, util::CheckOverflow((uint64_t)header_offset_ + h.map), full_backing_);
     // Setup reading for vocab.  TODO: support reading from pipe.
-    util::SeekOrThrow(fd, header_offset_ + h.map);
+    vocab_offset_ = header_offset_ + h.map + sizeof(uint64_t) /* size header for vocab */;
   }
 }
 

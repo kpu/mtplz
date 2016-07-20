@@ -33,7 +33,7 @@ class LineIterator {
   public:
     LineIterator() : backing_(NULL) {}
 
-    explicit LineIterator(FilePiece &f) : backing_(&f) {
+    explicit LineIterator(FilePiece &f, char delim = '\n') : backing_(&f), delim_(delim) {
       ++*this;
     }
 
@@ -55,6 +55,7 @@ class LineIterator {
   private:
     FilePiece *backing_;
     StringPiece line_;
+    char delim_;
 };
 
 // Memory backing the returned StringPiece may vanish on the next call.
@@ -71,8 +72,6 @@ class FilePiece {
      * name is just used for messages and FileName().
      */
     explicit FilePiece(std::istream &stream, const char *name = NULL, std::size_t min_buffer = 1048576);
-
-    ~FilePiece();
 
     LineIterator begin() {
       return LineIterator(*this);
@@ -196,7 +195,6 @@ class FilePiece {
 
     scoped_fd file_;
     const uint64_t total_size_;
-    const uint64_t page_;
 
     std::size_t default_map_size_;
     uint64_t mapped_offset_;

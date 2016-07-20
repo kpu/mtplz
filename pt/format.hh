@@ -12,6 +12,7 @@
  */
 
 #include "util/file.hh"
+#include "util/file_piece.hh"
 #include "util/mmap.hh"
 
 #include <cassert>
@@ -21,6 +22,19 @@
 namespace pt {
 
 extern const char kFileHeader[];
+
+class VocabRange {
+  public:
+    typedef util::LineIterator Iterator;
+
+    explicit VocabRange(int fd) : file_(util::DupOrThrow(fd)) {}
+
+    util::LineIterator begin() { return util::LineIterator(file_, '\0'); }
+    util::LineIterator end() const { return util::LineIterator(); }
+
+  private:
+    util::FilePiece file_;
+};
 
 class FileFormat {
   public:
@@ -37,9 +51,10 @@ class FileFormat {
     }
     uint64_t DirectWriteSize() const { return direct_write_size_; }
 
-    // 2. Vocab at the end is created in RAM but not read into RAM.
-    void DirectReadVocab(void *data, std::size_t size) {
-      util::ReadOrThrow(file_.get(), data, size);
+    // Only for reading the vocab from a binary file.
+    VocabRange Vocab() {
+      util::SeekOrThrow(file_.get(), vocab_offset_);
+      return VocabRange(file_.get());
     }
 
     void Write();
@@ -57,6 +72,8 @@ class FileFormat {
     uint64_t direct_write_size_ = 0;
 
     std::size_t header_offset_;
+
+    uint64_t vocab_offset_;
 };
 
 } // namespace pt
