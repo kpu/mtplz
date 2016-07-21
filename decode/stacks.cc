@@ -85,7 +85,7 @@ class Vertices {
 };
 
 struct MergeInfo {
-  const Objective &objective;
+  Objective &objective;
   HypothesisBuilder &hypo_builder;
   const std::vector<VocabWord*> &sentence;
 };

@@ -29,14 +29,10 @@ void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
   Stacks stacks(system, chart);
   const Hypothesis *hyp = stacks.End();
 	
-	history_map.clear();
+  history_map.clear();
 	
   if (hyp) {
-    if(verbose) {
-      OutputVerbose(*hyp, vocab, history_map, out, system.GetObjective().GetFeatureInit());
-    } else {
-	  	Output(*hyp, vocab, out, system.GetObjective().GetFeatureInit());
-	  }
+    Output(*hyp, vocab, history_map, out, system.GetObjective().GetFeatureInit(), verbose);
   }
   out << '\n';
 }

@@ -25,9 +25,8 @@ struct ScoreHistory {
 typedef boost::unordered_map<std::string, ScoreHistory> ScoreHistoryMap;
 
 void Output(const Hypothesis &hypo, const util::MutableVocab &vocab,
-    util::FileStream &out, const FeatureInit &feature_init);
-void OutputVerbose(const Hypothesis &hypo, const util::MutableVocab &vocab,
-    ScoreHistoryMap &map, util::FileStream &out, const FeatureInit &feature_init);
+    ScoreHistoryMap &map, util::FileStream &out,
+    const FeatureInit &feature_init, bool verbose);
 
 } // namespace decode
 
