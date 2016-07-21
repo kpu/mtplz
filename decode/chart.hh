@@ -44,6 +44,8 @@ class Chart {
     TargetPhrases &EndOfSentence();
 
   private:
+    void LoadPhrases(const pt::Table &table);
+
     void SetRange(std::size_t begin, std::size_t end, TargetPhrases *to) {
       assert(end - begin <= max_source_phrase_length_);
       entries_[begin * max_source_phrase_length_ + end - begin - 1] = to;
@@ -54,7 +56,8 @@ class Chart {
     void AddTargetPhraseToVertex(
         const pt::Row *phrase,
         const SourcePhrase &source_phrase,
-        search::Vertex &vertex);
+        search::Vertex &vertex,
+        bool passthrough);
 
     void AddPassthrough(std::size_t position);
 
@@ -64,6 +67,7 @@ class Chart {
     System &system_;
 
     std::vector<VocabWord*> sentence_;
+    std::vector<ID> ids_;
 
     // Backs any oov words that are passed through.  
     util::Pool oov_pool_;

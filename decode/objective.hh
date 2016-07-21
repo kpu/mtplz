@@ -26,6 +26,8 @@ class Objective {
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const;
 
+    void InitPassthroughPhrase(pt::Row *passthrough) const;
+
     // storage can be null
     float ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const;
 

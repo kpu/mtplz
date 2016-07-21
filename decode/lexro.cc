@@ -11,6 +11,12 @@ void LexicalizedReordering::Init(FeatureInit &feature_init) {
   phrase_access_ = &feature_init.phrase_access;
 }
 
+void LexicalizedReordering::InitPassthroughPhrase(pt::Row *passthrough) const {
+  for(std::size_t i; i < VALUE_COUNT; ++i) {
+    phrase_access_->lexical_reordering(passthrough)[i] = DEFAULT_VALUE;
+  }
+}
+
 void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
     const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const {
   // store phrase start index in layout; phrase end is already stored in the hypothesis

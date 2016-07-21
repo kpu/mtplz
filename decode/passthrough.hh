@@ -11,16 +11,18 @@ class Passthrough : public Feature {
     Passthrough() : Feature("Passthrough") {}
 
     void Init(FeatureInit &feature_init) override {
-      pt_row_field_ = feature_init.pt_row_field;
+      passthrough_field_ = feature_init.passthrough_field;
     }
 
     static const StringPiece Name();
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
 
+    void InitPassthroughPhrase(pt::Row *passthrough) const override {}
+
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {
       // TODO make sparse
-      collector.AddDense(0, (float)(pt_row_field_(phrase_pair.target_phrase) == nullptr));
+      collector.AddDense(0, (float)passthrough_field_(phrase_pair.target_phrase));
     }
 
     void ScoreHypothesisWithSourcePhrase(
@@ -40,7 +42,7 @@ class Passthrough : public Feature {
     }
 
   private:
-    util::PODField<const pt::Row*> pt_row_field_;
+    util::PODField<bool> passthrough_field_;
 };
 
 } // namespace decode

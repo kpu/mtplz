@@ -12,6 +12,7 @@
 
 // features
 #include "decode/distortion.hh"
+#include "decode/word_insert.hh"
 #include "decode/passthrough.hh"
 #include "decode/lm.hh"
 #include "decode/lexro.hh"
@@ -75,12 +76,16 @@ int main(int argc, char *argv[]) {
     decode::Weights weights;
     weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
+    decode::WordInsertion word_insert;
     decode::Passthrough passthrough;
     decode::LM lm(lm_file.c_str(), vocab);
     decode::LexicalizedReordering lexro;
+
     decode::System sys(config, table.Accessor(), weights, lm.Model());
     sys.LoadVocab(vocab);
+
     sys.GetObjective().AddFeature(distortion);
+    sys.GetObjective().AddFeature(word_insert);
     sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(lm);
     sys.GetObjective().AddFeature(lexro);

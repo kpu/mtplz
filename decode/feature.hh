@@ -34,6 +34,10 @@ class Feature {
     /** allows to save constant-length data in the word's representation */
     virtual void NewWord(const StringPiece string_rep, VocabWord *word) const = 0;
 
+    /** Allows to add data to a passthrough pt-phrase.
+     * See documentation in pt/access.hh */
+    virtual void InitPassthroughPhrase(pt::Row *passthrough) const = 0;
+
     /** Score isolated pair of source phrase and target phrase */
     virtual void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 

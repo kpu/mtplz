@@ -20,7 +20,8 @@ struct FeatureInit {
     lm_state_field(hypothesis_layout),
     pt_id_field(word_layout),
     pt_row_field(target_phrase_layout),
-    phrase_score_field(target_phrase_layout) {}
+    phrase_score_field(target_phrase_layout),
+    passthrough_field(target_phrase_layout) {}
 
   /** The first field of a hypothesis layout is always the Hypothesis
     * object, which stores the most important attributes of a hypothesis.
@@ -51,6 +52,7 @@ struct FeatureInit {
     */
   util::Layout word_layout;
   const util::PODField<ID> pt_id_field;
+  const util::PODField<bool> passthrough_field;
 
   const pt::Access &phrase_access;
 };

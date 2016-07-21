@@ -7,6 +7,10 @@ namespace decode {
 class LexicalizedReordering : public Feature {
   public:
     typedef std::size_t Relation;
+
+    static constexpr std::size_t VALUE_COUNT = 6;
+    static constexpr float DEFAULT_VALUE = 5;
+
     static constexpr std::size_t FORWARD = 0;
     static constexpr std::size_t BACKWARD = 3;
     static constexpr Relation MONOTONE = 0;
@@ -18,6 +22,8 @@ class LexicalizedReordering : public Feature {
     void Init(FeatureInit &feature_init) override;
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
+
+    void InitPassthroughPhrase(pt::Row *passthrough) const override;
 
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 

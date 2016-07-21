@@ -19,6 +19,8 @@ class LM : public Feature {
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
 
+    void InitPassthroughPhrase(pt::Row *passthrough) const override {}
+
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithSourcePhrase(
