@@ -18,6 +18,7 @@ namespace util { class MutableVocab; }
 namespace decode {
 
 class System;
+struct FeatureInit;
 struct VocabWord; // conforms to FeatureInit WordLayout
 
 typedef search::Vertex TargetPhrases;
@@ -61,13 +62,14 @@ class Chart {
 
     void AddPassthrough(std::size_t position);
 
-    util::Pool target_phrase_wrappers_; // TODO rename?
-    boost::object_pool<TargetPhrases> phrases_; // TODO name confuseable with entries_
+    util::Pool target_phrase_pool_;
+    boost::object_pool<search::Vertex> vertex_pool_;
 
     System &system_;
+    FeatureInit &feature_init_;
 
     std::vector<VocabWord*> sentence_;
-    std::vector<ID> ids_;
+    std::vector<ID> sentence_ids_;
 
     // Backs any oov words that are passed through.  
     util::Pool oov_pool_;
