@@ -101,8 +101,11 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   SourcePhrase source_phrase(merge_info.sentence, source_range.first, source_range.second);
   Hypothesis *next_hypo = merge_info.hypo_builder.CopyHypothesis(sourcephrase_hypo);
 
-  search::Score score = complete.GetScore() + merge_info.objective.ScoreHypothesisWithPhrasePair(
-      *prev_hypo, PhrasePair{source_phrase, target_phrase}, *next_hypo, NULL);
+  search::Score score = complete.GetScore()
+    // TODO target phrase score is available earlier, use in search
+    + merge_info.objective.GetFeatureInit().phrase_score_field(target_phrase)
+    + merge_info.objective.ScoreHypothesisWithPhrasePair(
+        *prev_hypo, PhrasePair{source_phrase, target_phrase}, *next_hypo, NULL);
 
   return merge_info.hypo_builder.BuildHypothesis(
       sourcephrase_hypo,

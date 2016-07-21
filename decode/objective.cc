@@ -66,7 +66,6 @@ float Objective::ScoreHypothesisWithSourcePhrase(
 float Objective::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair,
     Hypothesis &new_hypothesis, FeatureStore *storage) const {
-  // TODO add target phrase score (from layout)?
   auto collector = GetCollector(&new_hypothesis, storage);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
