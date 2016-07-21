@@ -7,12 +7,13 @@
 
 namespace decode {
 
+typedef lm::ngram::State LMState;
+
 /** A FeatureInit instance is owned by the Objective and is passed to each
  * Feature on Init. Features can add new fields to the provided layouts or
  * memorize already provided accessors.
  */
 struct FeatureInit {
-  typedef lm::ngram::State LMState;
 
   explicit FeatureInit(const pt::Access &phrase_access) :
     phrase_access(phrase_access),

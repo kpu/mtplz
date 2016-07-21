@@ -121,7 +121,9 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
 class EdgeOutput {
   public:
     EdgeOutput(Stack &stack, MergeInfo merge_info)
-      : stack_(stack), merge_info_(merge_info) {}
+      : stack_(stack), merge_info_(merge_info), deduper_(stack.size()* 4/3,
+          Recombinator<LMState>(merge_info_.objective.GetFeatureInit().lm_state_field),
+          Recombinator<LMState>(merge_info_.objective.GetFeatureInit().lm_state_field)) {}
 
     void NewHypothesis(search::PartialEdge complete) {
       stack_.push_back(HypothesisFromEdge(complete, merge_info_));
@@ -140,18 +142,7 @@ class EdgeOutput {
     void FinishedSearch() {}
 
   private:
-    struct RecombineHashPtr : public std::unary_function<const Hypothesis *, uint64_t> {
-      uint64_t operator()(const Hypothesis *hyp) const {
-        return RecombineHash()(*hyp);
-      }
-    };
-    struct RecombineEqualPtr : public std::binary_function<const Hypothesis *, const Hypothesis *, bool> {
-      bool operator()(const Hypothesis *first, const Hypothesis *second) const {
-        return RecombineEqual()(*first, *second);
-      }
-    };
-
-    typedef boost::unordered_set<Hypothesis *, RecombineHashPtr, RecombineEqualPtr> Dedupe;
+    typedef boost::unordered_set<Hypothesis *, Recombinator<LMState>, Recombinator<LMState>> Dedupe;
     Dedupe deduper_;
 
     Stack &stack_;

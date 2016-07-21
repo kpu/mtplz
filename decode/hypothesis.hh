@@ -4,7 +4,7 @@
 #include "decode/coverage.hh"
 #include "decode/id.hh"
 #include "lm/state.hh"
-#include "pt/query.hh" // TODO save TargetPhrase differently?
+#include "pt/query.hh"
 #include "util/murmur_hash.hh"
 
 #include <boost/utility.hpp>
@@ -90,21 +90,26 @@ class Hypothesis {
     Coverage coverage_;
 };
 
-struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> {
-  uint64_t operator()(const Hypothesis &hypothesis) const {
-    std::size_t source_index = hypothesis.SourceEndIndex();
-    return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.GetCoverage()));
-    // TODO hash lm state, too? original hypothesis does it
-  }
-};
+template <class LMState>
+class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<const Hypothesis*> {
+  public:
+    Recombinator(const util::PODField<LMState> lm_state_field)
+      : lm_state_field_(lm_state_field) {}
 
-struct RecombineEqual : public std::binary_function<const Hypothesis &, const Hypothesis &, bool> {
-  bool operator()(const Hypothesis &first, const Hypothesis &second) const {
-    // if (!(first.State() == second.State())) return false; // TODO
-    // find equivalent with Hypothesis Layout lm_state
-    if (!(first.GetCoverage() == second.GetCoverage())) return false;
-    return (first.SourceEndIndex() == second.SourceEndIndex());
-  }
+    size_t operator()(const Hypothesis *hypothesis) const {
+      std::size_t source_index = hypothesis->SourceEndIndex();
+      return util::MurmurHashNative(&source_index, sizeof(std::size_t),
+          hash_value(lm_state_field_(hypothesis), hash_value(hypothesis->GetCoverage())));
+    }
+
+    bool operator()(const Hypothesis *first, const Hypothesis *second) const {
+      if (! (lm_state_field_(first) == lm_state_field_(second))) return false;
+      if (! (first->GetCoverage() == second->GetCoverage())) return false;
+      return (first->SourceEndIndex() == second->SourceEndIndex());
+    }
+
+  private:
+    const util::PODField<LMState> lm_state_field_;
 };
 
 } // namespace decode
