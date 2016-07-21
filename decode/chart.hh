@@ -54,8 +54,7 @@ class Chart {
     void AddTargetPhraseToVertex(
         const pt::Row *phrase,
         const SourcePhrase &source_phrase,
-        search::Vertex &vertex,
-        bool passthrough);
+        search::Vertex &vertex);
 
     void AddPassthrough(std::size_t position);
 

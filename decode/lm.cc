@@ -22,7 +22,7 @@ void LM::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
   auto state = chart_state_field_(&hypothesis);
   lm::ngram::RuleScore<lm::ngram::Model> scorer(model_, state);
-  const pt::Row *pt_target_phrase = pt_row_field_(&phrase_pair.target_phrase);
+  const pt::Row *pt_target_phrase = pt_row_field_(phrase_pair.target_phrase);
   for (const ID i : phrase_access_->target(pt_target_phrase)) {
     scorer.Terminal(Convert(i));
   }

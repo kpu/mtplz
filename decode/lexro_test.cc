@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   BOOST_CHECK_EQUAL(14, collector.Score());
   BOOST_CHECK_EQUAL(0, store[0]);
   BOOST_CHECK_EQUAL(14, store[1]);
-  lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair{source_phrase, *row2}, collector);
+  lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair{source_phrase, row2}, collector);
   BOOST_CHECK_EQUAL(14+3, collector.Score());
   BOOST_CHECK_EQUAL(3, store[0]);
   BOOST_CHECK_EQUAL(14, store[1]);

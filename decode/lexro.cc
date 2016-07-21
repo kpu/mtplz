@@ -26,7 +26,7 @@ void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
 void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
   std::size_t index = FORWARD + PhraseRelation(hypothesis, phrase_pair.source_phrase.Span());
-  const pt::Row *target = pt_row_(&phrase_pair.target_phrase);
+  const pt::Row *target = pt_row_(phrase_pair.target_phrase);
   float score = phrase_access_->lexical_reordering(target)[index];
   collector.AddDense(0, score);
 }

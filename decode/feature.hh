@@ -15,7 +15,7 @@ struct VocabWord;
  
 struct PhrasePair {
   const SourcePhrase source_phrase;
-  TargetPhrase &target_phrase;
+  TargetPhrase *target_phrase;
 };
 
 class Feature {

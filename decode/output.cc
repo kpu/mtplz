@@ -1,6 +1,6 @@
 #include "decode/output.hh"
 
-#include "decode/hypothesis.hh"
+#include "decode/feature_init.hh"
 #include "util/file_stream.hh"
 #include "util/mutable_vocab.hh"
 
@@ -14,7 +14,8 @@ bool Valid(const TargetPhrase *row) {
   return true;
 }
 
-void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FileStream &to) {
+void Output(const Hypothesis &hypo, const util::MutableVocab &vocab,
+    util::FileStream &to, const FeatureInit &feature_init) {
   // TODO more efficient algorithm?  Also, I wish rope was part of the standard.
   std::vector<const Hypothesis*> hypos;
   for (const Hypothesis *h = &hypo; h; h = h->Previous()) {
@@ -22,9 +23,15 @@ void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FileS
     hypos.push_back(h);
   }
   to << hypo.GetScore();
+  assert(feature_init.phrase_access.target); // check that there is a target
   for (std::vector<const Hypothesis*>::const_reverse_iterator i = hypos.rbegin(); i != hypos.rend() - 1 /* skip EOS */; ++i) {
-    for (const ID *id = /*(*i)->Target().begin() TODO replace with access.source_phrase..*/NULL; id != /*TODO (*i)->Target().end()*/NULL; ++id) {
-      to << ' ' << vocab.String(*id);
+    if ((*i)->Target() != nullptr) {
+      auto ids = feature_init.phrase_access.target(feature_init.pt_row_field((*i)->Target()));
+      for (const ID id : ids) {
+        to << ' ' << vocab.String(id);
+      }
+    } else { // passthrough
+      // TODO ???
     }
   }
 }
@@ -32,7 +39,8 @@ void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FileS
 
 // TODO: fix bad code duplication. 
 
-void OutputVerbose(const Hypothesis &hypo, const util::MutableVocab &vocab, ScoreHistoryMap &map, util::FileStream &out) {
+void OutputVerbose(const Hypothesis &hypo, const util::MutableVocab &vocab,
+    ScoreHistoryMap &map, util::FileStream &out, const FeatureInit &feature_init) {
   // TODO more efficient algorithm?  Also, I wish rope was part of the standard.
   std::vector<const Hypothesis*> hypos;
   for (const Hypothesis *h = &hypo; h; h = h->Previous()) {

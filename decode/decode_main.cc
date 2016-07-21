@@ -12,7 +12,9 @@
 
 // features
 #include "decode/distortion.hh"
+#include "decode/passthrough.hh"
 #include "decode/lm.hh"
+#include "decode/lexro.hh"
 
 #include <boost/program_options.hpp>
 
@@ -30,9 +32,9 @@ void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
 	
   if (hyp) {
     if(verbose) {
-      OutputVerbose(*hyp, vocab, history_map, out);
+      OutputVerbose(*hyp, vocab, history_map, out, system.GetObjective().GetFeatureInit());
     } else {
-	  	Output(*hyp, vocab, out);
+	  	Output(*hyp, vocab, out, system.GetObjective().GetFeatureInit());
 	  }
   }
   out << '\n';
@@ -68,20 +70,20 @@ int main(int argc, char *argv[]) {
     }
 
     pt::Table table(phrase_file.c_str(), util::READ);
-    util::MutableVocab vocab; // TODO replace with something from Chart / pt::Table
+    util::MutableVocab vocab;
 
     decode::Weights weights;
     weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
+    decode::Passthrough passthrough;
     decode::LM lm(lm_file.c_str(), vocab);
-    /* TODO add word insertion feature with a scorePhrase function similar
-     * to previous Scorer function. e.g.:
-     * float TargetWordCount(std::size_t num_words) { return num_words; }
-     */
+    decode::LexicalizedReordering lexro;
     decode::System sys(config, table.Accessor(), weights, lm.Model());
     sys.LoadVocab(vocab);
     sys.GetObjective().AddFeature(distortion);
+    sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(lm);
+    sys.GetObjective().AddFeature(lexro);
 
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
