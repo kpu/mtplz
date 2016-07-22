@@ -1,61 +1,58 @@
 #pragma once
 
-#include "decode/id.hh"
-#include "decode/phrase.hh"
+#include "decode/source_phrase.hh"
 #include "decode/feature_init.hh"
 #include "decode/score_collector.hh"
 
 #include <cstddef>
-#include <utility> // for std::pair
 #include <string>
 
 namespace decode {
 
-typedef std::pair<std::size_t,std::size_t> Span; // TODO size_t -> ID*
-
 // Layouts:
-struct TargetPhrase;
 struct Hypothesis;
 struct VocabWord;
  
 struct PhrasePair {
-  const Phrase *phrase;
-  TargetPhrase *targetPhrase;
-};
-
-struct HypothesisAndSourcePhrase {
-  const Hypothesis &hypothesis;
-  const Span source_span;
-  const Phrase &phrase;
-};
-
-struct HypothesisAndPhrasePair {
-  const Hypothesis &hypothesis;
-  const Span source_span;
-  PhrasePair phrase_pair;
+  const SourcePhrase source_phrase;
+  TargetPhrase *target_phrase;
 };
 
 class Feature {
   public:
     // recommended constructor: Feature(const std::string &config);
 
+    Feature(const StringPiece feature_name) : name(feature_name) {}
+
     virtual ~Feature(){};
+    
+    StringPiece name;
 
-    virtual const StringPiece Name() const = 0;
-
+    /** Add state fields to the layouts in init */
     virtual void Init(FeatureInit &feature_init) = 0;
 
-    virtual void NewWord(StringPiece string_rep, VocabWord *word) const = 0;
+    /** allows to save constant-length data in the word's representation */
+    virtual void NewWord(const StringPiece string_rep, VocabWord *word) const = 0;
 
+    /** Allows to add data to a passthrough pt-phrase.
+     * See documentation in pt/access.hh */
+    virtual void InitPassthroughPhrase(pt::Row *passthrough) const = 0;
+
+    /** Score isolated pair of source phrase and target phrase */
     virtual void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
+    /** collects score and allows to save constant-length data in
+     * the hypothesis layout for the next hypothesis (collector.NewHypothesis()) */
     virtual void ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const = 0;
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const = 0;
 
+    /** collects score and allows to save arbitrary data in the hypothesis
+     * layout for the next hypothesis (collector.NewHypothesis()) */
     virtual void ScoreHypothesisWithPhrasePair(
-        HypothesisAndPhrasePair combination, ScoreCollector &collector) const = 0;
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
 
-    virtual void RescoreHypothesis(
+    /** collects score for a completed hypothesis */
+    virtual void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const = 0;
 
     virtual std::size_t DenseFeatureCount() const = 0;

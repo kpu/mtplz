@@ -2,44 +2,60 @@
 
 #include "decode/hypothesis.hh"
 #include "lm/state.hh"
+#include "pt/access.hh"
 #include "util/layout.hh"
 
 namespace decode {
 
-class FeatureInit {
-  public:
-    typedef lm::ngram::State LMState;
+typedef lm::ngram::Right LMState;
 
-    FeatureInit() :
-      hypothesis_field_(hypothesis_layout_),
-      lm_state_field_(hypothesis_layout_) {}
+/** A FeatureInit instance is owned by the Objective and is passed to each
+ * Feature on Init. Features can add new fields to the provided layouts or
+ * memorize already provided accessors.
+ */
+struct FeatureInit {
 
-    util::Layout &HypothesisLayout() {
-      return hypothesis_layout_;
-    }
+  explicit FeatureInit(const pt::Access &phrase_access) :
+    phrase_access(phrase_access),
+    hypothesis_field(hypothesis_layout),
+    lm_state_field(hypothesis_layout),
+    pt_id_field(word_layout),
+    pt_row_field(target_phrase_layout),
+    phrase_score_field(target_phrase_layout),
+    passthrough_field(target_phrase_layout) {}
 
-    util::Layout &TargetPhraseLayout() {
-      return target_phrase_layout_;
-    }
+  /** The first field of a hypothesis layout is always the Hypothesis
+    * object, which stores the most important attributes of a hypothesis.
+    * This way, we can pass around a Hypothesis*, have easy access to
+    * attributes which are always present, and can use the layout accessors
+    * to access additional information.
+    *
+    * A hypothesis layout can use all types of data which the layout class
+    * offers. However, VectorFields can only be updated when scoring with a
+    * target phrase.
+    */
+  util::Layout hypothesis_layout;
+  const util::PODField<Hypothesis> hypothesis_field; // has to be first field
+  const util::PODField<LMState> lm_state_field;
 
-    util::Layout &WordLayout() {
-      return word_layout_;
-    }
+  /** Use to store information about the target phrase when scoring in
+    * isolation (ScorePhrase).
+    * Only store fixed-length data, no VectorFields.
+    */
+  util::Layout target_phrase_layout;
+  const util::PODField<const pt::Row*> pt_row_field; // has to be first field
+  const util::PODField<float> phrase_score_field;
 
-    const util::PODField<Hypothesis> &HypothesisField() const {
-      return hypothesis_field_;
-    }
+  /** Store info about a word when NewWord is called. This call happens
+    * once in bulk for all known source words from training and later every
+    * time a new word is encountered.
+    * Only store fixed-length data, no VectorFields.
+    */
+  util::Layout word_layout;
+  const util::PODField<ID> pt_id_field;
+  const util::PODField<bool> passthrough_field;
 
-    const util::PODField<LMState> &LMStateField() const {
-      return lm_state_field_;
-    }
-
-  private:
-    util::Layout hypothesis_layout_ = util::Layout();
-    util::Layout target_phrase_layout_ = util::Layout();
-    util::Layout word_layout_ = util::Layout();
-    const util::PODField<Hypothesis> hypothesis_field_;
-    const util::PODField<LMState> lm_state_field_;
+  const pt::Access &phrase_access;
 };
 
 } // namespace decode

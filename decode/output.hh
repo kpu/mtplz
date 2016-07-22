@@ -15,6 +15,7 @@ class FileStream;
 namespace decode {
 
 class Hypothesis;
+struct FeatureInit;
 
 struct ScoreHistory {
 	std::vector<float> scores;
@@ -23,8 +24,9 @@ struct ScoreHistory {
 
 typedef boost::unordered_map<std::string, ScoreHistory> ScoreHistoryMap;
 
-void Output(const Hypothesis &hypo, const util::MutableVocab &vocab, util::FileStream &out);
-void OutputVerbose(const Hypothesis &hypo, const util::MutableVocab &vocab, ScoreHistoryMap &map, util::FileStream &out);
+void Output(const Hypothesis &hypo, const util::MutableVocab &vocab,
+    ScoreHistoryMap &map, util::FileStream &out,
+    const FeatureInit &feature_init, bool verbose);
 
 } // namespace decode
 

@@ -2,13 +2,12 @@
 
 namespace decode {
 
-// TODO const expr // static
-const StringPiece Distortion::Name() const { return "distortion"; }
+Distortion::Distortion() : Feature("distortion") {}
 
 void Distortion::ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const {
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const {
   std::size_t jump_size = abs(
-      (int) combination.hypothesis.SourceEndIndex() - (int)combination.source_span.first);
+      (int) hypothesis.SourceEndIndex() - (int) source_phrase.Span().first);
   collector.AddDense(0, jump_size);
 }
 

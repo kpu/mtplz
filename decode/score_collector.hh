@@ -6,16 +6,19 @@
 
 namespace decode {
 
+class Hypothesis;
+
 typedef std::vector<float> FeatureStore;
 
 class ScoreCollector {
   public:
-
-    explicit ScoreCollector(const std::vector<float> &weights)
-      : weights_(weights), dense_features_(NULL) {}
-
-    ScoreCollector(const std::vector<float> &weights, FeatureStore *dense_features)
-      : weights_(weights), dense_features_(dense_features) {}
+    ScoreCollector(
+        const std::vector<float> &weights,
+        Hypothesis *new_hypothesis,
+        FeatureStore *dense_features) :
+      weights_(weights),
+      new_hypothesis_(new_hypothesis),
+      dense_features_(dense_features) {}
 
     void SetDenseOffset(std::size_t offset) {
       dense_feature_offset_ = offset;
@@ -23,6 +26,10 @@ class ScoreCollector {
 
     float Score() const {
       return score_;
+    }
+
+    Hypothesis *NewHypothesis() {
+      return new_hypothesis_;
     }
 
     void AddDense(std::size_t index, float value);
@@ -33,6 +40,7 @@ class ScoreCollector {
   private:
     float score_ = 0;
     const std::vector<float> &weights_;
+    Hypothesis *new_hypothesis_;
     std::size_t dense_feature_offset_;
     FeatureStore *dense_features_;
 };

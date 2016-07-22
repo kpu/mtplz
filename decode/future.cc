@@ -1,7 +1,6 @@
 #include "decode/future.hh"
 
 #include "decode/chart.hh"
-#include "decode/phrase_table.hh"
 
 #include <cstddef>
 
@@ -21,7 +20,7 @@ Future::Future(const Chart &chart)
     for (std::size_t end = begin + 1; end <= max_end; ++end) {
       const TargetPhrases *phrases = chart.Range(begin, end);
       if (phrases) {
-        Entry(begin, end) = phrases->vertex.Bound();
+        Entry(begin, end) = phrases->Bound();
       }
     }
   }

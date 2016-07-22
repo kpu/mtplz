@@ -1,14 +1,21 @@
 #include "decode/system.hh"
 #include "decode/chart.hh"
-#include "decode/context.hh"
 #include "decode/output.hh"
-#include "decode/phrase_table.hh"
 #include "decode/stacks.hh"
+#include "decode/weights.hh"
+#include "pt/query.hh"
+#include "pt/access.hh"
+#include "pt/create.hh"
 #include "util/file_stream.hh"
+#include "util/mutable_vocab.hh"
 #include "util/usage.hh"
 
 // features
 #include "decode/distortion.hh"
+#include "decode/word_insert.hh"
+#include "decode/passthrough.hh"
+#include "decode/lm.hh"
+#include "decode/lexro.hh"
 
 #include <boost/program_options.hpp>
 
@@ -16,19 +23,16 @@
 #include <vector>
 
 namespace decode {
-void Decode(Context &context, const PhraseTable &table, const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  Chart chart(table, in, context.GetVocab(), context.GetScorer());
-  Stacks stacks(context, chart);
+void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
+    const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
+  Chart chart(table, in, vocab, system);
+  Stacks stacks(system, chart);
   const Hypothesis *hyp = stacks.End();
 	
-	history_map.clear();
+  history_map.clear();
 	
   if (hyp) {
-    if(verbose) {
-      OutputVerbose(*hyp, context.GetVocab(), history_map, out);
-    } else {
-	  	Output(*hyp, context.GetVocab(), out);
-	  }
+    Output(*hyp, vocab, history_map, out, system.GetObjective().GetFeatureInit(), verbose);
   }
   out << '\n';
 }
@@ -38,15 +42,15 @@ int main(int argc, char *argv[]) {
   try {
     namespace po = boost::program_options;
     po::options_description options("Decoder options");
-    std::string lm, phrase;
+    std::string lm_file, phrase_file;
     std::string weights_file;
     decode::Config config;
     bool verbose = false;
 
     options.add_options()
       ("verbose,v", "Produce verbose output")
-      ("lm,l", po::value<std::string>(&lm)->required(), "Language model file")
-      ("phrase,p", po::value<std::string>(&phrase)->required(), "Phrase table")
+      ("lm,l", po::value<std::string>(&lm_file)->required(), "Language model file")
+      ("phrase,p", po::value<std::string>(&phrase_file)->required(), "Phrase table")
       ("weights_file,W", po::value<std::string>(&weights_file)->required(), "Weights file")
       ("beam,K", po::value<unsigned int>(&config.pop_limit)->required(), "Beam size")
       ("reordering,R", po::value<std::size_t>(&config.reordering_limit)->required(), "Reordering limit");
@@ -61,12 +65,27 @@ int main(int argc, char *argv[]) {
     if(vm.count("verbose")) {
         verbose = true;
     }
-    decode::System sys(config, weights_file);
-    decode::Context context(lm.c_str(), weights_file, sys.GetConfig(), sys.GetObjective());
+
+    pt::Table table(phrase_file.c_str(), util::READ);
+    util::MutableVocab vocab;
+
+    decode::Weights weights;
+    weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
+    decode::WordInsertion word_insert;
+    decode::Passthrough passthrough;
+    decode::LM lm(lm_file.c_str(), vocab);
+    decode::LexicalizedReordering lexro;
+
+    decode::System sys(config, table.Accessor(), weights, lm.Model());
+    sys.LoadVocab(vocab);
+
     sys.GetObjective().AddFeature(distortion);
-    decode::PhraseTable table(phrase.c_str(), context.GetVocab(), context.GetScorer());
-    sys.GetObjective().lm_begin_sentence_state = &context.GetScorer().LanguageModel().BeginSentenceState();
+    sys.GetObjective().AddFeature(word_insert);
+    sys.GetObjective().AddFeature(passthrough);
+    sys.GetObjective().AddFeature(lm);
+    sys.GetObjective().AddFeature(lexro);
+
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
     decode::ScoreHistoryMap map;
@@ -75,7 +94,7 @@ int main(int argc, char *argv[]) {
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
-      decode::Decode(context, table, line, map, verbose, out);
+      decode::Decode(sys, table, vocab, line, map, verbose, out);
       out.flush();
       f.UpdateProgress();
     }

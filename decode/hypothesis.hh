@@ -3,8 +3,8 @@
 
 #include "decode/coverage.hh"
 #include "decode/id.hh"
-#include "decode/phrase.hh"
 #include "lm/state.hh"
+#include "pt/query.hh"
 #include "util/murmur_hash.hh"
 
 #include <boost/utility.hpp>
@@ -18,18 +18,30 @@ namespace util { class Pool; }
 
 namespace decode {
 
+// instances of the target phrase layout (see FeatureInit)
+struct TargetPhrase;
+
+/** Hypothesis
+ * Stores the overall score of the current hypothesis along with its
+ * coverage, the most recently added target phrase, and a pointer to the
+ * previous hypothesis.
+ *
+ * The hypothesis object stores only the most basic attributes,
+ * all other attributes are stored in the hypothesis layout
+ * (see FeatureInit).
+ */
 class Hypothesis {
   public:
-    // STL default constructor.
+    /** STL default constructor. */
     Hypothesis() : target_(NULL) {}
 
-    // Extend a previous hypothesis.
+    /** Extend a previous hypothesis. */
     Hypothesis(
         float score,
-        const Hypothesis *&previous,
+        const Hypothesis *previous,
         std::size_t source_begin,
         std::size_t source_end,
-        Phrase target) :
+        const TargetPhrase *target) :
       score_(score),
       pre_(previous),
       end_index_(source_end),
@@ -38,7 +50,7 @@ class Hypothesis {
       coverage_.Set(source_begin, source_end);
     }
 
-    // Initialize root hypothesis.
+    /** Initialize root hypothesis. */
     explicit Hypothesis(float score) :
       score_(score),
       pre_(NULL),
@@ -46,15 +58,24 @@ class Hypothesis {
       target_(NULL),
       coverage_() {}
 
+    /** Initialize hypothesis extension for source phrase pairing */
+    explicit Hypothesis(const Hypothesis *previous) :
+      score_(0),
+      pre_(previous),
+      end_index_(0),
+      target_(NULL),
+      coverage_() {}
+
     const Coverage &GetCoverage() const { return coverage_; }
 
-    float Score() const { return score_; }
+    void SetScore(float score) { score_ = score; }
+    float GetScore() const { return score_; }
 
     std::size_t SourceEndIndex() const { return end_index_; }
 
     const Hypothesis *Previous() const { return pre_; }
 
-    const Phrase &Target() const { return target_; }
+    const TargetPhrase *Target() const { return target_; }
 
   private:
     float score_;
@@ -64,26 +85,31 @@ class Hypothesis {
 	// one past the last source index of the hypothesis extension
     std::size_t end_index_;
     // Null for base hypothesis.
-    Phrase target_;
+    const TargetPhrase *target_;
 
     Coverage coverage_;
 };
 
-struct RecombineHash : public std::unary_function<const Hypothesis &, uint64_t> {
-  uint64_t operator()(const Hypothesis &hypothesis) const {
-    std::size_t source_index = hypothesis.SourceEndIndex();
-    return util::MurmurHashNative(&source_index, sizeof(std::size_t), hash_value(hypothesis.GetCoverage()));
-    // TODO hash lm state, too? original hypothesis does it
-  }
-};
+template <class LMState>
+class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<const Hypothesis*> {
+  public:
+    Recombinator(const util::PODField<LMState> lm_state_field)
+      : lm_state_field_(lm_state_field) {}
 
-struct RecombineEqual : public std::binary_function<const Hypothesis &, const Hypothesis &, bool> {
-  bool operator()(const Hypothesis &first, const Hypothesis &second) const {
-    // if (!(first.State() == second.State())) return false; // TODO
-    // find equivalent with Hypothesis Layout lm_state
-    if (!(first.GetCoverage() == second.GetCoverage())) return false;
-    return (first.SourceEndIndex() == second.SourceEndIndex());
-  }
+    size_t operator()(const Hypothesis *hypothesis) const {
+      std::size_t source_index = hypothesis->SourceEndIndex();
+      return util::MurmurHashNative(&source_index, sizeof(std::size_t),
+          hash_value(lm_state_field_(hypothesis), hash_value(hypothesis->GetCoverage())));
+    }
+
+    bool operator()(const Hypothesis *first, const Hypothesis *second) const {
+      if (! (lm_state_field_(first) == lm_state_field_(second))) return false;
+      if (! (first->GetCoverage() == second->GetCoverage())) return false;
+      return (first->SourceEndIndex() == second->SourceEndIndex());
+    }
+
+  private:
+    const util::PODField<LMState> lm_state_field_;
 };
 
 } // namespace decode

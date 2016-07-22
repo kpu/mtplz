@@ -6,21 +6,23 @@ namespace decode {
 
 class Distortion : public Feature {
   public:
-    const StringPiece Name() const override;
+    Distortion();
 
     void Init(FeatureInit &feature_init) override {}
 
-    void NewWord(StringPiece string_rep, VocabWord *word) const override {}
+    void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
+
+    void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithSourcePhrase(
-        HypothesisAndSourcePhrase combination, ScoreCollector &collector) const override;
+        const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override;
 
     void ScoreHypothesisWithPhrasePair(
-        HypothesisAndPhrasePair combination, ScoreCollector &collector) const override {}
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
-    void RescoreHypothesis(
+    void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
 
     std::size_t DenseFeatureCount() const override;
