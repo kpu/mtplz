@@ -7,7 +7,7 @@
 
 namespace decode {
 
-typedef lm::ngram::State LMState;
+typedef lm::ngram::Right LMState;
 
 /** A FeatureInit instance is owned by the Objective and is passed to each
  * Feature on Init. Features can add new fields to the provided layouts or
