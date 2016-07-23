@@ -19,9 +19,10 @@ void System::LoadVocab(const util::MutableVocab &vocab) {
   vocab_mapping_ = std::vector<VocabWord*>(vocab.Size());
   util::Layout &word_layout = objective_.GetFeatureInit().word_layout;
   for (ID i=0; i < vocab.Size(); ++i) {
-    vocab_mapping_[i] = reinterpret_cast<VocabWord*>(word_layout.Allocate(word_pool_));
-    objective_.GetFeatureInit().pt_id_field(vocab_mapping_[i]) = i;
-    objective_.NewWord(vocab.String(i), vocab_mapping_[i]);
+    VocabWord *mapping = reinterpret_cast<VocabWord*>(word_layout.Allocate(word_pool_));
+    objective_.GetFeatureInit().pt_id_field(mapping) = i;
+    objective_.NewWord(vocab.String(i), mapping);
+    vocab_mapping_[i] = mapping;
   }
 }
 

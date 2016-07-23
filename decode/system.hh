@@ -21,12 +21,8 @@ class System {
 
     void LoadVocab(const util::MutableVocab &vocab);
 
-    std::size_t VocabSize() const {
-      return vocab_mapping_.size();
-    }
-
-    VocabWord* GetVocabMapping(const ID index) const {
-      return vocab_mapping_[index];
+    const std::vector<VocabWord*> GetVocabMapping() const {
+      return vocab_mapping_;
     }
 
     const Config &GetConfig() const { return config_; }

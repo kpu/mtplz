@@ -4,6 +4,7 @@
 #include "decode/stacks.hh"
 #include "decode/weights.hh"
 #include "pt/query.hh"
+#include "pt/statistics.hh"
 #include "pt/access.hh"
 #include "pt/create.hh"
 #include "util/file_stream.hh"
@@ -25,7 +26,9 @@
 namespace decode {
 void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
     const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  Chart chart(table, in, vocab, system);
+  Chart chart(table.Stats().max_source_phrase_length, system.GetObjective());
+  chart.ReadSentence(in, vocab, system.GetVocabMapping());
+  chart.LoadPhrases(table);
   Stacks stacks(system, chart);
   const Hypothesis *hyp = stacks.End();
 	

@@ -22,5 +22,5 @@ set(DECODE_LIBS mtplz_decode mtplz_search mtplz_pt kenlm kenlm_util ${Boost_LIBR
 AddExes(EXES decode LIBRARIES ${DECODE_LIBS})
 
 if(BUILD_TESTING)
-  AddTests(TESTS coverage_test lexro_test LIBRARIES ${DECODE_LIBS})
+  AddTests(TESTS coverage_test chart_test lexro_test LIBRARIES ${DECODE_LIBS})
 endif()
