@@ -13,7 +13,7 @@ void LM::Init(FeatureInit &feature_init) {
   lm_state_field_ = feature_init.lm_state_field;
   pt_row_field_ = feature_init.pt_row_field;
   chart_state_field_ = util::PODField<lm::ngram::ChartState>(feature_init.hypothesis_layout);
-  UTIL_THROW_IF(feature_init.phrase_access.target, util::Exception,
+  UTIL_THROW_IF(!feature_init.phrase_access.target, util::Exception,
       "requested language model but target phrase text is missing in phrase access");
   phrase_access_ = &feature_init.phrase_access;
 }

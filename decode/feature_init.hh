@@ -15,8 +15,8 @@ typedef lm::ngram::Right LMState;
  */
 struct FeatureInit {
 
-  explicit FeatureInit(const pt::Access &phrase_access) :
-    phrase_access(phrase_access),
+  explicit FeatureInit(const pt::Access &phrase_accessor) :
+    phrase_access(phrase_accessor),
     hypothesis_field(hypothesis_layout),
     lm_state_field(hypothesis_layout),
     pt_id_field(word_layout),
