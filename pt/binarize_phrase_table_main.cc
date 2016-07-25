@@ -48,18 +48,18 @@ int main(int argc, char *argv[]) {
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, options), vm);
 
-    bool stdout_is_seekable = true;
+    bool stdout_is_sizable = true;
     try {
-      util::SeekOrThrow(1, 0);
+      util::SizeOrThrow(1);
     } catch (const util::FDException &) {
-      stdout_is_seekable = false;
+      stdout_is_sizable = false;
     }
 
-    if (vm["help"].as<bool>() || !stdout_is_seekable) {
+    if (vm["help"].as<bool>() || !stdout_is_sizable) {
       std::cerr << 
         "Converts a text phrase table to mtplz binary format.\n"
         "Usage: " << argv[0] << " <pt.text >pt.binary\n"
-        "Where pt.binary must be a seekable file.\n"
+        "Where pt.binary must be a regular file.\n"
         << options << std::endl;
       return 1;
     }
