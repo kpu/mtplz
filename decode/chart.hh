@@ -40,15 +40,17 @@ class Chart {
       entries_.resize(sentence_.size() * max_source_phrase_length_);
       for (std::size_t begin = 0; begin != sentence_.size(); ++begin) {
         for (std::size_t end = begin + 1; (end != sentence_.size() + 1) && (end <= begin + max_source_phrase_length_); ++end) {
-          search::Vertex &vertex = *vertex_pool_.construct();
-          vertex.Root().InitRoot();
           auto phrases = table.Lookup(&sentence_ids_[begin], &*sentence_ids_.begin() + end);
-          SourcePhrase source_phrase(sentence_, begin, end);
-          for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
-            AddTargetPhraseToVertex(&*phrase, source_phrase, vertex, false);
+          if (phrases) {
+            SourcePhrase source_phrase(sentence_, begin, end);
+            search::Vertex &vertex = *vertex_pool_.construct();
+            vertex.Root().InitRoot();
+            for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
+              AddTargetPhraseToVertex(&*phrase, source_phrase, vertex, false);
+            }
+            vertex.Root().FinishRoot(search::kPolicyLeft);
+            SetRange(begin, end, &vertex);
           }
-          vertex.Root().FinishRoot(search::kPolicyLeft);
-          SetRange(begin, end, &vertex);
         }
         if (!Range(begin, begin + 1)) {
           AddPassthrough(begin);
