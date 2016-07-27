@@ -122,6 +122,10 @@ template <class NewWordAction = NoOpUniqueWords> class GrowableVocab {
     NewWordAction &Action() { return new_word_; }
     const NewWordAction &Action() const { return new_word_; }
 
+    bool IsSpecial(WordIndex word) const {
+      return word <= 2;
+    }
+
   private:
     typedef util::AutoProbing<ProbingVocabularyEntry, util::IdentityHash> Lookup;
 
