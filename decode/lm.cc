@@ -6,38 +6,37 @@
 
 namespace decode {
 
-LM::LM(const char *model, util::MutableVocab &vocab) :
-  Feature("lm"), model_(model), vocab_(vocab) {}
+LM::LM(const char *model) :
+  Feature("lm"), model_(model) {}
 
 void LM::Init(FeatureInit &feature_init) {
-  lm_state_field_ = feature_init.lm_state_field;
   pt_row_field_ = feature_init.pt_row_field;
-  chart_state_field_ = util::PODField<lm::ngram::ChartState>(feature_init.hypothesis_layout);
+  pt_id_field_ = feature_init.pt_id_field;
   UTIL_THROW_IF(!feature_init.phrase_access.target, util::Exception,
       "requested language model but target phrase text is missing in phrase access");
   phrase_access_ = &feature_init.phrase_access;
+  phrase_score_field_ = util::PODField<float>(feature_init.target_phrase_layout);
 }
 
-void LM::ScoreHypothesisWithPhrasePair(
-    const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
-  auto state = chart_state_field_(&hypothesis);
+void LM::NewWord(const StringPiece string_rep, VocabWord *word) {
+  ID id = pt_id_field_(word);
+  assert(id >= vocab_mapping_.size());
+  vocab_mapping_.resize(id);
+  vocab_mapping_.push_back(model_.GetVocabulary().Index(string_rep));
+}
+
+void LM::ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const {
+  collector.AddDense(0, phrase_score_field_(phrase_pair.target_phrase));
+}
+
+void LM::ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const {
   lm::ngram::RuleScore<lm::ngram::Model> scorer(model_, state);
-  const pt::Row *pt_target_phrase = pt_row_field_(phrase_pair.target_phrase);
+  const pt::Row *pt_target_phrase = pt_row_field_(target_phrase);
   for (const ID i : phrase_access_->target(pt_target_phrase)) {
-    scorer.Terminal(Convert(i));
+    assert(i < vocab_mapping_.size());
+    scorer.Terminal(vocab_mapping_[i]);
   }
-  collector.AddDense(0, scorer.Finish());
-}
-
-lm::WordIndex LM::Convert(ID from) const {
-  /* TODO find replacement which allows for const
-  if (from >= vocab_mapping_.size()) {
-    vocab_mapping_.reserve(vocab_.Size());
-    while (vocab_mapping_.size() < vocab_.Size()) {
-      vocab_mapping_.push_back(model_.GetVocabulary().Index(vocab_.String(vocab_mapping_.size())));
-    }
-  } */
-  return vocab_mapping_[from];
+  phrase_score_field_(target_phrase) = scorer.Finish();
 }
 
 std::size_t LM::DenseFeatureCount() const { return 1; }

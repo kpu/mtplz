@@ -8,6 +8,7 @@
 namespace decode {
 
 class Weights;
+class LM;
 
 class Objective {
   public:
@@ -17,6 +18,14 @@ class Objective {
         const lm::ngram::State &lm_begin_sentence_state);
 
     void AddFeature(Feature &feature);
+
+    void RegisterLanguageModel(LM &lm_feature) {
+      lm_feature_ = &lm_feature;
+    }
+
+    const LM *GetLanguageModelFeature() const {
+      return lm_feature_;
+    }
 
     // cannot be const because it contains layouts,
     // which are modified on alloc
@@ -57,6 +66,7 @@ class Objective {
     std::vector<Feature*> features_;
     std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
+    const LM *lm_feature_;
 
     const lm::ngram::State &lm_begin_sentence_state_;
     ScoreCollector GetCollector(Hypothesis *new_hypothesis, FeatureStore *storage) const;

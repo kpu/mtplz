@@ -1,6 +1,7 @@
 #include "decode/chart.hh"
 
 #include "decode/system.hh"
+#include "decode/lm.hh"
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
@@ -46,9 +47,11 @@ void Chart::AddTargetPhraseToVertex(
       feature_init_.target_phrase_layout.Allocate(target_phrase_pool_));
   feature_init_.pt_row_field(phrase_wrapper) = phrase;
   feature_init_.passthrough_field(phrase_wrapper) = passthrough;
+  search::HypoState hypo;
+  // Bypass objective to allow the language model access to a hypo.state reference.
+  objective_.GetLanguageModelFeature()->ScoreTargetPhrase(phrase_wrapper, hypo.state);
   float score = objective_.ScorePhrase(PhrasePair{source_phrase, phrase_wrapper}, nullptr);
   feature_init_.phrase_score_field(phrase_wrapper) = score;
-  search::HypoState hypo;
   hypo.history.cvp = phrase_wrapper;
   hypo.score = score;
   vertex.Root().AppendHypothesis(hypo);

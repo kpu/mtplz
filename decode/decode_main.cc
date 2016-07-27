@@ -77,17 +77,18 @@ int main(int argc, char *argv[]) {
     decode::Distortion distortion;
     decode::WordInsertion word_insert;
     decode::Passthrough passthrough;
-    decode::LM lm(lm_file.c_str(), vocab);
+    decode::LM lm(lm_file.c_str());
     decode::LexicalizedReordering lexro;
 
     decode::System sys(config, table.Accessor(), weights, lm.Model());
-    sys.LoadVocab(vocab);
-
     sys.GetObjective().AddFeature(distortion);
     sys.GetObjective().AddFeature(word_insert);
     sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(lm);
-    sys.GetObjective().AddFeature(lexro);
+    sys.GetObjective().RegisterLanguageModel(lm);
+    /* TODO sys.GetObjective().AddFeature(lexro); */
+
+    sys.LoadVocab(vocab);
 
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);

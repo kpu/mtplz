@@ -32,7 +32,7 @@ class Feature {
     virtual void Init(FeatureInit &feature_init) = 0;
 
     /** allows to save constant-length data in the word's representation */
-    virtual void NewWord(const StringPiece string_rep, VocabWord *word) const = 0;
+    virtual void NewWord(const StringPiece string_rep, VocabWord *word) = 0;
 
     /** Allows to add data to a passthrough pt-phrase.
      * See documentation in pt/access.hh */

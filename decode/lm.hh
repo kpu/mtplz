@@ -11,23 +11,25 @@ namespace decode {
 
 class LM : public Feature {
   public:
-    LM(const char *model, util::MutableVocab &vocab);
+    LM(const char *model);
 
     void Init(FeatureInit &feature_init) override;
 
     static const StringPiece Name();
 
-    void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
+    void NewWord(const StringPiece string_rep, VocabWord *word) override;
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
+    void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const;
+
+    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override;
 
     void ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithPhrasePair(
-        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override;
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
@@ -37,16 +39,14 @@ class LM : public Feature {
     std::string FeatureDescription(std::size_t index) const override;
 
     const lm::ngram::Model &Model() const { return model_; }
-  private:
-    lm::WordIndex Convert(ID from) const;
 
+  private:
     lm::ngram::Model model_;
     std::vector<lm::WordIndex> vocab_mapping_;
     const pt::Access *phrase_access_;
-    util::PODField<lm::ngram::Right> lm_state_field_; // TODO why two state objects?
-    util::PODField<lm::ngram::ChartState> chart_state_field_;
     util::PODField<const pt::Row*> pt_row_field_;
-    util::MutableVocab &vocab_;
+    util::PODField<ID> pt_id_field_;
+    util::PODField<float> phrase_score_field_;
 };
 
 } // namespace decode

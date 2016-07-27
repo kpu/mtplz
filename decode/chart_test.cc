@@ -23,7 +23,7 @@ class FeatureMock : public Feature {
       : Feature("mock"), phrase_pair_buffer_(&phrase_pair_buffer) {}
 
     void Init(FeatureInit &feature_init) override {}
-    void NewWord(const StringPiece string_rep, VocabWord *word) const override {
+    void NewWord(const StringPiece string_rep, VocabWord *word) override {
       rep_buffer_->push_back(string_rep);
       word_buffer_->push_back(word);
     }

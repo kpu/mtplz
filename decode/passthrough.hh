@@ -16,7 +16,7 @@ class Passthrough : public Feature {
 
     static const StringPiece Name();
 
-    void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
+    void NewWord(const StringPiece string_rep, VocabWord *word) override {}
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
