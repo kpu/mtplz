@@ -235,9 +235,11 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
   search::Vertex all_hyps;
   for (Stack::const_iterator ant = stacks_[chart.SentenceLength()].begin(); ant != stacks_[chart.SentenceLength()].end(); ++ant) {
     assert(chart.SentenceLength() == (*ant)->GetCoverage().FirstZero());
-    // TODO: the zero in the following line assumes that EOS is not scored for distortion. 
-    // This assumption might need to be revisited.
-    AddHypothesisToVertex(*ant, 0, hypothesis_builder_.NextHypothesis(*ant), all_hyps, system.GetObjective().GetFeatureInit());
+    Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(*ant);
+    const Hypothesis *ant_hypo = ant_hypo;
+    float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
+        *ant_hypo, SourcePhrase(chart.Sentence(), chart.SentenceLength(), chart.SentenceLength()), *next_hypo, NULL);
+    AddHypothesisToVertex(*ant, score_delta, next_hypo, all_hyps, system.GetObjective().GetFeatureInit());
   }
   
   // Next, make Vertex which consists of a single EOS phrase.
