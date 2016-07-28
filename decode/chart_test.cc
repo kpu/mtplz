@@ -1,6 +1,7 @@
 #include "decode/chart.hh"
 
 #include "decode/objective.hh"
+#include "decode/lm.hh"
 #include "pt/access.hh"
 #include "lm/model.hh"
 
@@ -15,8 +16,9 @@ namespace {
 
 typedef std::pair<std::size_t,std::size_t> Range;
 
-class FeatureMock : public Feature {
+class FeatureMock : public Feature, public TargetPhraseInitializer {
   public:
+    FeatureMock() : Feature("mock") {}
     FeatureMock(std::vector<StringPiece> &rep_buffer, std::vector<VocabWord*> &word_buffer)
       : Feature("mock"), rep_buffer_(&rep_buffer), word_buffer_(&word_buffer) {}
     FeatureMock(std::vector<PhrasePair> &phrase_pair_buffer)
@@ -39,6 +41,7 @@ class FeatureMock : public Feature {
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
     std::size_t DenseFeatureCount() const override { return 1; }
     std::string FeatureDescription(std::size_t index) const override { return ""; }
+    void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const override {}
 
     std::vector<StringPiece> *rep_buffer_;
     std::vector<VocabWord*> *word_buffer_;
@@ -77,6 +80,8 @@ BOOST_AUTO_TEST_CASE(InitTest) {
   pt::Access access(config);
   lm::ngram::State lm_state;
   Objective objective(access, lm_state);
+  FeatureMock feature_mock;
+  objective.RegisterLanguageModel(feature_mock);
   Chart chart(13, objective);
   BOOST_CHECK_EQUAL(13, chart.MaxSourcePhraseLength());
 }
@@ -89,6 +94,7 @@ BOOST_AUTO_TEST_CASE(EosTest) {
   std::vector<PhrasePair> phrase_pair_buffer;
   FeatureMock feature_mock(phrase_pair_buffer);
   objective.AddFeature(feature_mock);
+  objective.RegisterLanguageModel(feature_mock);
   Chart chart(11, objective);
 
   TargetPhrases &eos = chart.EndOfSentence();
@@ -110,6 +116,7 @@ BOOST_AUTO_TEST_CASE(ReadSentenceTest) {
   std::vector<VocabWord*> word_buffer;
   FeatureMock feature_mock(rep_buffer, word_buffer);
   objective.AddFeature(feature_mock);
+  objective.RegisterLanguageModel(feature_mock);
   Chart chart(5, objective);
 
   // other setup
@@ -158,6 +165,7 @@ BOOST_AUTO_TEST_CASE(PhraseTest) {
   std::vector<PhrasePair> phrase_pair_buffer;
   FeatureMock feature_mock(phrase_pair_buffer);
   objective.AddFeature(feature_mock);
+  objective.RegisterLanguageModel(feature_mock);
   Chart chart(2, objective);
 
   // other setup

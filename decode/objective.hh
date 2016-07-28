@@ -9,6 +9,7 @@ namespace decode {
 
 class Weights;
 class LM;
+class TargetPhraseInitializer;
 
 class Objective {
   public:
@@ -19,11 +20,11 @@ class Objective {
 
     void AddFeature(Feature &feature);
 
-    void RegisterLanguageModel(LM &lm_feature) {
+    void RegisterLanguageModel(TargetPhraseInitializer &lm_feature) {
       lm_feature_ = &lm_feature;
     }
 
-    const LM *GetLanguageModelFeature() const {
+    const TargetPhraseInitializer *GetLanguageModelFeature() const {
       return lm_feature_;
     }
 
@@ -66,7 +67,7 @@ class Objective {
     std::vector<Feature*> features_;
     std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
-    const LM *lm_feature_;
+    const TargetPhraseInitializer *lm_feature_ = nullptr;
 
     const lm::ngram::State &lm_begin_sentence_state_;
     ScoreCollector GetCollector(Hypothesis *new_hypothesis, FeatureStore *storage) const;

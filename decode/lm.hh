@@ -9,7 +9,11 @@ namespace util { class MutableVocab; }
 
 namespace decode {
 
-class LM : public Feature {
+class TargetPhraseInitializer {
+  virtual void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const = 0;
+};
+
+class LM : public Feature, public TargetPhraseInitializer {
   public:
     LM(const char *model);
 
@@ -21,7 +25,7 @@ class LM : public Feature {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
-    void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const;
+    void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const override;
 
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override;
 

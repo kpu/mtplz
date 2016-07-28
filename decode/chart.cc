@@ -12,11 +12,14 @@ Chart::Chart(std::size_t max_source_phrase_length, Objective &objective)
     objective_(objective),
     feature_init_(objective.GetFeatureInit()),
     eos_phrase_(reinterpret_cast<pt::Row*>(objective.GetFeatureInit().target_phrase_layout.Allocate(oov_pool_))) {
-  pt::Access access = feature_init_.phrase_access;
-  if (access.target) {
-    const ID eos_word = EOS_WORD;
-    access.target(eos_phrase_, oov_pool_).push_back(eos_word);
+  UTIL_THROW_IF(objective.GetLanguageModelFeature() == nullptr, util::Exception,
+      "Missing language model for objective!");
+  if (feature_init_.phrase_access.target) {
+    pt::Access access = feature_init_.phrase_access;
+    access.target(eos_phrase_, oov_pool_).resize(1);
+    access.target(eos_phrase_)[0] = EOS_WORD;
   }
+  objective_.InitPassthroughPhrase(eos_phrase_);
 }
 
 void Chart::ReadSentence(StringPiece input, util::MutableVocab &vocab, const std::vector<VocabWord*> &vocab_mapping) {
@@ -56,7 +59,6 @@ void Chart::AddTargetPhraseToVertex(
   feature_init_.passthrough_field(phrase_wrapper) = passthrough;
   search::HypoState hypo;
   // Bypass objective to allow the language model access to a hypo.state reference.
-  objective_.GetLanguageModelFeature()->ScoreTargetPhrase(phrase_wrapper, hypo.state);
   float score = objective_.ScorePhrase(PhrasePair{source_phrase, phrase_wrapper}, nullptr);
   feature_init_.phrase_score_field(phrase_wrapper) = score;
   hypo.history.cvp = phrase_wrapper;
@@ -71,7 +73,8 @@ void Chart::AddPassthrough(std::size_t position) {
   pt::Row* pt_phrase = access.Allocate(oov_pool_);
   objective_.InitPassthroughPhrase(pt_phrase);
   if (access.target) {
-    access.target(pt_phrase, oov_pool_).push_back(sentence_ids_[position]);
+    access.target(pt_phrase, oov_pool_).resize(1);
+    access.target(pt_phrase)[0] = sentence_ids_[position];
   }
   AddTargetPhraseToVertex(pt_phrase, SourcePhrase(sentence_, position, position+1), pass, true);
   pass.Root().FinishRoot(search::kPolicyLeft);
@@ -80,16 +83,9 @@ void Chart::AddPassthrough(std::size_t position) {
 
 TargetPhrases &Chart::EndOfSentence() {
   search::Vertex &eos = *vertex_pool_.construct();
-  search::HypoState eos_hypo;
-  TargetPhrase *eos_phrase = reinterpret_cast<TargetPhrase*>(
-      feature_init_.target_phrase_layout.Allocate(
-        target_phrase_pool_));
-  feature_init_.pt_row_field(eos_phrase) = eos_phrase_;
-
-  eos_hypo.history.cvp = eos_phrase;
+  eos.Root().InitRoot();
   SourcePhrase source_phrase(sentence_, SentenceLength(), SentenceLength());
-  eos_hypo.score = objective_.ScorePhrase(PhrasePair{source_phrase,eos_phrase},nullptr);
-  eos.Root().AppendHypothesis(eos_hypo);
+  AddTargetPhraseToVertex(eos_phrase_, source_phrase, eos, false);
   eos.Root().FinishRoot(search::kPolicyLeft);
   return eos;
 }
