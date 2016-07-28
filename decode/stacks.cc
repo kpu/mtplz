@@ -108,7 +108,7 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
         *prev_hypo, PhrasePair{source_phrase, target_phrase}, *next_hypo, NULL);
 
   return merge_info.hypo_builder.BuildHypothesis(
-      sourcephrase_hypo,
+      next_hypo,
       complete.CompletedState().right,
       score,
       prev_hypo,
@@ -120,10 +120,10 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
 // TODO n-best lists.
 class EdgeOutput {
   public:
-    EdgeOutput(Stack &stack, MergeInfo merge_info)
-      : stack_(stack), merge_info_(merge_info), deduper_(stack.size()* 4/3,
-          Recombinator<LMState>(merge_info_.objective.GetFeatureInit().lm_state_field),
-          Recombinator<LMState>(merge_info_.objective.GetFeatureInit().lm_state_field)) {}
+    typedef boost::unordered_set<Hypothesis *, Recombinator<LMState>, Recombinator<LMState>> Dedupe;
+
+    EdgeOutput(Stack &stack, MergeInfo merge_info, Dedupe deduper)
+      : stack_(stack), merge_info_(merge_info), deduper_(deduper) {}
 
     void NewHypothesis(search::PartialEdge complete) {
       stack_.push_back(HypothesisFromEdge(complete, merge_info_));
@@ -142,7 +142,6 @@ class EdgeOutput {
     void FinishedSearch() {}
 
   private:
-    typedef boost::unordered_set<Hypothesis *, Recombinator<LMState>, Recombinator<LMState>> Dedupe;
     Dedupe deduper_;
 
     Stack &stack_;
@@ -223,7 +222,9 @@ Stacks::Stacks(System &system, Chart &chart) :
     vertices.Apply(chart, gen);
     stacks_.resize(stacks_.size() + 1);
     stacks_.back().reserve(system.SearchContext().PopLimit());
-    EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()});
+    Recombinator<LMState> recombinator(system.GetObjective().GetFeatureInit().lm_state_field);
+    EdgeOutput::Dedupe deduper(stacks_.size()*4/3, recombinator, recombinator);
+    EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()}, deduper);
     gen.Search(system.SearchContext(), output);
   }
   PopulateLastStack(system, chart);
