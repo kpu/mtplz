@@ -104,6 +104,8 @@ class Chart {
     util::Pool oov_pool_;
     std::vector<VocabWord*> oov_words_;
 
+    pt::Row *eos_phrase_;
+
     // Banded array: different source lengths are next to each other.
     std::vector<TargetPhrases*> entries_;
 

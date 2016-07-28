@@ -10,7 +10,14 @@ namespace decode {
 Chart::Chart(std::size_t max_source_phrase_length, Objective &objective)
   : max_source_phrase_length_(max_source_phrase_length),
     objective_(objective),
-    feature_init_(objective.GetFeatureInit()) {}
+    feature_init_(objective.GetFeatureInit()),
+    eos_phrase_(reinterpret_cast<pt::Row*>(objective.GetFeatureInit().target_phrase_layout.Allocate(oov_pool_))) {
+  pt::Access access = feature_init_.phrase_access;
+  if (access.target) {
+    const ID eos_word = EOS_WORD;
+    access.target(eos_phrase_, oov_pool_).push_back(eos_word);
+  }
+}
 
 void Chart::ReadSentence(StringPiece input, util::MutableVocab &vocab, const std::vector<VocabWord*> &vocab_mapping) {
   for (util::TokenIter<util::BoolCharacter, true> word(input, util::kSpaces); word; ++word) {
@@ -77,8 +84,7 @@ TargetPhrases &Chart::EndOfSentence() {
   TargetPhrase *eos_phrase = reinterpret_cast<TargetPhrase*>(
       feature_init_.target_phrase_layout.Allocate(
         target_phrase_pool_));
-  feature_init_.pt_id_field(eos_phrase) = EOS_WORD;
-  feature_init_.pt_row_field(eos_phrase) = nullptr;
+  feature_init_.pt_row_field(eos_phrase) = eos_phrase_;
 
   eos_hypo.history.cvp = eos_phrase;
   SourcePhrase source_phrase(sentence_, SentenceLength(), SentenceLength());
