@@ -94,7 +94,9 @@ BOOST_AUTO_TEST_CASE(EosTest) {
   TargetPhrases &eos = chart.EndOfSentence();
   BOOST_CHECK_EQUAL(1, eos.Root().Size());
   ID eos_word = Chart::EOS_WORD;
-  BOOST_CHECK_EQUAL(eos_word, objective.GetFeatureInit().pt_id_field(eos.Root().End().cvp));
+  const pt::Row *eos_row = objective.GetFeatureInit().pt_row_field(eos.Root().End().cvp);
+  BOOST_CHECK_EQUAL(1, access.target(eos_row).size());
+  BOOST_CHECK_EQUAL(eos_word, access.target(eos_row)[0]);
   BOOST_CHECK_EQUAL(1, phrase_pair_buffer.size());
 }
 
