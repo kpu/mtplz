@@ -36,6 +36,9 @@ VocabWord *Chart::MapToVocabWord(const StringPiece word, const ID id, const std:
   if (id < vocab_mapping.size()) {
     return vocab_mapping[id];
   } else {
+    // TODO do we want vocab to have global ids? and wouldn't we need a
+    // chart-local offset for start of oov_words_ then? what about the dict
+    // in lm, are all our ids still unique and thread-safe?
     if (local_id >= oov_words_.size()) {
       oov_words_.resize(local_id + 1);
     }

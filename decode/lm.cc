@@ -20,9 +20,10 @@ void LM::Init(FeatureInit &feature_init) {
 
 void LM::NewWord(const StringPiece string_rep, VocabWord *word) {
   ID id = pt_id_field_(word);
-  assert(id >= vocab_mapping_.size());
-  vocab_mapping_.resize(id);
-  vocab_mapping_.push_back(model_.GetVocabulary().Index(string_rep));
+  if (id >= vocab_mapping_.size()) {
+    vocab_mapping_.resize(id+1);
+  }
+  vocab_mapping_[id] = model_.GetVocabulary().Index(string_rep);
 }
 
 void LM::ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const {
