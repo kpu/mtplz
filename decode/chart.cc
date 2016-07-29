@@ -2,6 +2,7 @@
 
 #include "decode/system.hh"
 #include "decode/lm.hh"
+#include "util/exception.hh"
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
@@ -59,7 +60,10 @@ void Chart::AddTargetPhraseToVertex(
   feature_init_.passthrough_field(phrase_wrapper) = passthrough;
   search::HypoState hypo;
   // Bypass objective to allow the language model access to a hypo.state reference.
-  float score = objective_.ScorePhrase(PhrasePair{source_phrase, phrase_wrapper}, nullptr);
+  objective_.GetLanguageModelFeature()->ScoreTargetPhrase(phrase_wrapper, hypo.state);
+  PhrasePair phrase_pair(source_phrase, phrase_wrapper);
+  phrase_pair.target_phrase_pool = &target_phrase_pool_;
+  float score = objective_.ScorePhrase(phrase_pair, nullptr);
   feature_init_.phrase_score_field(phrase_wrapper) = score;
   hypo.history.cvp = phrase_wrapper;
   hypo.score = score;
@@ -67,18 +71,19 @@ void Chart::AddTargetPhraseToVertex(
 }
 
 void Chart::AddPassthrough(std::size_t position) {
-  TargetPhrases &pass = *vertex_pool_.construct();
-  pass.Root().InitRoot();
+  SourcePhrase source_phrase(sentence_, position, position+1);
+  TargetPhrases *pass = vertex_pool_.construct();
+  pass->Root().InitRoot();
   pt::Access access = feature_init_.phrase_access;
   pt::Row* pt_phrase = access.Allocate(oov_pool_);
-  objective_.InitPassthroughPhrase(pt_phrase);
   if (access.target) {
     access.target(pt_phrase, oov_pool_).resize(1);
     access.target(pt_phrase)[0] = sentence_ids_[position];
   }
-  AddTargetPhraseToVertex(pt_phrase, SourcePhrase(sentence_, position, position+1), pass, true);
-  pass.Root().FinishRoot(search::kPolicyLeft);
-  SetRange(position, position+1, &pass);
+  objective_.InitPassthroughPhrase(pt_phrase);
+  AddTargetPhraseToVertex(pt_phrase, source_phrase, *pass, true);
+  pass->Root().FinishRoot(search::kPolicyLeft);
+  SetRange(position, position+1, pass);
 }
 
 TargetPhrases &Chart::EndOfSentence() {

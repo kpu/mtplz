@@ -100,12 +100,12 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   TargetPhrase *target_phrase = reinterpret_cast<TargetPhrase*>(complete.NT()[1].End().cvp);
   SourcePhrase source_phrase(merge_info.sentence, source_range.first, source_range.second);
   Hypothesis *next_hypo = merge_info.hypo_builder.CopyHypothesis(sourcephrase_hypo);
-
+  PhrasePair phrase_pair(source_phrase, target_phrase);
   search::Score score = complete.GetScore()
     // TODO target phrase score is available earlier, use in search
     + merge_info.objective.GetFeatureInit().phrase_score_field(target_phrase)
     + merge_info.objective.ScoreHypothesisWithPhrasePair(
-        *prev_hypo, PhrasePair{source_phrase, target_phrase}, *next_hypo, NULL);
+        *prev_hypo, phrase_pair, *next_hypo, NULL);
 
   return merge_info.hypo_builder.BuildHypothesis(
       next_hypo,
@@ -206,7 +206,6 @@ Stacks::Stacks(System &system, Chart &chart) :
         do {
           const TargetPhrases *phrases = chart.Range(begin, begin + phrase_length);
           if (!phrases || !coverage.Compatible(begin, begin + phrase_length)) continue;
-          // distortion etc.
           const Hypothesis *ant_hypo = *ant;
           Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(ant_hypo);
           float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
@@ -252,9 +251,10 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
   note.ints.second = chart.SentenceLength();
   AddEdge(all_hyps, eos_vertex, note, gen);
 
-  stacks_.resize(stacks_.size() + 1);
-  PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()});
-  gen.Search(system.SearchContext(), output);
+  // TODO
+  /* stacks_.resize(stacks_.size() + 1); */
+  /* PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()}); */
+  /* gen.Search(system.SearchContext(), output); */
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];
 }

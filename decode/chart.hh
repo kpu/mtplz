@@ -77,6 +77,7 @@ class Chart {
   private:
     void SetRange(std::size_t begin, std::size_t end, TargetPhrases *to) {
       assert(end - begin <= max_source_phrase_length_);
+      assert(begin * max_source_phrase_length_ + end - begin - 1 < entries_.size());
       entries_[begin * max_source_phrase_length_ + end - begin - 1] = to;
     }
 

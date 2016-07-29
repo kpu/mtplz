@@ -10,7 +10,8 @@ namespace util { class MutableVocab; }
 namespace decode {
 
 class TargetPhraseInitializer {
-  virtual void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const = 0;
+  public:
+    virtual void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const = 0;
 };
 
 class LM : public Feature, public TargetPhraseInitializer {

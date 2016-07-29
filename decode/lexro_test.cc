@@ -46,6 +46,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   std::vector<float> weights({1,1});
   FeatureStore store({0,0});
   std::vector<VocabWord*> sentence;
+  for (int i=0; i<=6; ++i) sentence.push_back(nullptr);
   SourcePhrase source_phrase(sentence, 5,6);
   ScoreCollector collector(weights, next, &store);
   collector.SetDenseOffset(0);
@@ -55,7 +56,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   BOOST_CHECK_EQUAL(14, collector.Score());
   BOOST_CHECK_EQUAL(0, store[0]);
   BOOST_CHECK_EQUAL(14, store[1]);
-  lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair{source_phrase, row2}, collector);
+  lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair(source_phrase, row2), collector);
   BOOST_CHECK_EQUAL(14+3, collector.Score());
   BOOST_CHECK_EQUAL(3, store[0]);
   BOOST_CHECK_EQUAL(14, store[1]);
