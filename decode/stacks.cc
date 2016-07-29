@@ -160,6 +160,7 @@ class PickBest {
     void NewHypothesis(search::PartialEdge complete) {
       Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
       new_hypo->SetScore(new_hypo->GetScore() + merge_info_.objective.ScoreFinalHypothesis(*new_hypo, NULL));
+      std::cerr << "one: " << new_hypo->GetScore() << std::endl;
       if (best_ == NULL || new_hypo->GetScore() > best_->GetScore()) {
         best_ = new_hypo;
       }
@@ -168,12 +169,13 @@ class PickBest {
     void FinishedSearch() {
       if (best_ != NULL)
         stack_.push_back(best_);
+      std::cerr << "best: " << best_->GetScore() << std::endl;
     }
 
   private:
     Stack &stack_;
     MergeInfo merge_info_;
-    Hypothesis *best_;
+    Hypothesis *best_ = NULL;
 };
 
 } // namespace
@@ -234,11 +236,12 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
   search::Vertex all_hyps;
   for (Stack::const_iterator ant = stacks_[chart.SentenceLength()].begin(); ant != stacks_[chart.SentenceLength()].end(); ++ant) {
     assert(chart.SentenceLength() == (*ant)->GetCoverage().FirstZero());
-    Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(*ant);
-    const Hypothesis *ant_hypo = ant_hypo;
+    const Hypothesis *ant_hypo = *ant;
+    Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(ant_hypo);
+    SourcePhrase source_phrase(chart.Sentence(), chart.SentenceLength(), chart.SentenceLength());
     float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
-        *ant_hypo, SourcePhrase(chart.Sentence(), chart.SentenceLength(), chart.SentenceLength()), next_hypo, NULL);
-    AddHypothesisToVertex(*ant, score_delta, next_hypo, all_hyps, system.GetObjective().GetFeatureInit());
+        *ant_hypo, source_phrase, next_hypo, NULL);
+    AddHypothesisToVertex(ant_hypo, score_delta, next_hypo, all_hyps, system.GetObjective().GetFeatureInit());
   }
   
   // Next, make Vertex which consists of a single EOS phrase.
@@ -251,10 +254,9 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
   note.ints.second = chart.SentenceLength();
   AddEdge(all_hyps, eos_vertex, note, gen);
 
-  // TODO
-  /* stacks_.resize(stacks_.size() + 1); */
-  /* PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()}); */
-  /* gen.Search(system.SearchContext(), output); */
+  stacks_.resize(stacks_.size() + 1);
+  PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()});
+  gen.Search(system.SearchContext(), output);
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];
 }
