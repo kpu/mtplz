@@ -11,14 +11,15 @@ namespace decode {
 Chart::Chart(std::size_t max_source_phrase_length, Objective &objective)
   : max_source_phrase_length_(max_source_phrase_length),
     objective_(objective),
-    feature_init_(objective.GetFeatureInit()),
-    eos_phrase_(reinterpret_cast<pt::Row*>(objective.GetFeatureInit().target_phrase_layout.Allocate(oov_pool_))) {
+    feature_init_(objective.GetFeatureInit()) {
   UTIL_THROW_IF(objective.GetLanguageModelFeature() == nullptr, util::Exception,
       "Missing language model for objective!");
+  pt::Access access = feature_init_.phrase_access;
+  eos_phrase_ = access.Allocate(oov_pool_);
   if (feature_init_.phrase_access.target) {
-    pt::Access access = feature_init_.phrase_access;
     access.target(eos_phrase_, oov_pool_).resize(1);
     access.target(eos_phrase_)[0] = EOS_WORD;
+    assert(access.target(eos_phrase_).size()==1);
   }
   objective_.InitPassthroughPhrase(eos_phrase_);
 }
