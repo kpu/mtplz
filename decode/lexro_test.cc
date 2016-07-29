@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   std::vector<VocabWord*> sentence;
   for (int i=0; i<=6; ++i) sentence.push_back(nullptr);
   SourcePhrase source_phrase(sentence, 5,6);
-  ScoreCollector collector(weights, next, &store);
+  ScoreCollector collector(weights, next, nullptr, &store);
   collector.SetDenseOffset(0);
 
   // monotone source, forward scoring
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   // for next source phrase we can use backwards reordering score
   SourcePhrase swap_source(sentence,1,5);
   FeatureStore store2({0,0});
-  ScoreCollector collector2(weights, snd_next, &store2);
+  ScoreCollector collector2(weights, snd_next, nullptr, &store2);
   collector2.SetDenseOffset(0);
   lexro.ScoreHypothesisWithSourcePhrase(*next, swap_source, collector2);
   BOOST_CHECK_EQUAL(15, collector2.Score());

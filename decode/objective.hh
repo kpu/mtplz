@@ -44,12 +44,13 @@ class Objective {
     // storage can be null
     float ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase,
-        Hypothesis &new_hypothesis, FeatureStore *storage) const;
+        Hypothesis *&new_hypothesis, FeatureStore *storage) const;
 
     // storage can be null
     float ScoreHypothesisWithPhrasePair(
         const Hypothesis &hypothesis, PhrasePair phrase_pair,
-        Hypothesis &new_hypothesis, FeatureStore *storage) const;
+        Hypothesis *&new_hypothesis, util::Pool &hypothesis_pool,
+        FeatureStore *storage) const;
 
     // storage can be null
     float ScoreFinalHypothesis(
@@ -64,13 +65,17 @@ class Objective {
     }
 
   private:
+    ScoreCollector GetCollector(
+        Hypothesis *&new_hypothesis,
+        util::Pool *hypothesis_pool,
+        FeatureStore *storage) const;
+
     std::vector<Feature*> features_;
     std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
     const TargetPhraseInitializer *lm_feature_ = nullptr;
 
     const lm::ngram::State &lm_begin_sentence_state_;
-    ScoreCollector GetCollector(Hypothesis *new_hypothesis, FeatureStore *storage) const;
 };
 
 } // namespace decode

@@ -31,6 +31,10 @@ class HypothesisBuilder {
 
     /** Allocates a copy of hypothesis */
     Hypothesis *CopyHypothesis(Hypothesis *hypothesis) const;
+
+    util::Pool &HypothesisPool() {
+      return pool_;
+    }
   private:
     FeatureInit &feature_init_;
 

@@ -105,7 +105,7 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
     // TODO target phrase score is available earlier, use in search
     + merge_info.objective.GetFeatureInit().phrase_score_field(target_phrase)
     + merge_info.objective.ScoreHypothesisWithPhrasePair(
-        *prev_hypo, phrase_pair, *next_hypo, NULL);
+        *prev_hypo, phrase_pair, next_hypo, merge_info.hypo_builder.HypothesisPool(), NULL);
 
   return merge_info.hypo_builder.BuildHypothesis(
       next_hypo,
@@ -209,7 +209,7 @@ Stacks::Stacks(System &system, Chart &chart) :
           const Hypothesis *ant_hypo = *ant;
           Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(ant_hypo);
           float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
-              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), *next_hypo, NULL);
+              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), next_hypo, NULL);
           // Future costs: remove span to be filled.
           score_delta += future.Change(coverage, begin, begin + phrase_length);
           vertices.Add(*ant, begin, begin + phrase_length, next_hypo, score_delta);
@@ -237,7 +237,7 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
     Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(*ant);
     const Hypothesis *ant_hypo = ant_hypo;
     float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
-        *ant_hypo, SourcePhrase(chart.Sentence(), chart.SentenceLength(), chart.SentenceLength()), *next_hypo, NULL);
+        *ant_hypo, SourcePhrase(chart.Sentence(), chart.SentenceLength(), chart.SentenceLength()), next_hypo, NULL);
     AddHypothesisToVertex(*ant, score_delta, next_hypo, all_hyps, system.GetObjective().GetFeatureInit());
   }
   
