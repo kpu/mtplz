@@ -81,12 +81,12 @@ int main(int argc, char *argv[]) {
     decode::LexicalizedReordering lexro;
 
     decode::System sys(config, table.Accessor(), weights, lm.Model());
-    /* sys.GetObjective().AddFeature(distortion); */ // TODO
-    /* sys.GetObjective().AddFeature(word_insert); */
-    /* sys.GetObjective().AddFeature(passthrough); */
+    sys.GetObjective().AddFeature(distortion);
+    sys.GetObjective().AddFeature(word_insert);
+    sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(lm);
     sys.GetObjective().RegisterLanguageModel(lm);
-    /* TODO sys.GetObjective().AddFeature(lexro); */
+    /* sys.GetObjective().AddFeature(lexro); */
 
     sys.LoadVocab(vocab);
 
