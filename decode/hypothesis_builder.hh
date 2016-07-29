@@ -26,10 +26,11 @@ class HypothesisBuilder {
         std::size_t source_end,
         const TargetPhrase *target);
 
-    /** Allocates a new hypothesis */
+    /** Allocates an incomplete hypothesis, consisting only of a
+     * back-reference */
     Hypothesis *NextHypothesis(const Hypothesis *previous_hypothesis);
 
-    /** Allocates a copy of hypothesis */
+    /** Allocates a copy of the fixed-size part of hypothesis */
     Hypothesis *CopyHypothesis(Hypothesis *hypothesis) const;
 
     util::Pool &HypothesisPool() {
