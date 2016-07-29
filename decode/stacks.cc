@@ -160,7 +160,6 @@ class PickBest {
     void NewHypothesis(search::PartialEdge complete) {
       Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
       new_hypo->SetScore(new_hypo->GetScore() + merge_info_.objective.ScoreFinalHypothesis(*new_hypo, NULL));
-      std::cerr << "one: " << new_hypo->GetScore() << std::endl;
       if (best_ == NULL || new_hypo->GetScore() > best_->GetScore()) {
         best_ = new_hypo;
       }
@@ -169,7 +168,6 @@ class PickBest {
     void FinishedSearch() {
       if (best_ != NULL)
         stack_.push_back(best_);
-      std::cerr << "best: " << best_->GetScore() << std::endl;
     }
 
   private:
