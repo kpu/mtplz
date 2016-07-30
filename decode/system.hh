@@ -19,7 +19,7 @@ class System {
 
     void LoadWeights();
 
-    void LoadVocab(pt::VocabRange vocab);
+    void LoadVocab(pt::VocabRange vocab, std::size_t vocab_size);
 
     const std::vector<VocabWord*> GetVocabMapping() const {
       return vocab_mapping_;

@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     sys.GetObjective().RegisterLanguageModel(lm);
     sys.GetObjective().AddFeature(lexro);
 
-    sys.LoadVocab(table.Vocab());
+    sys.LoadVocab(table.Vocab(), table.Stats().vocab_size);
 
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
