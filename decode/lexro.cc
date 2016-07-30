@@ -12,7 +12,7 @@ void LexicalizedReordering::Init(FeatureInit &feature_init) {
 }
 
 void LexicalizedReordering::InitPassthroughPhrase(pt::Row *passthrough) const {
-  for(std::size_t i; i < VALUE_COUNT; ++i) {
+  for(std::size_t i = 0; i < VALUE_COUNT; ++i) {
     phrase_access_->lexical_reordering(passthrough)[i] = DEFAULT_VALUE;
   }
 }

@@ -9,7 +9,7 @@ class LexicalizedReordering : public Feature {
     typedef std::size_t Relation;
 
     static constexpr std::size_t VALUE_COUNT = 6;
-    static constexpr float DEFAULT_VALUE = 5;
+    static constexpr float DEFAULT_VALUE = 0;
 
     static constexpr std::size_t FORWARD = 0;
     static constexpr std::size_t BACKWARD = 3;
