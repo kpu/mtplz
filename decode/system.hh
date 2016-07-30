@@ -19,7 +19,7 @@ class System {
 
     void LoadWeights();
 
-    void LoadVocab(const util::MutableVocab &vocab);
+    void LoadVocab(pt::VocabRange vocab);
 
     const std::vector<VocabWord*> GetVocabMapping() const {
       return vocab_mapping_;
@@ -33,10 +33,14 @@ class System {
 
     Objective &GetObjective() { return objective_; }
 
+    // TODO make const, needs changes in chart
+    util::MutableVocab &GetVocab() { return vocab_; }
+
   private:
     Objective objective_;
     const Config config_;
 
+    util::MutableVocab vocab_;
     std::vector<VocabWord*> vocab_mapping_;
     util::Pool word_pool_;
 

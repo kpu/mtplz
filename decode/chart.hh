@@ -3,6 +3,7 @@
 
 #include "decode/id.hh"
 #include "decode/source_phrase.hh"
+#include "pt/format.hh"
 #include "search/vertex.hh"
 #include "util/pool.hh"
 #include "util/string_piece.hh"
@@ -12,23 +13,21 @@
 
 #include <vector>
 
-namespace util { class MutableVocab; }
 namespace pt { class Row; }
+namespace util { class MutableVocab; }
 
 namespace decode {
 
 class Objective;
 struct FeatureInit;
-struct VocabWord; // conforms to FeatureInit WordLayout
+struct VocabWord; // conforms to FeatureInit word_layout
 
 typedef search::Vertex TargetPhrases;
 
 // Target phrases that correspond to each source span
 class Chart {
   public:
-    // TODO should be 2 to indicate </s> rather than <unk>,
-    // but </s> is currently only in GrowableVocab, not in MutableVocab
-    static constexpr ID EOS_WORD = 0;
+    static constexpr ID EOS_WORD = 2;
 
     Chart(std::size_t max_source_phrase_length, Objective &objective);
 

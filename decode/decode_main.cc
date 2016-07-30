@@ -24,10 +24,10 @@
 #include <vector>
 
 namespace decode {
-void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
-    const StringPiece in, ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
+void Decode(System &system, const pt::Table &table, const StringPiece in,
+    ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
   Chart chart(table.Stats().max_source_phrase_length, system.GetObjective());
-  chart.ReadSentence(in, vocab, system.GetVocabMapping());
+  chart.ReadSentence(in, system.GetVocab(), system.GetVocabMapping());
   chart.LoadPhrases(table);
   Stacks stacks(system, chart);
   const Hypothesis *hyp = stacks.End();
@@ -35,7 +35,7 @@ void Decode(System &system, const pt::Table &table, util::MutableVocab &vocab,
   history_map.clear();
 	
   if (hyp) {
-    Output(*hyp, vocab, history_map, out, system.GetObjective().GetFeatureInit(), verbose);
+    Output(*hyp, system.GetVocab(), history_map, out, system.GetObjective().GetFeatureInit(), verbose);
   }
   out << '\n';
 }
@@ -70,7 +70,6 @@ int main(int argc, char *argv[]) {
     }
 
     pt::Table table(phrase_file.c_str(), util::READ);
-    util::MutableVocab vocab;
 
     decode::Weights weights;
     weights.ReadFromFile(weights_file);
@@ -88,7 +87,7 @@ int main(int argc, char *argv[]) {
     sys.GetObjective().RegisterLanguageModel(lm);
     sys.GetObjective().AddFeature(lexro);
 
-    sys.LoadVocab(vocab);
+    sys.LoadVocab(table.Vocab());
 
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
@@ -98,7 +97,7 @@ int main(int argc, char *argv[]) {
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
-      decode::Decode(sys, table, vocab, line, map, verbose, out);
+      decode::Decode(sys, table, line, map, verbose, out);
       out.flush();
       f.UpdateProgress();
     }
