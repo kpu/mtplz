@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(lm);
     sys.GetObjective().RegisterLanguageModel(lm);
-    /* sys.GetObjective().AddFeature(lexro); */
+    sys.GetObjective().AddFeature(lexro);
 
     sys.LoadVocab(vocab);
 
