@@ -36,7 +36,7 @@ void Output(const Hypothesis &hypo, const util::MutableVocab &vocab,
   out << hypo.GetScore();
   float previous_score = 0.0;
   assert(feature_init.phrase_access.target);
-  for (std::vector<const Hypothesis*>::const_reverse_iterator i = hypos.rbegin(); i != hypos.rend(); ++i) {
+  for (std::vector<const Hypothesis*>::const_reverse_iterator i = hypos.rbegin(); i != hypos.rend()-1/*ignore EOS*/; ++i) {
     auto ids = feature_init.phrase_access.target(feature_init.pt_row_field((*i)->Target()));
     for (const ID id : ids) {
       out << ' ' << vocab.String(id);
