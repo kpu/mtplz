@@ -8,7 +8,7 @@ namespace decode {
 
 class WordInsertion : public Feature {
   public:
-    WordInsertion() : Feature("WordInsertion") {}
+    WordInsertion() : Feature("target_word_insertion") {}
 
     void Init(FeatureInit &feature_init) override {
       UTIL_THROW_IF(!feature_init.phrase_access.target, util::Exception,

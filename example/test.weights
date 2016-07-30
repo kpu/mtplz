@@ -1,4 +1,6 @@
 target_word_insertion 1
 lm 1
+lexro 1 1
 distortion 3
 phrase_table 1 2 3 4 5
+passthrough -100

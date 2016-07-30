@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
     sys.GetObjective().AddFeature(lexro);
 
     sys.LoadVocab(table.Vocab(), table.Stats().vocab_size);
+    sys.GetObjective().LoadWeights(weights);
 
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);

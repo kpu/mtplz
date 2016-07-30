@@ -15,13 +15,13 @@ Objective::Objective(
 void Objective::AddFeature(Feature &feature) {
   features_.push_back(&feature);
   feature.Init(feature_init_);
-  std::size_t dense_feature_count = feature.DenseFeatureCount();
-  feature_offsets_.push_back(dense_feature_count);
-  weights.resize(dense_feature_count, 1);
+  std::size_t feature_end = feature_offsets_.back() + feature.DenseFeatureCount();
+  feature_offsets_.push_back(feature_end);
+  weights.resize(feature_end, 1);
 }
 
 void Objective::LoadWeights(const Weights &loaded_weights) {
-  weights.resize(DenseFeatureCount());
+  assert(weights.size() == DenseFeatureCount());
   for (std::size_t i=0; i < features_.size(); i++) {
     std::vector<float> feature_weights = loaded_weights.GetWeights(features_[i]->name);
     assert(feature_weights.size() == features_[i]->DenseFeatureCount());

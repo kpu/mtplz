@@ -8,7 +8,7 @@ namespace decode {
 
 class Passthrough : public Feature {
   public:
-    Passthrough() : Feature("Passthrough") {}
+    Passthrough() : Feature("passthrough") {}
 
     void Init(FeatureInit &feature_init) override {
       passthrough_field_ = feature_init.passthrough_field;
