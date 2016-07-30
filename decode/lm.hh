@@ -9,11 +9,6 @@ namespace util { class MutableVocab; }
 
 namespace decode {
 
-class TargetPhraseInitializer {
-  public:
-    virtual void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const = 0;
-};
-
 class LM : public Feature, public TargetPhraseInitializer {
   public:
     LM(const char *model);
@@ -22,11 +17,11 @@ class LM : public Feature, public TargetPhraseInitializer {
 
     static const StringPiece Name();
 
-    void NewWord(const StringPiece string_rep, VocabWord *word) override;
+    void NewWord(const StringPiece string_rep, VocabWord *word) const override;
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
-    void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const override;
+    void ScoreTargetPhrase(PhrasePair phrase_pair, lm::ngram::ChartState &state) const override;
 
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override;
 
@@ -47,10 +42,9 @@ class LM : public Feature, public TargetPhraseInitializer {
 
   private:
     lm::ngram::Model model_;
-    std::vector<lm::WordIndex> vocab_mapping_;
     const pt::Access *phrase_access_;
     util::PODField<const pt::Row*> pt_row_field_;
-    util::PODField<ID> pt_id_field_;
+    util::PODField<lm::WordIndex> lm_word_index_;
     util::PODField<float> phrase_score_field_;
 };
 

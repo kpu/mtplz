@@ -1,18 +1,19 @@
 set(DECODE_SOURCE
   chart.cc
   coverage.cc
+  distortion.cc
   filter.cc
   future.cc
+  hypothesis_builder.cc
+  lexro.cc
+  lm.cc
   output.cc
   objective.cc
   system.cc
   score_collector.cc
-  hypothesis_builder.cc
   stacks.cc
-  weights.cc
-  distortion.cc
-  lm.cc
-  lexro.cc)
+  vocab_map.cc
+  weights.cc)
 add_library(mtplz_decode ${DECODE_SOURCE})
 target_link_libraries(mtplz_decode mtplz_search mtplz_pt kenlm kenlm_util ${Boost_LIBRARIES})
 target_compile_features(mtplz_decode PUBLIC cxx_range_for)

@@ -1,7 +1,6 @@
 #include "decode/chart.hh"
 
 #include "decode/objective.hh"
-#include "decode/lm.hh"
 #include "pt/access.hh"
 #include "lm/model.hh"
 
@@ -25,7 +24,7 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
       : Feature("mock"), phrase_pair_buffer_(&phrase_pair_buffer) {}
 
     void Init(FeatureInit &feature_init) override {}
-    void NewWord(const StringPiece string_rep, VocabWord *word) override {
+    void NewWord(const StringPiece string_rep, VocabWord *word) const override {
       rep_buffer_->push_back(string_rep);
       word_buffer_->push_back(word);
     }
@@ -41,7 +40,7 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
     std::size_t DenseFeatureCount() const override { return 1; }
     std::string FeatureDescription(std::size_t index) const override { return ""; }
-    void ScoreTargetPhrase(TargetPhrase *target_phrase, lm::ngram::ChartState &state) const override {}
+    void ScoreTargetPhrase(PhrasePair pair, lm::ngram::ChartState &state) const override {}
 
     std::vector<StringPiece> *rep_buffer_;
     std::vector<VocabWord*> *word_buffer_;
@@ -82,7 +81,7 @@ BOOST_AUTO_TEST_CASE(InitTest) {
   Objective objective(access, lm_state);
   FeatureMock feature_mock;
   objective.RegisterLanguageModel(feature_mock);
-  Chart chart(13, objective);
+  Chart chart(13, std::vector<VocabWord*>(), objective);
   BOOST_CHECK_EQUAL(13, chart.MaxSourcePhraseLength());
 }
 
@@ -95,7 +94,8 @@ BOOST_AUTO_TEST_CASE(EosTest) {
   FeatureMock feature_mock(phrase_pair_buffer);
   objective.AddFeature(feature_mock);
   objective.RegisterLanguageModel(feature_mock);
-  Chart chart(11, objective);
+  std::vector<VocabWord*> vocab_map;
+  Chart chart(11, vocab_map, objective);
 
   TargetPhrases &eos = chart.EndOfSentence();
   BOOST_CHECK_EQUAL(1, eos.Root().Size());
@@ -117,9 +117,6 @@ BOOST_AUTO_TEST_CASE(ReadSentenceTest) {
   FeatureMock feature_mock(rep_buffer, word_buffer);
   objective.AddFeature(feature_mock);
   objective.RegisterLanguageModel(feature_mock);
-  Chart chart(5, objective);
-
-  // other setup
   util::MutableVocab vocab;
   vocab.FindOrInsert("small");
   const std::size_t orig_vocabsize = vocab.Size();
@@ -132,10 +129,11 @@ BOOST_AUTO_TEST_CASE(ReadSentenceTest) {
   }
   orig_mapping.push_back(word_small);
   const std::vector<VocabWord*> mapping = orig_mapping;
+  Chart chart(5, mapping, objective);
 
   // test known and unknown
   std::string input = "a small test test";
-  chart.ReadSentence(input, vocab, mapping);
+  chart.ReadSentence(input, vocab);
   // vocab update
   BOOST_CHECK_EQUAL("a", vocab.String(orig_vocabsize));
   BOOST_CHECK_EQUAL("test", vocab.String(orig_vocabsize+1));
@@ -152,52 +150,6 @@ BOOST_AUTO_TEST_CASE(ReadSentenceTest) {
   BOOST_CHECK_EQUAL("a", rep_buffer[0]);
   BOOST_CHECK_EQUAL("test", rep_buffer[1]);
 }
-
-/* Damnit, I do not know how to read out the vertex to validate that the
- * lookup is correct. Feel free to continue on this, but the lookup seems to
- * be ok for now.
-BOOST_AUTO_TEST_CASE(PhraseTest) {
-  // init chart
-  pt::FieldConfig config;
-  pt::Access access(config);
-  lm::ngram::State lm_state;
-  Objective objective(access, lm_state);
-  std::vector<PhrasePair> phrase_pair_buffer;
-  FeatureMock feature_mock(phrase_pair_buffer);
-  objective.AddFeature(feature_mock);
-  objective.RegisterLanguageModel(feature_mock);
-  Chart chart(2, objective);
-
-  // other setup
-  util::MutableVocab vocab;
-  vocab.FindOrInsert("small");
-  vocab.FindOrInsert("test");
-  std::vector<VocabWord*> orig_mapping;
-  util::Pool pool;
-  util::Layout &word_layout = objective.GetFeatureInit().word_layout;
-  VocabWord *word_small = reinterpret_cast<VocabWord*>(word_layout.Allocate(pool));
-  VocabWord *word_test = reinterpret_cast<VocabWord*>(word_layout.Allocate(pool));
-  orig_mapping.push_back(word_small);
-  orig_mapping.push_back(word_test);
-  const std::vector<VocabWord*> mapping = orig_mapping;
-
-  std::string input = "small test";
-  chart.ReadSentence(input, vocab, mapping);
-  PTMock pt(access);
-  pt::Row *target1 = reinterpret_cast<pt::Row*>(access.Allocate(pool));
-  pt::Row *target2 = reinterpret_cast<pt::Row*>(access.Allocate(pool));
-  pt::Row *target3 = reinterpret_cast<pt::Row*>(access.Allocate(pool));
-  pt.AddEntries(Range(0,2), {target1});
-  pt.AddEntries(Range(0,3), {target2, target3});
-
-  chart.LoadPhrases(pt);
-}
-*/ /* TODO
-   * check that vertex content is ...
-   * ... target1 for Range [0-2),
-   * ... target2 and target3 for Range [0-3),
-   * ... a passthrough for Range [1-3)
-   * */
 
 } // namespace
 } // namespace decode

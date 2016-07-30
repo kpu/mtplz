@@ -3,11 +3,14 @@
 #include "decode/source_phrase.hh"
 #include "decode/feature_init.hh"
 #include "decode/score_collector.hh"
+// TODO cleanup imports
 
 #include <cstddef>
 #include <string>
 
 namespace decode {
+
+class VocabMap;
 
 // Layouts:
 struct Hypothesis;
@@ -19,6 +22,7 @@ struct PhrasePair {
 
   const SourcePhrase source_phrase;
   TargetPhrase *&target_phrase;
+  const VocabMap *vocab_map;
   // pool is null when target phrase only allows constant-length data changes
   util::Pool *target_phrase_pool = nullptr;
 };
@@ -37,7 +41,7 @@ class Feature {
     virtual void Init(FeatureInit &feature_init) = 0;
 
     /** allows to save constant-length data in the word's representation */
-    virtual void NewWord(const StringPiece string_rep, VocabWord *word) = 0;
+    virtual void NewWord(const StringPiece string_rep, VocabWord *word) const = 0;
 
     /** Allows to add constant-length data to a passthrough or eos pt-phrase.
      * See documentation in pt/access.hh */
@@ -66,5 +70,12 @@ class Feature {
 
     virtual std::string FeatureDescription(std::size_t index) const = 0;
 };
+
+// for LM bypass
+class TargetPhraseInitializer {
+  public:
+    virtual void ScoreTargetPhrase(PhrasePair phrase_pair, lm::ngram::ChartState &state) const = 0;
+};
+
 
 } // namespace decode

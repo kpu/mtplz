@@ -26,8 +26,8 @@
 namespace decode {
 void Decode(System &system, const pt::Table &table, const StringPiece in,
     ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  Chart chart(table.Stats().max_source_phrase_length, system.GetObjective());
-  chart.ReadSentence(in, system.GetVocab(), system.GetVocabMapping());
+  Chart chart(table.Stats().max_source_phrase_length, system.GetVocabMapping(), system.GetObjective());
+  chart.ReadSentence(in, system.GetVocab());
   chart.LoadPhrases(table);
   Stacks stacks(system, chart);
   const Hypothesis *hyp = stacks.End();

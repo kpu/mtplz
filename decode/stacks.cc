@@ -87,7 +87,7 @@ class Vertices {
 struct MergeInfo {
   Objective &objective;
   HypothesisBuilder &hypo_builder;
-  const std::vector<VocabWord*> &sentence;
+  const Chart& chart;
 };
 
 Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {
@@ -98,9 +98,10 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   Hypothesis *sourcephrase_hypo = reinterpret_cast<Hypothesis*>(complete.NT()[0].End().cvp);
   const Hypothesis *prev_hypo = sourcephrase_hypo->Previous();
   TargetPhrase *target_phrase = reinterpret_cast<TargetPhrase*>(complete.NT()[1].End().cvp);
-  SourcePhrase source_phrase(merge_info.sentence, source_range.first, source_range.second);
+  SourcePhrase source_phrase(merge_info.chart.Sentence(), source_range.first, source_range.second);
   Hypothesis *next_hypo = merge_info.hypo_builder.CopyHypothesis(sourcephrase_hypo);
   PhrasePair phrase_pair(source_phrase, target_phrase);
+  phrase_pair.vocab_map = &merge_info.chart.VocabMapping();
   search::Score score = complete.GetScore()
     // TODO target phrase score is available earlier, use in search
     + merge_info.objective.GetFeatureInit().phrase_score_field(target_phrase)
@@ -223,7 +224,7 @@ Stacks::Stacks(System &system, Chart &chart) :
     stacks_.back().reserve(system.SearchContext().PopLimit());
     Recombinator<LMState> recombinator(system.GetObjective().GetFeatureInit().lm_state_field);
     EdgeOutput::Dedupe deduper(stacks_.size()*4/3, recombinator, recombinator);
-    EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()}, deduper);
+    EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart}, deduper);
     gen.Search(system.SearchContext(), output);
   }
   PopulateLastStack(system, chart);
@@ -253,7 +254,7 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
   AddEdge(all_hyps, eos_vertex, note, gen);
 
   stacks_.resize(stacks_.size() + 1);
-  PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart.Sentence()});
+  PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart});
   gen.Search(system.SearchContext(), output);
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];

@@ -1,17 +1,20 @@
 #include "decode/chart.hh"
 
 #include "decode/system.hh"
-#include "decode/lm.hh"
+#include "decode/vocab_map.hh"
 #include "util/exception.hh"
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
 namespace decode {
 
-Chart::Chart(std::size_t max_source_phrase_length, Objective &objective)
-  : max_source_phrase_length_(max_source_phrase_length),
-    objective_(objective),
-    feature_init_(objective.GetFeatureInit()) {
+Chart::Chart(std::size_t max_source_phrase_length,
+    const std::vector<VocabWord*> &vocab_mapping,
+    Objective &objective)
+    : max_source_phrase_length_(max_source_phrase_length),
+      objective_(objective),
+      feature_init_(objective.GetFeatureInit()),
+      vocab_map_(vocab_mapping, *this) {
   UTIL_THROW_IF(objective.GetLanguageModelFeature() == nullptr, util::Exception,
       "Missing language model for objective!");
   pt::Access access = feature_init_.phrase_access;
@@ -24,31 +27,11 @@ Chart::Chart(std::size_t max_source_phrase_length, Objective &objective)
   objective_.InitPassthroughPhrase(eos_phrase_);
 }
 
-// TODO make vocab const and keep new words locally.
-// that means we do not guarantee unique ids, what about lm having its own?
-void Chart::ReadSentence(StringPiece input, util::MutableVocab &vocab, const std::vector<VocabWord*> &vocab_mapping) {
+void Chart::ReadSentence(StringPiece input, util::MutableVocab &vocab) {
   for (util::TokenIter<util::BoolCharacter, true> word(input, util::kSpaces); word; ++word) {
     const ID id = vocab.FindOrInsert(*word);
     sentence_ids_.push_back(id);
-    sentence_.push_back(MapToVocabWord(*word, id, vocab_mapping));
-  }
-}
-
-VocabWord *Chart::MapToVocabWord(const StringPiece word, const ID id, const std::vector<VocabWord*> &vocab_mapping) {
-  std::size_t local_id = id - vocab_mapping.size();
-  if (id < vocab_mapping.size()) {
-    return vocab_mapping[id];
-  } else {
-    if (local_id >= oov_words_.size()) {
-      oov_words_.resize(local_id + 1);
-    }
-    if (oov_words_[local_id] == nullptr) {
-      VocabWord *new_word = reinterpret_cast<VocabWord*>(feature_init_.word_layout.Allocate<util::Pool>(oov_pool_));
-      feature_init_.pt_id_field(new_word) = id;
-      objective_.NewWord(word, new_word);
-      oov_words_[local_id] = new_word;
-    }
-    return oov_words_[local_id];
+    sentence_.push_back(vocab_map_.FindOrInsert(*word, id));
   }
 }
 
@@ -63,9 +46,10 @@ void Chart::AddTargetPhraseToVertex(
   feature_init_.passthrough_field(phrase_wrapper) = passthrough;
   search::HypoState hypo;
   // Bypass objective to allow the language model access to a hypo.state reference.
-  objective_.GetLanguageModelFeature()->ScoreTargetPhrase(phrase_wrapper, hypo.state);
   PhrasePair phrase_pair(source_phrase, phrase_wrapper);
+  phrase_pair.vocab_map = &vocab_map_;
   phrase_pair.target_phrase_pool = &target_phrase_pool_;
+  objective_.GetLanguageModelFeature()->ScoreTargetPhrase(phrase_pair, hypo.state);
   float score = objective_.ScorePhrase(phrase_pair, nullptr);
   feature_init_.phrase_score_field(phrase_wrapper) = score;
   hypo.history.cvp = phrase_wrapper;

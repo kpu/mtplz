@@ -21,7 +21,7 @@ class System {
 
     void LoadVocab(pt::VocabRange vocab, std::size_t vocab_size);
 
-    const std::vector<VocabWord*> GetVocabMapping() const {
+    const std::vector<VocabWord*> &GetVocabMapping() const {
       return vocab_mapping_;
     }
 

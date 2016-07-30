@@ -18,11 +18,11 @@ class SourcePhrase {
       assert(end <= base.size());
     }
 
-    std::vector<VocabWord*>::const_iterator Begin() const {
+    std::vector<VocabWord*>::const_iterator begin() const {
       return base_.cbegin() + span_.first;
     }
 
-    std::vector<VocabWord*>::const_iterator End() const {
+    std::vector<VocabWord*>::const_iterator end() const {
       return base_.cbegin() + span_.second;
     }
 
