@@ -7,6 +7,8 @@
 
 namespace decode {
 
+struct VocabWord; // conforms to FeatureInit word_layout
+
 typedef lm::ngram::Right LMState;
 
 /** A FeatureInit instance is owned by the Objective and is passed to each
@@ -39,21 +41,18 @@ struct FeatureInit {
   const util::PODField<LMState> lm_state_field;
 
   /** Use to store information about the target phrase when scoring in
-    * isolation (ScorePhrase).
-    * Only store fixed-length data, no VectorFields.
-    */
+    * isolation (ScorePhrase). */
   util::Layout target_phrase_layout;
   const util::PODField<const pt::Row*> pt_row_field; // has to be first field
   const util::PODField<float> phrase_score_field;
+  const util::PODField<bool> passthrough_field;
 
   /** Store info about a word when NewWord is called. This call happens
     * once in bulk for all known source words from training and later every
     * time a new word is encountered.
-    * Only store fixed-length data, no VectorFields.
     */
   util::Layout word_layout;
   const util::PODField<ID> pt_id_field;
-  const util::PODField<bool> passthrough_field;
 
   const pt::Access &phrase_access;
 };
