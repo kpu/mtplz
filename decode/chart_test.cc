@@ -1,6 +1,6 @@
 #include "decode/chart.hh"
 
-#include "decode/objective.hh"
+#include "decode/system.hh"
 #include "pt/access.hh"
 #include "lm/model.hh"
 
@@ -47,33 +47,6 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
     std::vector<PhrasePair> *phrase_pair_buffer_;
 };
 
-/* This does not work and I will not invest time in bugfixes,
- * considering that the test will not work as planned anyway (see PhraseTest
- * comment)
-class PTMock {
-  public:
-    PTMock(const pt::Access &access) : access_(access) {}
-
-    void AddEntries(Range range, std::vector<pt::Row*> entries) {
-      map_[range] = entries;
-    }
-
-    std::vector<pt::Row*> Lookup(const ID *source_begin, const ID *source_end) const {
-      return map_[Range((std::size_t)begin, (std::size_t)end)];
-    }
-  private:
-    struct PairHash {
-      size_t operator()(const Range pair) const {
-        std::size_t first = pair.first, second = pair.second;
-        return std::hash<std::size_t>(first) ^ std::hash<std::size_t>(second);
-      }
-    };
-
-    const pt::Access &access_;
-    std::unordered_map<Range,std::vector<pt::Row*>,PairHash> map_;
-};
-*/
-
 BOOST_AUTO_TEST_CASE(InitTest) {
   pt::FieldConfig config;
   pt::Access access(config);
@@ -81,7 +54,10 @@ BOOST_AUTO_TEST_CASE(InitTest) {
   Objective objective(access, lm_state);
   FeatureMock feature_mock;
   objective.RegisterLanguageModel(feature_mock);
-  Chart chart(13, std::vector<VocabWord*>(), objective);
+  BaseVocab base_vocab;
+  base_vocab.map.push_back(nullptr);
+  VocabMap vocab_map(objective, base_vocab);
+  Chart chart(13, vocab_map, objective);
   BOOST_CHECK_EQUAL(13, chart.MaxSourcePhraseLength());
 }
 
@@ -94,7 +70,9 @@ BOOST_AUTO_TEST_CASE(EosTest) {
   FeatureMock feature_mock(phrase_pair_buffer);
   objective.AddFeature(feature_mock);
   objective.RegisterLanguageModel(feature_mock);
-  std::vector<VocabWord*> vocab_map;
+  BaseVocab base_vocab;
+  base_vocab.map.push_back(nullptr);
+  VocabMap vocab_map(objective, base_vocab);
   Chart chart(11, vocab_map, objective);
 
   TargetPhrases &eos = chart.EndOfSentence();
@@ -117,26 +95,24 @@ BOOST_AUTO_TEST_CASE(ReadSentenceTest) {
   FeatureMock feature_mock(rep_buffer, word_buffer);
   objective.AddFeature(feature_mock);
   objective.RegisterLanguageModel(feature_mock);
-  util::MutableVocab vocab;
-  vocab.FindOrInsert("small");
-  const std::size_t orig_vocabsize = vocab.Size();
-  std::vector<VocabWord*> orig_mapping;
-  util::Pool pool;
+  BaseVocab base_vocab;
+  base_vocab.vocab.FindOrInsert("small");
+  const std::size_t orig_vocabsize = base_vocab.vocab.Size();
   util::Layout &word_layout = objective.GetFeatureInit().word_layout;
-  VocabWord *word_small = reinterpret_cast<VocabWord*>(word_layout.Allocate(pool));
+  VocabWord *word_small = reinterpret_cast<VocabWord*>(word_layout.Allocate(base_vocab.pool));
   for (std::size_t i=0; i < orig_vocabsize-1; ++i) {
-    orig_mapping.push_back(nullptr);
+    base_vocab.map.push_back(nullptr);
   }
-  orig_mapping.push_back(word_small);
-  const std::vector<VocabWord*> mapping = orig_mapping;
-  Chart chart(5, mapping, objective);
+  base_vocab.map.push_back(word_small);
+  VocabMap vocab_map(objective, base_vocab);
+  Chart chart(5, vocab_map, objective);
 
   // test known and unknown
   std::string input = "a small test test";
-  chart.ReadSentence(input, vocab);
+  chart.ReadSentence(input);
   // vocab update
-  BOOST_CHECK_EQUAL("a", vocab.String(orig_vocabsize));
-  BOOST_CHECK_EQUAL("test", vocab.String(orig_vocabsize+1));
+  BOOST_CHECK_EQUAL("a", vocab_map.String(orig_vocabsize));
+  BOOST_CHECK_EQUAL("test", vocab_map.String(orig_vocabsize+1));
   // lengths
   BOOST_CHECK_EQUAL(4, chart.SentenceLength());
   BOOST_CHECK_EQUAL(2, word_buffer.size());

@@ -12,6 +12,17 @@ struct Config {
   unsigned int pop_limit;
 };
 
+struct BaseVocab {
+  util::MutableVocab vocab;
+  std::vector<VocabWord*> map;
+  util::Pool pool;
+
+  std::size_t Size() const {
+    assert(vocab.Size() == map.size());
+    return map.size();
+  }
+};
+
 class System {
   public:
     System(const Config config, const pt::Access &phrase_access,
@@ -21,10 +32,6 @@ class System {
 
     void LoadVocab(pt::VocabRange vocab, std::size_t vocab_size);
 
-    const std::vector<VocabWord*> &GetVocabMapping() const {
-      return vocab_mapping_;
-    }
-
     const Config &GetConfig() const { return config_; }
 
     const search::Context<lm::ngram::Model> &SearchContext() const {
@@ -33,16 +40,13 @@ class System {
 
     Objective &GetObjective() { return objective_; }
 
-    // TODO make const, needs changes in chart
-    util::MutableVocab &GetVocab() { return vocab_; }
+    BaseVocab &GetBaseVocab() { return base_vocab_; }
 
   private:
     Objective objective_;
     const Config config_;
 
-    util::MutableVocab vocab_;
-    std::vector<VocabWord*> vocab_mapping_;
-    util::Pool word_pool_;
+    BaseVocab base_vocab_;
 
     search::Context<lm::ngram::Model> search_context_;
     const Weights &weights_;

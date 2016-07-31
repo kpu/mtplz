@@ -1,8 +1,8 @@
 #include "decode/output.hh"
 
+#include "decode/vocab_map.hh"
 #include "decode/feature_init.hh"
 #include "util/file_stream.hh"
-#include "util/mutable_vocab.hh"
 
 #include <string.h>
 
@@ -24,8 +24,7 @@ void PrintOptionalInfo(ScoreHistoryMap &map, float score_delta, util::FileStream
   }
 }
 
-// verbose print
-void Output(const Hypothesis &hypo, const util::MutableVocab &vocab,
+void Output(const Hypothesis &hypo, const VocabMap &vocab,
     ScoreHistoryMap &map, util::FileStream &out, const FeatureInit &feature_init,
     bool verbose) {
   std::vector<const Hypothesis*> hypos;

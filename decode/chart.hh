@@ -28,9 +28,9 @@ class Chart {
   public:
     static constexpr ID EOS_WORD = 2;
 
-    Chart(std::size_t max_source_phrase_length, const std::vector<VocabWord*> &vocab_mapping, Objective &objective);
+    Chart(std::size_t max_source_phrase_length, VocabMap &vocab_map, Objective &objective);
 
-    void ReadSentence(StringPiece input, util::MutableVocab &vocab);
+    void ReadSentence(StringPiece input);
 
     template <class PhraseTable> void LoadPhrases(const PhraseTable &table) {
       // There's some unreachable ranges off the edge. Meh.
@@ -74,8 +74,6 @@ class Chart {
     const VocabMap &VocabMapping() const { return vocab_map_; }
 
   private:
-    friend VocabWord *VocabMap::FindOrInsert(const StringPiece word, const ID global_word);
-
     void SetRange(std::size_t begin, std::size_t end, TargetPhrases *to) {
       assert(end - begin <= max_source_phrase_length_);
       assert(begin * max_source_phrase_length_ + end - begin - 1 < entries_.size());
@@ -90,7 +88,7 @@ class Chart {
 
     void AddPassthrough(std::size_t position);
 
-    VocabMap vocab_map_;
+    VocabMap &vocab_map_;
 
     util::Pool target_phrase_pool_;
     boost::object_pool<search::Vertex> vertex_pool_;
@@ -102,7 +100,7 @@ class Chart {
     std::vector<ID> sentence_ids_;
 
     // Backs any oov words that are passed through.  
-    util::Pool oov_pool_;
+    util::Pool passthrough_pool_;
 
     pt::Row *eos_phrase_;
 

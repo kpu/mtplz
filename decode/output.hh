@@ -8,13 +8,13 @@
 #include <boost/utility.hpp>
 
 namespace util {
-class MutableVocab;
 class FileStream;
 }
 
 namespace decode {
 
 class Hypothesis;
+class VocabMap;
 struct FeatureInit;
 
 struct ScoreHistory {
@@ -24,7 +24,7 @@ struct ScoreHistory {
 
 typedef boost::unordered_map<std::string, ScoreHistory> ScoreHistoryMap;
 
-void Output(const Hypothesis &hypo, const util::MutableVocab &vocab,
+void Output(const Hypothesis &hypo, const VocabMap &vocab,
     ScoreHistoryMap &map, util::FileStream &out,
     const FeatureInit &feature_init, bool verbose);
 

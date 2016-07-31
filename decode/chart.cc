@@ -1,7 +1,6 @@
 #include "decode/chart.hh"
 
 #include "decode/system.hh"
-#include "decode/vocab_map.hh"
 #include "util/exception.hh"
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
@@ -9,29 +8,29 @@
 namespace decode {
 
 Chart::Chart(std::size_t max_source_phrase_length,
-    const std::vector<VocabWord*> &vocab_mapping,
+    VocabMap &vocab_map,
     Objective &objective)
     : max_source_phrase_length_(max_source_phrase_length),
       objective_(objective),
       feature_init_(objective.GetFeatureInit()),
-      vocab_map_(vocab_mapping, *this) {
+      vocab_map_(vocab_map) {
   UTIL_THROW_IF(objective.GetLanguageModelFeature() == nullptr, util::Exception,
       "Missing language model for objective!");
   pt::Access access = feature_init_.phrase_access;
-  eos_phrase_ = access.Allocate(oov_pool_);
+  eos_phrase_ = access.Allocate(passthrough_pool_);
   if (feature_init_.phrase_access.target) {
-    access.target(eos_phrase_, oov_pool_).resize(1);
+    access.target(eos_phrase_, passthrough_pool_).resize(1);
     access.target(eos_phrase_)[0] = EOS_WORD;
     assert(access.target(eos_phrase_).size()==1);
   }
   objective_.InitPassthroughPhrase(eos_phrase_);
 }
 
-void Chart::ReadSentence(StringPiece input, util::MutableVocab &vocab) {
+void Chart::ReadSentence(StringPiece input) {
   for (util::TokenIter<util::BoolCharacter, true> word(input, util::kSpaces); word; ++word) {
-    const ID id = vocab.FindOrInsert(*word);
-    sentence_ids_.push_back(id);
+    ID id; // set by VocabMap
     sentence_.push_back(vocab_map_.FindOrInsert(*word, id));
+    sentence_ids_.push_back(id);
   }
 }
 
@@ -62,9 +61,9 @@ void Chart::AddPassthrough(std::size_t position) {
   TargetPhrases *pass = vertex_pool_.construct();
   pass->Root().InitRoot();
   pt::Access access = feature_init_.phrase_access;
-  pt::Row* pt_phrase = access.Allocate(oov_pool_);
+  pt::Row* pt_phrase = access.Allocate(passthrough_pool_);
   if (access.target) {
-    access.target(pt_phrase, oov_pool_).resize(1);
+    access.target(pt_phrase, passthrough_pool_).resize(1);
     access.target(pt_phrase)[0] = sentence_ids_[position];
   }
   objective_.InitPassthroughPhrase(pt_phrase);

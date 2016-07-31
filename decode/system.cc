@@ -16,15 +16,15 @@ void System::LoadWeights() {
 }
 
 void System::LoadVocab(pt::VocabRange vocab_range, std::size_t vocab_size) {
-  vocab_mapping_ = std::vector<VocabWord*>(vocab_size);
+  base_vocab_.map = std::vector<VocabWord*>(vocab_size);
   util::Layout &word_layout = objective_.GetFeatureInit().word_layout;
-  assert(vocab_.String(0) == *vocab_range.begin());
-  for (auto word = vocab_range.begin(); word != vocab_range.end(); ++word) {
-    VocabWord *mapping = reinterpret_cast<VocabWord*>(word_layout.Allocate(word_pool_));
-    std::size_t i = vocab_.FindOrInsert(*word);
+  assert(base_vocab_.vocab.String(0) == *vocab_range.begin());
+  for (auto word : vocab_range) {
+    VocabWord *mapping = reinterpret_cast<VocabWord*>(word_layout.Allocate(base_vocab_.pool));
+    std::size_t i = base_vocab_.vocab.FindOrInsert(word);
     objective_.GetFeatureInit().pt_id_field(mapping) = i;
-    objective_.NewWord(vocab_.String(i), mapping);
-    vocab_mapping_[i] = mapping;
+    objective_.NewWord(base_vocab_.vocab.String(i), mapping);
+    base_vocab_.map[i] = mapping;
   }
 }
 
