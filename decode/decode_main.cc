@@ -14,6 +14,8 @@
 // features
 #include "decode/distortion.hh"
 #include "decode/word_insert.hh"
+#include "decode/phrase_count_feature.hh"
+#include "decode/pt_features.hh"
 #include "decode/passthrough.hh"
 #include "decode/lm.hh"
 #include "decode/lexro.hh"
@@ -76,6 +78,8 @@ int main(int argc, char *argv[]) {
     weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
     decode::WordInsertion word_insert;
+    decode::PhraseCountFeature phrase_count_feature;
+    decode::PhraseTableFeatures pt_features;
     decode::Passthrough passthrough;
     decode::LM lm(lm_file.c_str());
     decode::LexicalizedReordering lexro;
@@ -83,10 +87,11 @@ int main(int argc, char *argv[]) {
     decode::System sys(config, table.Accessor(), weights, lm.Model());
     sys.GetObjective().AddFeature(distortion);
     sys.GetObjective().AddFeature(word_insert);
+    sys.GetObjective().AddFeature(phrase_count_feature);
+    sys.GetObjective().AddFeature(pt_features);
     sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(lm);
     sys.GetObjective().RegisterLanguageModel(lm);
-    sys.GetObjective().AddFeature(lexro);
 
     sys.LoadVocab(table.Vocab(), table.Stats().vocab_size);
     sys.GetObjective().LoadWeights(weights);
