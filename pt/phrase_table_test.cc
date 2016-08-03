@@ -6,6 +6,8 @@
 #include "pt/query.hh"
 #include "util/file.hh"
 
+#include <cmath>
+
 namespace pt { namespace {
 
 util::scoped_fd MakeFile() {
@@ -58,7 +60,7 @@ BOOST_AUTO_TEST_CASE(CreateAndQuery) {
   BOOST_CHECK_EQUAL(3, row.Accessor().target(row).size());
   BOOST_REQUIRE(row.Accessor().dense_features);
   BOOST_CHECK_EQUAL(5, row.Accessor().dense_features(row).size());
-  BOOST_CHECK_CLOSE(log(0.25), row.Accessor().dense_features(row)[0], 0.001);
+  BOOST_CHECK_CLOSE(std::log(0.25), row.Accessor().dense_features(row)[0], 0.001);
 }
 
 } } // namespaces
