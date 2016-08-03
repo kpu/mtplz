@@ -33,12 +33,14 @@ template <class Field> class OptionalField {
     OptionalField(util::Layout &layout, bool present) {
       if (present) {
         field_ = Field(layout);
+        size_ = 0;
       }
     }
 
     OptionalField(util::Layout &layout, std::size_t size) {
       if (size != FieldConfig::kNotPresent) {
         field_ = Field(layout, size);
+        size_ = size;
       }
     }
 
@@ -53,8 +55,10 @@ template <class Field> class OptionalField {
     }
     operator bool() const { return bool(field_); }
 
+    std::size_t size() const { return size_; }
   private: 
     boost::optional<Field> field_;
+    std::size_t size_; // TODO read from original Field instead
 };
 
 // Usage:

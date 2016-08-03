@@ -25,7 +25,7 @@ void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
   if (hypothesis.Previous()) {
     std::size_t index = BACKWARD + PhraseRelation(hypothesis, source_phrase.Span());
     const pt::Row *target = pt_row_(hypothesis.Target());
-    collector.AddDense(1, phrase_access_->lexical_reordering(target)[index]);
+    collector.AddDense(index, phrase_access_->lexical_reordering(target)[index]);
   }
 }
 
@@ -34,14 +34,14 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
   std::size_t index = FORWARD + PhraseRelation(hypothesis, phrase_pair.source_phrase.Span());
   const pt::Row *target = pt_row_(phrase_pair.target_phrase);
   float score = phrase_access_->lexical_reordering(target)[index];
-  collector.AddDense(0, score);
+  collector.AddDense(index, score);
 }
 
 void LexicalizedReordering::ScoreFinalHypothesis(
     const Hypothesis &hypothesis, ScoreCollector &collector) const {
   std::size_t index = BACKWARD + MONOTONE;
   const pt::Row *target = pt_row_(hypothesis.Target());
-  collector.AddDense(1, phrase_access_->lexical_reordering(target)[index]);
+  collector.AddDense(index, phrase_access_->lexical_reordering(target)[index]);
 }
 
 LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(
@@ -57,11 +57,16 @@ LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(
 
 std::string LexicalizedReordering::FeatureDescription(std::size_t index) const {
   assert(index < DenseFeatureCount());
-  switch(index) {
-    case 0: return "forward lexicalized reordering";
-    case 1: return "backward lexicalized reordering";
+  std::string out;
+  switch(index % 3) {
+    case 0: out = "monotone ";
+    case 1: out = "swap ";
+    case 2: out = "discontinuous ";
     default: return "no such feature!";
   }
+  out += index < BACKWARD ? "forward" : "backward";
+  out += " lexicalized reordering";
+  return out;
 }
 
 } // namespace decode

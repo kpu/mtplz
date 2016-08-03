@@ -36,7 +36,7 @@ class LexicalizedReordering : public Feature {
     void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override;
 
-    std::size_t DenseFeatureCount() const override { return 2; }
+    std::size_t DenseFeatureCount() const override { return 6; }
 
     std::string FeatureDescription(std::size_t index) const override;
   private:
