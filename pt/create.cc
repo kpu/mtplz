@@ -60,7 +60,16 @@ void ExtractLine(StringPiece from, std::vector<StringPiece> &out) {
 
 static const double_conversion::StringToDoubleConverter kConverter(0, std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), "inf", "NaN");
 
-void ParseFloats(StringPiece from, OptionalField<util::ArrayField<float> > &field, Row *row) {
+struct TakeLogAndMosesFloor {
+  float operator()(float in) const {
+    return std::max(-100.0, log(in));
+  }
+};
+struct FloatIdentity {
+  float operator()(float in) const { return in; }
+};
+
+template <class Transform> void ParseFloats(StringPiece from, OptionalField<util::ArrayField<float> > &field, Row *row, const Transform &op) {
   if (!field) return;
   util::TokenIter<util::BoolCharacter, true> token(from);
   float *to = field(row).begin();
@@ -70,6 +79,7 @@ void ParseFloats(StringPiece from, OptionalField<util::ArrayField<float> > &fiel
     *to = kConverter.StringToFloat(token->data(), token->size(), &processed);
     using namespace std;
     UTIL_THROW_IF2(isnan(*to), "Bad floating point number " << *token << " in section: " << from);
+    *to = op(*to);
     UTIL_THROW_IF2(processed != token->size(), "Did not process full float for " << *token);
   }
   UTIL_THROW_IF2(token, "More than " << field(row).size() << " floats in " << from);
@@ -131,8 +141,8 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
       for (util::TokenIter<util::BoolCharacter, true> t(target); t; ++t) {
         vec.push_back(vocab.FindOrInsert(*t));
       }
-      ParseFloats(dense_features, access.dense_features, row);
-      ParseFloats(lexical_reordering, access.lexical_reordering, row);
+      ParseFloats(dense_features, access.dense_features, row, TakeLogAndMosesFloor());
+      ParseFloats(lexical_reordering, access.lexical_reordering, row, FloatIdentity());
       // TODO sparse features
  
       if (!++line) break;
