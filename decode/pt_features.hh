@@ -19,7 +19,12 @@ class PhraseTableFeatures : public Feature {
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
 
-    void InitPassthroughPhrase(pt::Row *passthrough) const override {}
+    void InitPassthroughPhrase(pt::Row *passthrough) const override {
+      std::size_t num_features = DenseFeatureCount();
+      for (std::size_t i = 0; i < num_features; ++i) {
+        phrase_access_->dense_features(passthrough)[i] = 0;
+      }
+    }
 
     void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {
       std::size_t i = 0;
