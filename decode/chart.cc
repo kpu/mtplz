@@ -21,7 +21,6 @@ Chart::Chart(std::size_t max_source_phrase_length,
   if (feature_init_.phrase_access.target) {
     access.target(eos_phrase_, passthrough_pool_).resize(1);
     access.target(eos_phrase_)[0] = EOS_WORD;
-    assert(access.target(eos_phrase_).size()==1);
   }
   objective_.InitPassthroughPhrase(eos_phrase_);
 }

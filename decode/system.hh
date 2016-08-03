@@ -43,6 +43,8 @@ class System {
     BaseVocab &GetBaseVocab() { return base_vocab_; }
 
   private:
+    void InsertNewWord(const ID id);
+
     Objective objective_;
     const Config config_;
 
