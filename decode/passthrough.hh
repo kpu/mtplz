@@ -10,8 +10,9 @@ class Passthrough : public Feature {
   public:
     Passthrough() : Feature("passthrough") {}
 
-    void Init(FeatureInit &feature_init) override {
+    uint8_t Init(FeatureInit &feature_init) override {
       passthrough_field_ = feature_init.passthrough_field;
+      return ScoreMethod::Phrase;
     }
 
     static const StringPiece Name();

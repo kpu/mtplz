@@ -10,11 +10,12 @@ class WordInsertion : public Feature {
   public:
     WordInsertion() : Feature("target_word_insertion") {}
 
-    void Init(FeatureInit &feature_init) override {
+    uint8_t Init(FeatureInit &feature_init) override {
       UTIL_THROW_IF(!feature_init.phrase_access.target, util::Exception,
           "requested word insertion penalty but target words missing in phrase access");
       phrase_access_ = &feature_init.phrase_access;
       pt_row_field_ = feature_init.pt_row_field;
+      return ScoreMethod::Phrase | ScoreMethod::Final;
     }
 
     static const StringPiece Name();

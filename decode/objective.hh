@@ -65,7 +65,9 @@ class Objective {
         Hypothesis *&new_hypothesis,
         util::Pool *hypothesis_pool) const;
 
-    std::vector<Feature*> features_;
+    // features_[0] is all features, others are task-specific
+    std::vector<Feature*> features_[64];
+
     std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
     const TargetPhraseInitializer *lm_feature_ = nullptr;

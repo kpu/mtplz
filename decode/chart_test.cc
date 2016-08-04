@@ -23,7 +23,7 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
     FeatureMock(std::vector<PhrasePair> &phrase_pair_buffer)
       : Feature("mock"), phrase_pair_buffer_(&phrase_pair_buffer) {}
 
-    void Init(FeatureInit &feature_init) override {}
+    uint8_t Init(FeatureInit &feature_init) override { return ScoreMethod::Max; }
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {
       rep_buffer_->push_back(string_rep);
       word_buffer_->push_back(word);

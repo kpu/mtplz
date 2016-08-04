@@ -10,13 +10,14 @@ namespace decode {
 LM::LM(const char *model) :
   Feature("lm"), model_(model) {}
 
-void LM::Init(FeatureInit &feature_init) {
+uint8_t LM::Init(FeatureInit &feature_init) {
   pt_row_field_ = feature_init.pt_row_field;
   UTIL_THROW_IF(!feature_init.phrase_access.target, util::Exception,
       "requested language model but target phrase text is missing in phrase access");
   phrase_access_ = &feature_init.phrase_access;
   lm_word_index_ = util::PODField<lm::WordIndex>(feature_init.word_layout);
   phrase_score_field_ = util::PODField<float>(feature_init.target_phrase_layout);
+  return ScoreMethod::NewWord | ScoreMethod::InitPassthrough | ScoreMethod::Phrase;
 }
 
 void LM::NewWord(const StringPiece string_rep, VocabWord *word) const {

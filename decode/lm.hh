@@ -13,9 +13,7 @@ class LM : public Feature, public TargetPhraseInitializer {
   public:
     LM(const char *model);
 
-    void Init(FeatureInit &feature_init) override;
-
-    static const StringPiece Name();
+    uint8_t Init(FeatureInit &feature_init) override;
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override;
 
