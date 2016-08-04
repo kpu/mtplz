@@ -14,9 +14,9 @@
 // features
 #include "decode/distortion.hh"
 #include "decode/word_insert.hh"
+#include "decode/passthrough.hh"
 #include "decode/phrase_count_feature.hh"
 #include "decode/pt_features.hh"
-#include "decode/passthrough.hh"
 #include "decode/lm.hh"
 #include "decode/lexro.hh"
 
@@ -29,6 +29,11 @@ namespace decode {
 void Decode(System &system, const pt::Table &table, const StringPiece in,
     ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
   VocabMap vocab_map(system.GetObjective(), system.GetBaseVocab());
+  FeatureStore feature_store;
+  if (verbose) {
+    feature_store.resize(system.GetObjective().weights.size());
+    system.GetObjective().feature_storage = &feature_store;
+  }
   Chart chart(table.Stats().max_source_phrase_length, vocab_map, system.GetObjective());
   chart.ReadSentence(in);
   chart.LoadPhrases(table);
@@ -41,6 +46,15 @@ void Decode(System &system, const pt::Table &table, const StringPiece in,
     Output(*hyp, vocab_map, history_map, out, system.GetObjective().GetFeatureInit(), verbose);
   }
   out << '\n';
+
+  if (verbose) {
+    std::cerr << "feature values: [ \n";
+    std::size_t i = 0;
+    for (auto value : feature_store) {
+      std::cerr << system.GetObjective().FeatureDescription(i++) << ": " << value << std::endl;
+    }
+    std::cerr << "]\n";
+  }
 }
 } // namespace decode
 
@@ -77,19 +91,19 @@ int main(int argc, char *argv[]) {
     decode::Weights weights;
     weights.ReadFromFile(weights_file);
     decode::Distortion distortion;
+    decode::Passthrough passthrough;
     decode::WordInsertion word_insert;
     decode::PhraseCountFeature phrase_count_feature;
     decode::PhraseTableFeatures pt_features;
-    decode::Passthrough passthrough;
     decode::LM lm(lm_file.c_str());
     decode::LexicalizedReordering lexro;
 
     decode::System sys(config, table.Accessor(), weights, lm.Model());
     sys.GetObjective().AddFeature(distortion);
+    sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(word_insert);
     sys.GetObjective().AddFeature(phrase_count_feature);
     sys.GetObjective().AddFeature(pt_features);
-    sys.GetObjective().AddFeature(passthrough);
     sys.GetObjective().AddFeature(lm);
     sys.GetObjective().RegisterLanguageModel(lm);
 

@@ -6,6 +6,8 @@ namespace decode {
 
 class PhraseTableFeatures : public Feature {
   public:
+    static constexpr float DEFAULT_VALUE = 0;
+
     PhraseTableFeatures() : Feature("phrase_table") {}
 
     void Init(FeatureInit &feature_init) override {
@@ -22,7 +24,7 @@ class PhraseTableFeatures : public Feature {
     void InitPassthroughPhrase(pt::Row *passthrough) const override {
       std::size_t num_features = DenseFeatureCount();
       for (std::size_t i = 0; i < num_features; ++i) {
-        phrase_access_->dense_features(passthrough)[i] = 0;
+        phrase_access_->dense_features(passthrough)[i] = DEFAULT_VALUE;
       }
     }
 

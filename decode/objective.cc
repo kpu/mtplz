@@ -43,9 +43,9 @@ void Objective::InitPassthroughPhrase(pt::Row *passthrough) const {
   }
 }
 
-float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const {
+float Objective::ScorePhrase(PhrasePair phrase_pair) const {
   Hypothesis *null_hypo = nullptr;
-  auto collector = GetCollector(null_hypo, nullptr, storage);
+  auto collector = GetCollector(null_hypo, nullptr);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i]->ScorePhrase(phrase_pair, collector);
@@ -55,8 +55,8 @@ float Objective::ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) cons
 
 float Objective::ScoreHypothesisWithSourcePhrase(
     const Hypothesis &hypothesis, const SourcePhrase source_phrase,
-    Hypothesis *&new_hypothesis, FeatureStore *storage) const {
-  auto collector = GetCollector(new_hypothesis, nullptr, storage);
+    Hypothesis *&new_hypothesis) const {
+  auto collector = GetCollector(new_hypothesis, nullptr);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i]->ScoreHypothesisWithSourcePhrase(hypothesis, source_phrase, collector);
@@ -66,9 +66,8 @@ float Objective::ScoreHypothesisWithSourcePhrase(
 
 float Objective::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair,
-    Hypothesis *&new_hypothesis, util::Pool &hypothesis_pool,
-    FeatureStore *storage) const {
-  auto collector = GetCollector(new_hypothesis, &hypothesis_pool, storage);
+    Hypothesis *&new_hypothesis, util::Pool &hypothesis_pool) const {
+  auto collector = GetCollector(new_hypothesis, &hypothesis_pool);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i]->ScoreHypothesisWithPhrasePair(hypothesis, phrase_pair, collector);
@@ -76,10 +75,9 @@ float Objective::ScoreHypothesisWithPhrasePair(
   return collector.Score();
 }
 
-float Objective::ScoreFinalHypothesis(
-    const Hypothesis &hypothesis, FeatureStore *storage) const {
+float Objective::ScoreFinalHypothesis(const Hypothesis &hypothesis) const {
   Hypothesis *null_hypo = nullptr;
-  auto collector = GetCollector(null_hypo, nullptr, storage);
+  auto collector = GetCollector(null_hypo, nullptr);
   for (std::size_t i=0; i<features_.size(); i++) {
     collector.SetDenseOffset(feature_offsets_[i]);
     features_[i]->ScoreFinalHypothesis(hypothesis, collector);
@@ -93,19 +91,18 @@ std::size_t Objective::DenseFeatureCount() const {
 
 std::string Objective::FeatureDescription(std::size_t index) const {
   assert(index < feature_offsets_.back());
-  for (std::size_t i=0; ; i++) {
+  for (std::size_t i=0; i < feature_offsets_.back(); i++) {
     if (index < feature_offsets_[i+1]) {
       std::size_t local_index = index - feature_offsets_[i];
-      return features_[local_index]->FeatureDescription(local_index);
+      return features_[i]->FeatureDescription(local_index);
     }
   }
 }
 
 ScoreCollector Objective::GetCollector(
     Hypothesis *&new_hypothesis,
-    util::Pool *hypothesis_pool,
-    FeatureStore *storage) const {
-  return ScoreCollector(weights, new_hypothesis, hypothesis_pool, storage);
+    util::Pool *hypothesis_pool) const {
+  return ScoreCollector(weights, new_hypothesis, hypothesis_pool, feature_storage);
 }
 
 } // namespace decode

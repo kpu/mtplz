@@ -48,7 +48,7 @@ void Chart::AddTargetPhraseToVertex(
   phrase_pair.vocab_map = &vocab_map_;
   phrase_pair.target_phrase_pool = &target_phrase_pool_;
   objective_.GetLanguageModelFeature()->ScoreTargetPhrase(phrase_pair, hypo.state);
-  float score = objective_.ScorePhrase(phrase_pair, nullptr);
+  float score = objective_.ScorePhrase(phrase_pair);
   feature_init_.phrase_score_field(phrase_wrapper) = score;
   hypo.history.cvp = phrase_wrapper;
   hypo.score = score;

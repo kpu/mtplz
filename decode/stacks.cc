@@ -103,10 +103,8 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   PhrasePair phrase_pair(source_phrase, target_phrase);
   phrase_pair.vocab_map = &merge_info.chart.VocabMapping();
   search::Score score = complete.GetScore()
-    // TODO target phrase score is available earlier, use in search
-    + merge_info.objective.GetFeatureInit().phrase_score_field(target_phrase)
     + merge_info.objective.ScoreHypothesisWithPhrasePair(
-        *prev_hypo, phrase_pair, next_hypo, merge_info.hypo_builder.HypothesisPool(), NULL);
+        *prev_hypo, phrase_pair, next_hypo, merge_info.hypo_builder.HypothesisPool());
 
   return merge_info.hypo_builder.BuildHypothesis(
       next_hypo,
@@ -160,7 +158,7 @@ class PickBest {
 
     void NewHypothesis(search::PartialEdge complete) {
       Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
-      new_hypo->SetScore(new_hypo->GetScore() + merge_info_.objective.ScoreFinalHypothesis(*new_hypo, NULL));
+      new_hypo->SetScore(new_hypo->GetScore() + merge_info_.objective.ScoreFinalHypothesis(*new_hypo));
       if (best_ == NULL || new_hypo->GetScore() > best_->GetScore()) {
         best_ = new_hypo;
       }
@@ -210,7 +208,7 @@ Stacks::Stacks(System &system, Chart &chart) :
           const Hypothesis *ant_hypo = *ant;
           Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(ant_hypo);
           float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
-              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), next_hypo, NULL);
+              *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), next_hypo);
           // Future costs: remove span to be filled.
           score_delta += future.Change(coverage, begin, begin + phrase_length);
           vertices.Add(*ant, begin, begin + phrase_length, next_hypo, score_delta);
@@ -239,7 +237,7 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
     Hypothesis *next_hypo = hypothesis_builder_.NextHypothesis(ant_hypo);
     SourcePhrase source_phrase(chart.Sentence(), chart.SentenceLength(), chart.SentenceLength());
     float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
-        *ant_hypo, source_phrase, next_hypo, NULL);
+        *ant_hypo, source_phrase, next_hypo);
     AddHypothesisToVertex(ant_hypo, score_delta, next_hypo, all_hyps, system.GetObjective().GetFeatureInit());
   }
   

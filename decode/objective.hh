@@ -14,6 +14,8 @@ class TargetPhraseInitializer;
 class Objective {
   public:
     std::vector<float> weights = std::vector<float>();
+    // if non-null, individual feature values are stored here
+    std::vector<float> *feature_storage = nullptr;
 
     explicit Objective(const pt::Access &phrase_access,
         const lm::ngram::State &lm_begin_sentence_state);
@@ -38,23 +40,17 @@ class Objective {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const;
 
-    // storage can be null
-    float ScorePhrase(PhrasePair phrase_pair, FeatureStore *storage) const;
+    float ScorePhrase(PhrasePair phrase_pair) const;
 
-    // storage can be null
     float ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase,
-        Hypothesis *&new_hypothesis, FeatureStore *storage) const;
+        Hypothesis *&new_hypothesis) const;
 
-    // storage can be null
     float ScoreHypothesisWithPhrasePair(
         const Hypothesis &hypothesis, PhrasePair phrase_pair,
-        Hypothesis *&new_hypothesis, util::Pool &hypothesis_pool,
-        FeatureStore *storage) const;
+        Hypothesis *&new_hypothesis, util::Pool &hypothesis_pool) const;
 
-    // storage can be null
-    float ScoreFinalHypothesis(
-        const Hypothesis &hypothesis, FeatureStore *storage) const;
+    float ScoreFinalHypothesis(const Hypothesis &hypothesis) const;
 
     std::size_t DenseFeatureCount() const;
 
@@ -67,8 +63,7 @@ class Objective {
   private:
     ScoreCollector GetCollector(
         Hypothesis *&new_hypothesis,
-        util::Pool *hypothesis_pool,
-        FeatureStore *storage) const;
+        util::Pool *hypothesis_pool) const;
 
     std::vector<Feature*> features_;
     std::vector<std::size_t> feature_offsets_;
