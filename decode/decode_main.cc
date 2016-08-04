@@ -99,6 +99,8 @@ int main(int argc, char *argv[]) {
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
     decode::ScoreHistoryMap map;
+    std::cerr << "initialized model" << std::endl;
+    util::PrintUsage(std::cerr);
     while (true) {
       StringPiece line;
       try {
