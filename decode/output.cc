@@ -44,7 +44,8 @@ void Output(const Hypothesis &hypo, const VocabMap &vocab,
       float this_score = hypo.GetScore();
       float score_delta = this_score - previous_score;
       previous_score = this_score;
-      PrintOptionalInfo(map, score_delta, out);
+      // TODO make this work again
+      /* PrintOptionalInfo(map, score_delta, out); */
     }
   }
 }
