@@ -71,6 +71,7 @@ class Objective {
         Hypothesis *&new_hypothesis,
         util::Pool *hypothesis_pool) const;
 
+    // TODO use ScoreMethod values to make list of features for each method
     std::vector<FeatureInfo> features_;
     std::size_t dense_feature_count_ = 0;
 

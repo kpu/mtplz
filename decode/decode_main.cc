@@ -106,6 +106,7 @@ int main(int argc, char *argv[]) {
     sys.GetObjective().AddFeature(pt_features);
     sys.GetObjective().AddFeature(lm);
     sys.GetObjective().RegisterLanguageModel(lm);
+    sys.GetObjective().AddFeature(lexro);
 
     sys.LoadVocab(table.Vocab(), table.Stats().vocab_size);
     sys.GetObjective().LoadWeights(weights);
