@@ -17,7 +17,7 @@ uint8_t LM::Init(FeatureInit &feature_init) {
   phrase_access_ = &feature_init.phrase_access;
   lm_word_index_ = util::PODField<lm::WordIndex>(feature_init.word_layout);
   phrase_score_field_ = util::PODField<float>(feature_init.target_phrase_layout);
-  return ScoreMethod::NewWord | ScoreMethod::InitPassthrough | ScoreMethod::Phrase;
+  return ScoreMethod::NewWord | ScoreMethod::Phrase;
 }
 
 void LM::NewWord(const StringPiece string_rep, VocabWord *word) const {

@@ -61,14 +61,19 @@ class Objective {
     }
 
   private:
+    struct FeatureInfo {
+      const Feature *feature;
+      const std::size_t offset;
+      const uint8_t score_methods;
+    };
+
     ScoreCollector GetCollector(
         Hypothesis *&new_hypothesis,
         util::Pool *hypothesis_pool) const;
 
-    // features_[0] is all features, others are task-specific
-    std::vector<Feature*> features_[64];
+    std::vector<FeatureInfo> features_;
+    std::size_t dense_feature_count_ = 0;
 
-    std::vector<std::size_t> feature_offsets_;
     FeatureInit feature_init_;
     const TargetPhraseInitializer *lm_feature_ = nullptr;
 
