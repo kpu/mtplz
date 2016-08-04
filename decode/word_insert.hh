@@ -34,7 +34,9 @@ class WordInsertion : public Feature {
         const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreFinalHypothesis(
-        const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
+        const Hypothesis &hypothesis, ScoreCollector &collector) const override {
+      collector.AddDense(0, -1); // compensate for counting eos as insert
+    }
 
     std::size_t DenseFeatureCount() const override { return 1; }
 

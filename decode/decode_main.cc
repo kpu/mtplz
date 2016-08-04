@@ -51,7 +51,7 @@ void Decode(System &system, const pt::Table &table, const StringPiece in,
     std::cerr << "feature values: [ \n";
     std::size_t i = 0;
     for (auto value : feature_store) {
-      std::cerr << system.GetObjective().FeatureDescription(i++) << ": " << value << std::endl;
+      std::cerr << system.GetObjective().FeatureDescription(i++) << ": " << system.GetObjective().weights[i] * value << std::endl;
     }
     std::cerr << "]\n";
   }

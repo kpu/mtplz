@@ -1,7 +1,9 @@
 How to convert from moses.ini weights to our weights.  Our length feature is just the length without any transform, so to some extent this is removing constants that Moses uses.
 
-MOSES        MTPLZ                 MULTIPLY
-WordPenalty0 target_word_insertion -1
-LM           lm                    2.30258509299404568401
-Distortion0  distortion            -1
-Phrase*       phrase_table          1
+MOSES               MTPLZ                 MULTIPLY
+WordPenalty         target_word_insertion -1
+PhrasePenalty       phrase_insertion      1 (yes, really!)
+LM                  lm                    2.30258509299404568401
+Distortion          distortion            -1
+Phrase*             phrase_table          1
+UnknownWordPenalty  passthrough           -100
