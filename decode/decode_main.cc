@@ -114,13 +114,14 @@ int main(int argc, char *argv[]) {
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
     decode::ScoreHistoryMap map;
-    std::cerr << "initialized model" << std::endl;
-    util::PrintUsage(std::cerr);
+    std::size_t i = 0;
     while (true) {
       StringPiece line;
       try {
         line = f.ReadLine();
       } catch (const util::EndOfFileException &e) { break; }
+      util::PrintUsage(std::cerr);
+      std::cerr << "sentence " << i++ << std::endl;
       decode::Decode(sys, table, line, map, verbose, out);
       out.flush();
       f.UpdateProgress();

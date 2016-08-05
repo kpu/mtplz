@@ -6,4 +6,5 @@ PhrasePenalty       phrase_insertion      1 (yes, really!)
 LM                  lm                    2.30258509299404568401
 Distortion          distortion            -1
 Phrase*             phrase_table          1
+LexicalReordering   lexical_reordering    1
 UnknownWordPenalty  passthrough           -100

@@ -22,11 +22,13 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   pt::Access access(config);
   FeatureInit init(access);
                                           //  forward  backward
-                                          //  M  S  D   M  S  D
+  pt::Row *pt_row0 = Row(access,pool,0);  //  M  S  D   M  S  D
   pt::Row *pt_row1 = Row(access,pool,11); // 11 12 13  14 15 16
   pt::Row *pt_row2 = Row(access, pool,3); //  3  4  5   6  7  8
+  TargetPhrase *row0 = reinterpret_cast<TargetPhrase*>(init.target_phrase_layout.Allocate(pool));
   TargetPhrase *row1 = reinterpret_cast<TargetPhrase*>(init.target_phrase_layout.Allocate(pool));
   TargetPhrase *row2 = reinterpret_cast<TargetPhrase*>(init.target_phrase_layout.Allocate(pool));
+  init.pt_row_field(row0) = pt_row0;
   init.pt_row_field(row1) = pt_row1;
   init.pt_row_field(row2) = pt_row2;
   LexicalizedReordering lexro_obj = LexicalizedReordering();
@@ -35,7 +37,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
 
   // init hypothesis
   Hypothesis *zero_hypo = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
-  init.hypothesis_field(zero_hypo) = Hypothesis((float)0);
+  init.hypothesis_field(zero_hypo) = Hypothesis(0, row0);
   Hypothesis *hypo = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
   init.hypothesis_field(hypo) = Hypothesis(0,zero_hypo,3,5,row1);
   Hypothesis *next = reinterpret_cast<Hypothesis*>(init.hypothesis_layout.Allocate(pool));
@@ -76,7 +78,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   lexro.ScoreFinalHypothesis(*next, collector);
   BOOST_CHECK_EQUAL(14+3+6, collector.Score());
   BOOST_CHECK_EQUAL(3, store[0]);
-  BOOST_CHECK_EQUAL(6, store[3]);
+  BOOST_CHECK_EQUAL(20, store[3]);
 }
 
 } // namespace

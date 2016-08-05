@@ -51,11 +51,11 @@ class Hypothesis {
     }
 
     /** Initialize root hypothesis. */
-    explicit Hypothesis(float score) :
+    explicit Hypothesis(float score, const TargetPhrase *target) :
       score_(score),
       pre_(NULL),
       end_index_(0),
-      target_(NULL),
+      target_(target),
       coverage_() {}
 
     /** Initialize hypothesis extension for source phrase pairing */

@@ -179,17 +179,21 @@ class PickBest {
 
 Stacks::Stacks(System &system, Chart &chart) :
   hypothesis_builder_(hypothesis_pool_, system.GetObjective().GetFeatureInit()) {
+  FeatureInit &feature_init = system.GetObjective().GetFeatureInit();
   Future future(chart);
   // Reservation is critical because pointers to Hypothesis objects are retained as history.
   stacks_.reserve(chart.SentenceLength() + 2 /* begin/end of sentence */);
   stacks_.resize(1);
   // Initialize root hypothesis with <s> context and future cost for everything.
+  pt::Access access = feature_init.phrase_access;
+  pt::Row *target = access.Allocate(hypothesis_pool_);
+  system.GetObjective().InitPassthroughPhrase(target);
   stacks_[0].push_back(hypothesis_builder_.BuildHypothesis(
         system.GetObjective().BeginSentenceState(),
-        future.Full()));
+        future.Full(), target));
   // Decode with increasing numbers of source words.
   for (std::size_t source_words = 1; source_words <= chart.SentenceLength(); ++source_words) {
-    Vertices vertices(system.GetObjective().GetFeatureInit());
+    Vertices vertices(feature_init);
     // Iterate over stacks to continue from.
     for (std::size_t from = source_words - std::min(source_words, chart.MaxSourcePhraseLength());
          from < source_words;
@@ -220,7 +224,7 @@ Stacks::Stacks(System &system, Chart &chart) :
     vertices.Apply(chart, gen);
     stacks_.resize(stacks_.size() + 1);
     stacks_.back().reserve(system.SearchContext().PopLimit());
-    Recombinator<LMState> recombinator(system.GetObjective().GetFeatureInit().lm_state_field);
+    Recombinator<LMState> recombinator(feature_init.lm_state_field);
     EdgeOutput::Dedupe deduper(stacks_.size()*4/3, recombinator, recombinator);
     EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart}, deduper);
     gen.Search(system.SearchContext(), output);

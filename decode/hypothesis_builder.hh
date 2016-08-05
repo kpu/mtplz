@@ -14,7 +14,10 @@ class HypothesisBuilder {
       : pool_(pool), feature_init_(feature_init) {}
 
     /** Build root hypothesis */
-    Hypothesis *BuildHypothesis(const lm::ngram::Right &state, float score);
+    Hypothesis *BuildHypothesis(
+        const lm::ngram::Right &state,
+        float score,
+        const pt::Row *target);
 
     /** Initializes an instance of Hypothesis on the layout at *base */
     Hypothesis *BuildHypothesis(

@@ -6,18 +6,18 @@ namespace decode {
   
 class LexicalizedReordering : public Feature {
   public:
-    typedef std::size_t Relation;
+    typedef uint8_t Relation;
 
-    static constexpr std::size_t VALUE_COUNT = 6;
+    static constexpr uint8_t VALUE_COUNT = 6;
     static constexpr float DEFAULT_VALUE = 0;
 
-    static constexpr std::size_t FORWARD = 0;
-    static constexpr std::size_t BACKWARD = 3;
+    static constexpr uint8_t FORWARD = 0;
+    static constexpr uint8_t BACKWARD = 3;
     static constexpr Relation MONOTONE = 0;
     static constexpr Relation SWAP = 1;
     static constexpr Relation DISCONTINUOUS = 2;
 
-    LexicalizedReordering() : Feature("lexro") {}
+    LexicalizedReordering() : Feature("lexical_reordering") {}
 
     uint8_t Init(FeatureInit &feature_init) override;
 
@@ -40,7 +40,7 @@ class LexicalizedReordering : public Feature {
 
     std::string FeatureDescription(std::size_t index) const override;
   private:
-    Relation PhraseRelation(const Hypothesis &hypothesis, SourceSpan span) const;
+    Relation PhraseRelation(SourceSpan phrase1, SourceSpan phrase2) const;
 
     util::PODField<const pt::Row*> pt_row_;
     util::PODField<std::size_t> phrase_start_;

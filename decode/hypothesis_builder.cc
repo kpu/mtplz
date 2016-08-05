@@ -2,9 +2,12 @@
 
 namespace decode {
   
-Hypothesis *HypothesisBuilder::BuildHypothesis(const lm::ngram::Right &state, float score) {
+Hypothesis *HypothesisBuilder::BuildHypothesis(
+    const lm::ngram::Right &state, float score, const pt::Row *target) {
+  TargetPhrase *target_phrase = reinterpret_cast<TargetPhrase*>(feature_init_.target_phrase_layout.Allocate(pool_));
+  feature_init_.pt_row_field(target_phrase) = target;
   void *hypo = feature_init_.hypothesis_layout.Allocate(pool_);
-  feature_init_.hypothesis_field(hypo) = Hypothesis(score);
+  feature_init_.hypothesis_field(hypo) = Hypothesis(score, target_phrase);
   feature_init_.lm_state_field(hypo) = state;
   return reinterpret_cast<Hypothesis*>(hypo);
 }
