@@ -76,9 +76,9 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   // on a final hypothesis, we can get a final score
   init.hypothesis_field(next) = Hypothesis(3,hypo,5,6,row2);
   lexro.ScoreFinalHypothesis(*next, collector);
-  BOOST_CHECK_EQUAL(14+3+6, collector.Score());
+  BOOST_CHECK_EQUAL(14+3-14, collector.Score());
   BOOST_CHECK_EQUAL(3, store[0]);
-  BOOST_CHECK_EQUAL(20, store[3]);
+  BOOST_CHECK_EQUAL(0, store[3]);
 }
 
 } // namespace

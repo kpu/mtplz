@@ -45,6 +45,7 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
 
 void LexicalizedReordering::ScoreFinalHypothesis(
     const Hypothesis &hypothesis, ScoreCollector &collector) const {
+  // remove eos scoring
   SourceSpan hypo_span = SourceSpan(phrase_start_(&hypothesis), hypothesis.SourceEndIndex());
   SourceSpan prev_span;
   if (hypothesis.Previous()->Previous()) {
@@ -53,8 +54,8 @@ void LexicalizedReordering::ScoreFinalHypothesis(
     prev_span = SourceSpan(0,0);
   }
   uint8_t index = BACKWARD + PhraseRelation(prev_span, hypo_span);
-  const pt::Row *target = pt_row_(hypothesis.Target());
-  collector.AddDense(index, phrase_access_->lexical_reordering(target)[index]);
+  const pt::Row *target = pt_row_(hypothesis.Previous()->Target());
+  collector.AddDense(index, -phrase_access_->lexical_reordering(target)[index]);
 }
 
 LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(

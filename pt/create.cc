@@ -142,7 +142,7 @@ void CreateTable(int from, int to, const TextColumns columns, FieldConfig &confi
         vec.push_back(vocab.FindOrInsert(*t));
       }
       ParseFloats(dense_features, access.dense_features, row, TakeLogAndMosesFloor());
-      ParseFloats(lexical_reordering, access.lexical_reordering, row, FloatIdentity());
+      ParseFloats(lexical_reordering, access.lexical_reordering, row, TakeLogAndMosesFloor());
       // TODO sparse features
  
       if (!++line) break;
