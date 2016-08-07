@@ -225,7 +225,7 @@ Stacks::Stacks(System &system, Chart &chart) :
     stacks_.resize(stacks_.size() + 1);
     stacks_.back().reserve(system.SearchContext().PopLimit());
     Recombinator<LMState> recombinator(feature_init.lm_state_field);
-    EdgeOutput::Dedupe deduper(stacks_.size()*4/3, recombinator, recombinator);
+    EdgeOutput::Dedupe deduper(stacks_.back().size()*4/3, recombinator, recombinator);
     EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart}, deduper);
     gen.Search(system.SearchContext(), output);
   }
