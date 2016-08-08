@@ -9,6 +9,7 @@
 #include "util/string_piece.hh"
 
 #include <boost/pool/object_pool.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/utility.hpp>
 
 #include <vector>
@@ -23,12 +24,15 @@ struct FeatureInit;
 
 typedef search::Vertex TargetPhrases;
 
+// TODO currently not thread-safe because of state_buffer_!
 // Target phrases that correspond to each source span
 class Chart {
   public:
+    typedef boost::unordered_map<const pt::Row*,search::HypoState> StateMap;
+
     static constexpr ID EOS_WORD = 2;
 
-    Chart(std::size_t max_source_phrase_length, VocabMap &vocab_map, Objective &objective);
+    Chart(std::size_t max_source_phrase_length, VocabMap &vocab_map, Objective &objective, StateMap &state_map);
 
     void ReadSentence(StringPiece input);
 
@@ -108,6 +112,9 @@ class Chart {
     std::vector<TargetPhrases*> entries_;
 
     const std::size_t max_source_phrase_length_;
+
+    // TODO replace with something better, possibly remove totally.
+    StateMap &state_buffer_;
 };
 
 } // namespace decode
