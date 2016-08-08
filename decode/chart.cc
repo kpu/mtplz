@@ -37,7 +37,6 @@ void Chart::ReadSentence(StringPiece input) {
 
 void Chart::AddTargetPhraseToVertex(
     const pt::Row *phrase,
-    const SourcePhrase &source_phrase,
     search::Vertex &vertex,
     bool passthrough) {
   TargetPhrase *phrase_wrapper = reinterpret_cast<TargetPhrase*>(
@@ -47,12 +46,10 @@ void Chart::AddTargetPhraseToVertex(
   auto hypo_iter = state_buffer_.find(phrase);
   search::HypoState hypo;
   if (passthrough || hypo_iter == state_buffer_.end()) {
-    PhrasePair phrase_pair(source_phrase, phrase_wrapper);
-    phrase_pair.vocab_map = &vocab_map_;
-    phrase_pair.target_phrase_pool = &target_phrase_pool_;
+    TargetPhraseInfo target{phrase_wrapper, vocab_map_, target_phrase_pool_};
     // Bypass objective to allow the language model access to a hypo.state reference.
-    objective_.GetLanguageModelFeature()->ScoreTargetPhrase(phrase_pair, hypo.state);
-    float score = objective_.ScorePhrase(phrase_pair);
+    objective_.GetLanguageModelFeature()->InitTargetPhrase(target, hypo.state);
+    float score = objective_.ScoreTargetPhrase(target);
     feature_init_.phrase_score_field(phrase_wrapper) = score;
     hypo.score = score;
     if (!passthrough) {
@@ -66,7 +63,6 @@ void Chart::AddTargetPhraseToVertex(
 }
 
 void Chart::AddPassthrough(std::size_t position) {
-  SourcePhrase source_phrase(sentence_, position, position+1);
   TargetPhrases *pass = vertex_pool_.construct();
   pass->Root().InitRoot();
   pt::Access access = feature_init_.phrase_access;
@@ -76,7 +72,7 @@ void Chart::AddPassthrough(std::size_t position) {
     access.target(pt_phrase)[0] = sentence_ids_[position];
   }
   objective_.InitPassthroughPhrase(pt_phrase);
-  AddTargetPhraseToVertex(pt_phrase, source_phrase, *pass, true);
+  AddTargetPhraseToVertex(pt_phrase, *pass, true);
   pass->Root().FinishRoot(search::kPolicyLeft);
   SetRange(position, position+1, pass);
 }
@@ -84,8 +80,7 @@ void Chart::AddPassthrough(std::size_t position) {
 TargetPhrases &Chart::EndOfSentence() {
   search::Vertex &eos = *vertex_pool_.construct();
   eos.Root().InitRoot();
-  SourcePhrase source_phrase(sentence_, SentenceLength(), SentenceLength());
-  AddTargetPhraseToVertex(eos_phrase_, source_phrase, eos, false);
+  AddTargetPhraseToVertex(eos_phrase_, eos, false);
   eos.Root().FinishRoot(search::kPolicyLeft);
   return eos;
 }

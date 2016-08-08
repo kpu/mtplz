@@ -43,11 +43,10 @@ class Chart {
         for (std::size_t end = begin + 1; (end != sentence_.size() + 1) && (end <= begin + max_source_phrase_length_); ++end) {
           auto phrases = table.Lookup(&sentence_ids_[begin], &*sentence_ids_.begin() + end);
           if (phrases) {
-            SourcePhrase source_phrase(sentence_, begin, end);
             search::Vertex &vertex = *vertex_pool_.construct();
             vertex.Root().InitRoot();
             for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
-              AddTargetPhraseToVertex(&*phrase, source_phrase, vertex, false);
+              AddTargetPhraseToVertex(&*phrase, vertex, false);
             }
             vertex.Root().FinishRoot(search::kPolicyLeft);
             SetRange(begin, end, &vertex);
@@ -86,7 +85,6 @@ class Chart {
 
     void AddTargetPhraseToVertex(
         const pt::Row *phrase,
-        const SourcePhrase &source_phrase,
         search::Vertex &vertex,
         bool passthrough);
 

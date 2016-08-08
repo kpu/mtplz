@@ -21,9 +21,9 @@ class Passthrough : public Feature {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {
+    void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {
       // TODO make sparse
-      collector.AddDense(0, (float)passthrough_field_(phrase_pair.target_phrase));
+      collector.AddDense(0, (float)passthrough_field_(target.phrase));
     }
 
     void ScoreHypothesisWithSourcePhrase(

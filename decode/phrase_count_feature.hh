@@ -18,7 +18,7 @@ class PhraseCountFeature : public Feature {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {
+    void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {
       collector.AddDense(0, 1);
     }
 

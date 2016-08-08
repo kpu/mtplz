@@ -19,9 +19,9 @@ class LM : public Feature, public TargetPhraseInitializer {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
-    void ScoreTargetPhrase(PhrasePair phrase_pair, lm::ngram::ChartState &state) const override;
+    void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const override;
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override;
+    void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override;
 
     void ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override {}

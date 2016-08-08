@@ -40,7 +40,7 @@ class Objective {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const;
 
-    float ScorePhrase(PhrasePair phrase_pair) const;
+    float ScoreTargetPhrase(TargetPhraseInfo target) const;
 
     float ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase,

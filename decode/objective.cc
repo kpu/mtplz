@@ -45,13 +45,13 @@ void Objective::InitPassthroughPhrase(pt::Row *passthrough) const {
   }
 }
 
-float Objective::ScorePhrase(PhrasePair phrase_pair) const {
+float Objective::ScoreTargetPhrase(TargetPhraseInfo target) const {
   Hypothesis *null_hypo = nullptr;
   auto collector = GetCollector(null_hypo, nullptr);
   for (auto feature : features_) {
     if (feature.score_methods & ScoreMethod::Phrase) {
       collector.SetDenseOffset(feature.offset);
-      feature.feature->ScorePhrase(phrase_pair, collector);
+      feature.feature->ScoreTargetPhrase(target, collector);
     }
   }
   return collector.Score();

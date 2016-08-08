@@ -25,7 +25,7 @@ class LexicalizedReordering : public Feature {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override;
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {}
+    void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override;

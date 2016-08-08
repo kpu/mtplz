@@ -24,8 +24,8 @@ class WordInsertion : public Feature {
 
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {
-      collector.AddDense(0, phrase_access_->target(pt_row_field_(phrase_pair.target_phrase)).size());
+    void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {
+      collector.AddDense(0, phrase_access_->target(pt_row_field_(target.phrase)).size());
     }
 
     void ScoreHypothesisWithSourcePhrase(

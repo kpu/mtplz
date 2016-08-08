@@ -24,17 +24,17 @@ void LM::NewWord(const StringPiece string_rep, VocabWord *word) const {
   lm_word_index_(word) = model_.GetVocabulary().Index(string_rep);
 }
 
-void LM::ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const {
-  collector.AddDense(0, phrase_score_field_(phrase_pair.target_phrase));
+void LM::ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const {
+  collector.AddDense(0, phrase_score_field_(target.phrase));
 }
 
-void LM::ScoreTargetPhrase(PhrasePair pair, lm::ngram::ChartState &state) const {
+void LM::InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const {
   lm::ngram::RuleScore<lm::ngram::Model> scorer(model_, state);
-  const pt::Row *pt_target_phrase = pt_row_field_(pair.target_phrase);
+  const pt::Row *pt_target_phrase = pt_row_field_(target.phrase);
   for (const ID i : phrase_access_->target(pt_target_phrase)) {
-    scorer.Terminal(lm_word_index_(pair.vocab_map->Find(i)));
+    scorer.Terminal(lm_word_index_(target.vocab_map.Find(i)));
   }
-  phrase_score_field_(pair.target_phrase) = scorer.Finish();
+  phrase_score_field_(target.phrase) = scorer.Finish();
 }
 
 std::size_t LM::DenseFeatureCount() const { return 1; }

@@ -27,9 +27,9 @@ class PhraseTableFeatures : public Feature {
       }
     }
 
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {
+    void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {
       std::size_t i = 0;
-      for (float feature : phrase_access_->dense_features(pt_row_field_(phrase_pair.target_phrase))) {
+      for (float feature : phrase_access_->dense_features(pt_row_field_(target.phrase))) {
         collector.AddDense(i++, feature);
       }
     }

@@ -20,7 +20,7 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
     FeatureMock() : Feature("mock") {}
     FeatureMock(std::vector<StringPiece> &rep_buffer, std::vector<VocabWord*> &word_buffer)
       : Feature("mock"), rep_buffer_(&rep_buffer), word_buffer_(&word_buffer) {}
-    FeatureMock(std::vector<PhrasePair> &phrase_pair_buffer)
+    FeatureMock(std::vector<TargetPhraseInfo> &phrase_pair_buffer)
       : Feature("mock"), phrase_pair_buffer_(&phrase_pair_buffer) {}
 
     uint8_t Init(FeatureInit &feature_init) override { return ScoreMethod::Max; }
@@ -29,8 +29,8 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
       word_buffer_->push_back(word);
     }
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
-    void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const override {
-      phrase_pair_buffer_->push_back(phrase_pair);
+    void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {
+      phrase_pair_buffer_->push_back(target);
     }
     void ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override {}
@@ -40,11 +40,11 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
     std::size_t DenseFeatureCount() const override { return 1; }
     std::string FeatureDescription(std::size_t index) const override { return ""; }
-    void ScoreTargetPhrase(PhrasePair pair, lm::ngram::ChartState &state) const override {}
+    void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const override {}
 
     std::vector<StringPiece> *rep_buffer_;
     std::vector<VocabWord*> *word_buffer_;
-    std::vector<PhrasePair> *phrase_pair_buffer_;
+    std::vector<TargetPhraseInfo> *phrase_pair_buffer_;
 };
 
 BOOST_AUTO_TEST_CASE(InitTest) {
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(EosTest) {
   pt::Access access(config);
   lm::ngram::State lm_state;
   Objective objective(access, lm_state);
-  std::vector<PhrasePair> phrase_pair_buffer;
+  std::vector<TargetPhraseInfo> phrase_pair_buffer;
   FeatureMock feature_mock(phrase_pair_buffer);
   objective.AddFeature(feature_mock);
   objective.RegisterLanguageModel(feature_mock);

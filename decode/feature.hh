@@ -21,11 +21,15 @@ class VocabMap;
 // Layouts:
 struct Hypothesis;
 struct VocabWord;
- 
-struct PhrasePair {
-  PhrasePair(const SourcePhrase source, TargetPhrase *&target)
-    : source_phrase(source), target_phrase(target) {}
 
+struct TargetPhraseInfo {
+  TargetPhrase *&phrase;
+  const VocabMap &vocab_map;
+  util::Pool &target_phrase_pool; // for dynamic-length access to phrase
+};
+ 
+// TODO store TargetPhraseInfo instead of single values
+struct PhrasePair {
   const SourcePhrase source_phrase;
   TargetPhrase *&target_phrase;
   const VocabMap *vocab_map;
@@ -54,9 +58,9 @@ class Feature {
      * See documentation in pt/access.hh */
     virtual void InitPassthroughPhrase(pt::Row *passthrough) const = 0;
 
-    /** Score isolated pair of source phrase and target phrase.
+    /** Score isolated target phrase.
      * Allows to store data in target phrase. */
-    virtual void ScorePhrase(PhrasePair phrase_pair, ScoreCollector &collector) const = 0;
+    virtual void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const = 0;
 
     /** collects score and allows to save constant-length data in
      * the hypothesis layout for the next hypothesis (collector.NewHypothesis()) */
@@ -81,7 +85,7 @@ class Feature {
 // for LM bypass
 class TargetPhraseInitializer {
   public:
-    virtual void ScoreTargetPhrase(PhrasePair phrase_pair, lm::ngram::ChartState &state) const = 0;
+    virtual void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const = 0;
 };
 
 
