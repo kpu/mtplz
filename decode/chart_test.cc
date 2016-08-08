@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(InitTest) {
   BaseVocab base_vocab;
   base_vocab.map.push_back(nullptr);
   VocabMap vocab_map(objective, base_vocab);
-  Chart::StateMap state_map;
-  Chart chart(13, vocab_map, objective, state_map);
+  Chart::VertexCache cache;
+  Chart chart(13, vocab_map, objective, cache);
   BOOST_CHECK_EQUAL(13, chart.MaxSourcePhraseLength());
 }
 
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(EosTest) {
   BaseVocab base_vocab;
   base_vocab.map.push_back(nullptr);
   VocabMap vocab_map(objective, base_vocab);
-  Chart::StateMap state_map;
-  Chart chart(11, vocab_map, objective, state_map);
+  Chart::VertexCache cache;
+  Chart chart(11, vocab_map, objective, cache);
 
   TargetPhrases &eos = chart.EndOfSentence();
   BOOST_CHECK_EQUAL(1, eos.Root().Size());
@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE(ReadSentenceTest) {
   }
   base_vocab.map.push_back(word_small);
   VocabMap vocab_map(objective, base_vocab);
-  Chart::StateMap state_map;
-  Chart chart(5, vocab_map, objective, state_map);
+  Chart::VertexCache cache;
+  Chart chart(5, vocab_map, objective, cache);
 
   // test known and unknown
   std::string input = "a small test test";

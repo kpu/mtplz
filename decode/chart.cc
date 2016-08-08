@@ -10,12 +10,12 @@ namespace decode {
 Chart::Chart(std::size_t max_source_phrase_length,
     VocabMap &vocab_map,
     Objective &objective,
-    StateMap &state_map)
+    VertexCache &cache)
     : max_source_phrase_length_(max_source_phrase_length),
       objective_(objective),
       feature_init_(objective.GetFeatureInit()),
       vocab_map_(vocab_map),
-      state_buffer_(state_map) {
+      cache_(cache) {
   UTIL_THROW_IF(objective.GetLanguageModelFeature() == nullptr, util::Exception,
       "Missing language model for objective!");
   pt::Access access = feature_init_.phrase_access;
@@ -40,24 +40,16 @@ void Chart::AddTargetPhraseToVertex(
     search::Vertex &vertex,
     bool passthrough) {
   TargetPhrase *phrase_wrapper = reinterpret_cast<TargetPhrase*>(
-      feature_init_.target_phrase_layout.Allocate(target_phrase_pool_));
+      feature_init_.target_phrase_layout.Allocate(cache_.target_phrase_pool));
   feature_init_.pt_row_field(phrase_wrapper) = phrase;
   feature_init_.passthrough_field(phrase_wrapper) = passthrough;
-  auto hypo_iter = state_buffer_.find(phrase);
   search::HypoState hypo;
-  if (passthrough || hypo_iter == state_buffer_.end()) {
-    TargetPhraseInfo target{phrase_wrapper, vocab_map_, target_phrase_pool_};
-    // Bypass objective to allow the language model access to a hypo.state reference.
-    objective_.GetLanguageModelFeature()->InitTargetPhrase(target, hypo.state);
-    float score = objective_.ScoreTargetPhrase(target);
-    feature_init_.phrase_score_field(phrase_wrapper) = score;
-    hypo.score = score;
-    if (!passthrough) {
-      state_buffer_.insert(std::make_pair(phrase,hypo));
-    }
-  } else { // lookup successful
-    hypo = (*hypo_iter).second;
-  }
+  TargetPhraseInfo target{phrase_wrapper, vocab_map_, cache_.target_phrase_pool};
+  // Bypass objective to allow the language model access to a hypo.state reference.
+  objective_.GetLanguageModelFeature()->InitTargetPhrase(target, hypo.state);
+  float score = objective_.ScoreTargetPhrase(target);
+  feature_init_.phrase_score_field(phrase_wrapper) = score;
+  hypo.score = score;
   hypo.history.cvp = phrase_wrapper;
   vertex.Root().AppendHypothesis(hypo);
 }

@@ -26,16 +26,15 @@
 #include <vector>
 
 namespace decode {
-void Decode(System &system, const pt::Table &table, Chart::StateMap &state_map,
+void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache, VocabMap &vocab_map,
     const StringPiece in,
     ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  VocabMap vocab_map(system.GetObjective(), system.GetBaseVocab());
   FeatureStore feature_store;
   if (verbose) {
     feature_store.resize(system.GetObjective().weights.size());
     system.GetObjective().feature_storage = &feature_store;
   }
-  Chart chart(table.Stats().max_source_phrase_length, vocab_map, system.GetObjective(), state_map);
+  Chart chart(table.Stats().max_source_phrase_length, vocab_map, system.GetObjective(), cache);
   chart.ReadSentence(in);
   chart.LoadPhrases(table);
   Stacks stacks(system, chart);
@@ -114,7 +113,11 @@ int main(int argc, char *argv[]) {
 
     util::FilePiece f(0, NULL, &std::cerr);
     util::FileStream out(1);
-    decode::Chart::StateMap state_map(15000000); // TODO non-hardcode
+    decode::Chart::VertexCache cache(15000000); // TODO non-hardcode
+    // TODO vocab map originally exists to avoid having a global dictionary.
+    // it is now here because we need backing for cache, which only exists
+    // to make speed comparable to the previous mtplz
+    decode::VocabMap vocab_map(sys.GetObjective(), sys.GetBaseVocab());
     decode::ScoreHistoryMap history_map;
     std::size_t i = 0;
     while (true) {
@@ -124,7 +127,7 @@ int main(int argc, char *argv[]) {
       } catch (const util::EndOfFileException &e) { break; }
       util::PrintUsage(std::cerr);
       std::cerr << "sentence " << i++ << std::endl;
-      decode::Decode(sys, table, state_map, line, history_map, verbose, out);
+      decode::Decode(sys, table, cache, vocab_map, line, history_map, verbose, out);
       out.flush();
       f.UpdateProgress();
     }

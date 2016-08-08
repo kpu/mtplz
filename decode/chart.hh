@@ -24,15 +24,21 @@ struct FeatureInit;
 
 typedef search::Vertex TargetPhrases;
 
-// TODO currently not thread-safe because of state_buffer_!
+// TODO currently not thread-safe because of cache_!
 // Target phrases that correspond to each source span
 class Chart {
   public:
-    typedef boost::unordered_map<const pt::Row*,search::HypoState> StateMap;
+    typedef boost::unordered_map<SourcePhrase,search::Vertex,SourcePhraseHasher,SourcePhraseEqual> VertexMap;
+    struct VertexCache {
+      VertexCache() {}
+      explicit VertexCache(std::size_t size) : map(size) {}
+      VertexMap map;
+      util::Pool target_phrase_pool;
+    };
 
     static constexpr ID EOS_WORD = 2;
 
-    Chart(std::size_t max_source_phrase_length, VocabMap &vocab_map, Objective &objective, StateMap &state_map);
+    Chart(std::size_t max_source_phrase_length, VocabMap &vocab_map, Objective &objective, VertexCache &cache);
 
     void ReadSentence(StringPiece input);
 
@@ -41,14 +47,21 @@ class Chart {
       entries_.resize(sentence_.size() * max_source_phrase_length_);
       for (std::size_t begin = 0; begin != sentence_.size(); ++begin) {
         for (std::size_t end = begin + 1; (end != sentence_.size() + 1) && (end <= begin + max_source_phrase_length_); ++end) {
-          auto phrases = table.Lookup(&sentence_ids_[begin], &*sentence_ids_.begin() + end);
-          if (phrases) {
-            search::Vertex &vertex = *vertex_pool_.construct();
-            vertex.Root().InitRoot();
-            for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
-              AddTargetPhraseToVertex(&*phrase, vertex, false);
+          SourcePhrase source_phrase(sentence_, begin, end);
+          SourcePhraseHasher hasher;
+          search::Vertex &vertex = cache_.map[source_phrase];
+          if (vertex.Empty()) {
+            auto phrases = table.Lookup(&sentence_ids_[begin], &*sentence_ids_.begin() + end);
+            if (phrases) {
+              vertex.Root().InitRoot();
+              for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
+                AddTargetPhraseToVertex(&*phrase, vertex, false);
+              }
+              vertex.Root().FinishRoot(search::kPolicyLeft);
+              cache_.map.insert(std::make_pair(source_phrase,vertex));
+              SetRange(begin, end, &vertex);
             }
-            vertex.Root().FinishRoot(search::kPolicyLeft);
+          } else {
             SetRange(begin, end, &vertex);
           }
         }
@@ -92,7 +105,6 @@ class Chart {
 
     VocabMap &vocab_map_;
 
-    util::Pool target_phrase_pool_;
     boost::object_pool<search::Vertex> vertex_pool_;
 
     Objective &objective_;
@@ -101,7 +113,7 @@ class Chart {
     std::vector<VocabWord*> sentence_;
     std::vector<ID> sentence_ids_;
 
-    // Backs any oov words that are passed through.  
+    // Backs any oov phrases that are passed through.  
     util::Pool passthrough_pool_;
 
     pt::Row *eos_phrase_;
@@ -112,7 +124,8 @@ class Chart {
     const std::size_t max_source_phrase_length_;
 
     // TODO replace with something better, possibly remove totally.
-    StateMap &state_buffer_;
+    // or at least pre-fill and make constant
+    VertexCache &cache_;
 };
 
 } // namespace decode

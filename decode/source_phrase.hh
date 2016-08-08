@@ -33,10 +33,29 @@ class SourcePhrase {
     const std::size_t Length() const {
       return span_.second - span_.first;
     }
-
   private:
     const std::vector<VocabWord*> &base_;
     const SourceSpan span_;
+};
+
+struct SourcePhraseHasher {
+  std::size_t operator()(const SourcePhrase &source) const noexcept {
+    std::size_t result = 0;
+    for (VocabWord *word : source) {
+      result = 13 + 13*result + (std::size_t)word;
+    }
+    return result;
+  }
+};
+
+struct SourcePhraseEqual {
+  bool operator()(const SourcePhrase &first, const SourcePhrase &second) const {
+    if (first.Length() != second.Length()) { return false; }
+    for (auto a = first.begin(), b = second.begin(); a != first.end(); ++a, ++b) {
+      if (*a != *b) { return false; }
+    }
+    return true;
+  }
 };
 
 } // namespace decode

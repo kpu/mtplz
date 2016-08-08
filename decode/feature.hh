@@ -25,16 +25,16 @@ struct VocabWord;
 struct TargetPhraseInfo {
   TargetPhrase *&phrase;
   const VocabMap &vocab_map;
-  util::Pool &target_phrase_pool; // for dynamic-length access to phrase
+  util::Pool &phrase_pool; // for dynamic-length access to phrase
 };
  
-// TODO store TargetPhraseInfo instead of single values
 struct PhrasePair {
-  const SourcePhrase source_phrase;
-  TargetPhrase *&target_phrase;
+  PhrasePair(const SourcePhrase &source_phrase, TargetPhrase *target_phrase)
+    : source(source_phrase), target(target_phrase) {}
+
+  const SourcePhrase source;
+  TargetPhrase *target;
   const VocabMap *vocab_map;
-  // pool is null when target phrase only allows constant-length data changes
-  util::Pool *target_phrase_pool = nullptr;
 };
 
 class Feature {

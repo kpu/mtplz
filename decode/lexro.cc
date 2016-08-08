@@ -37,8 +37,8 @@ void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
 void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
   SourceSpan hypo_span(phrase_start_(&hypothesis), hypothesis.SourceEndIndex());
-  uint8_t index = FORWARD + PhraseRelation(hypo_span, phrase_pair.source_phrase.Span());
-  const pt::Row *target = pt_row_(phrase_pair.target_phrase);
+  uint8_t index = FORWARD + PhraseRelation(hypo_span, phrase_pair.source.Span());
+  const pt::Row *target = pt_row_(phrase_pair.target);
   float score = phrase_access_->lexical_reordering(target)[index];
   collector.AddDense(index, score);
 }
