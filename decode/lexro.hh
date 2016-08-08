@@ -19,7 +19,7 @@ class LexicalizedReordering : public Feature {
 
     LexicalizedReordering() : Feature("lexical_reordering") {}
 
-    uint8_t Init(FeatureInit &feature_init) override;
+    void Init(FeatureInit &feature_init) override;
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
 

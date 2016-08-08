@@ -3,13 +3,12 @@
 
 namespace decode {
 
-uint8_t LexicalizedReordering::Init(FeatureInit &feature_init) {
+void LexicalizedReordering::Init(FeatureInit &feature_init) {
   pt_row_ = feature_init.pt_row_field;
   UTIL_THROW_IF(!feature_init.phrase_access.lexical_reordering, util::Exception,
       "requested lexicalized reordering but feature values are missing in phrase access");
   phrase_start_ = util::PODField<std::size_t>(feature_init.hypothesis_layout);
   phrase_access_ = &feature_init.phrase_access;
-  return ScoreMethod::InitPassthrough | ScoreMethod::Source | ScoreMethod::Pair | ScoreMethod::Final;
 }
 
 void LexicalizedReordering::InitPassthroughPhrase(pt::Row *passthrough) const {

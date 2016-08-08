@@ -4,9 +4,7 @@ namespace decode {
 
 Distortion::Distortion() : Feature("distortion") {}
 
-uint8_t Distortion::Init(FeatureInit &feature_init) {
-  return ScoreMethod::Source;
-}
+void Distortion::Init(FeatureInit &feature_init) {}
 
 void Distortion::ScoreHypothesisWithSourcePhrase(
         const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const {

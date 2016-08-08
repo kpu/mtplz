@@ -64,7 +64,6 @@ class Objective {
     struct FeatureInfo {
       const Feature *feature;
       const std::size_t offset;
-      const uint8_t score_methods;
     };
 
     ScoreCollector GetCollector(

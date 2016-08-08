@@ -10,12 +10,11 @@ class PhraseTableFeatures : public Feature {
 
     PhraseTableFeatures() : Feature("phrase_table") {}
 
-    uint8_t Init(FeatureInit &feature_init) override {
+    void Init(FeatureInit &feature_init) override {
       UTIL_THROW_IF(!feature_init.phrase_access.dense_features, util::Exception,
           "requested phrase table score but feature values are missing in phrase access");
       phrase_access_ = &feature_init.phrase_access;
       pt_row_field_ = feature_init.pt_row_field;
-      return ScoreMethod::InitPassthrough | ScoreMethod::Phrase;
     }
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {}

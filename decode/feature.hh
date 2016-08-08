@@ -10,12 +10,6 @@
 
 namespace decode {
 
-enum ScoreMethod : uint8_t {
-  Any = 0,
-  NewWord = 1, InitPassthrough = 2, Phrase = 4, Source = 8, Pair = 16, Final = 32,
-  Max = 63
-};
-
 class VocabMap;
 
 // Layouts:
@@ -47,9 +41,8 @@ class Feature {
     
     StringPiece name;
 
-    /** Add state fields to the layouts in init. Return which scoring
-     * methods should be used (see ScoreMethod above) */
-    virtual uint8_t Init(FeatureInit &feature_init) = 0;
+    /** Add state fields to the layouts in init. */
+    virtual void Init(FeatureInit &feature_init) = 0;
 
     /** allows to save constant-length data in the word's representation */
     virtual void NewWord(const StringPiece string_rep, VocabWord *word) const = 0;
