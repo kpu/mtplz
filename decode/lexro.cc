@@ -29,8 +29,8 @@ void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
     hypo_span = SourceSpan(0,0);
   }
   uint8_t index = BACKWARD + PhraseRelation(hypo_span, source_phrase.Span());
-  const pt::Row *target = pt_row_(hypothesis.Target());
-  collector.AddDense(index, phrase_access_->lexical_reordering(target)[index]);
+  float score = phrase_access_->lexical_reordering(pt_row_(hypothesis.Target()))[index];
+  collector.AddDense(index, score);
 }
 
 void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
@@ -53,8 +53,8 @@ void LexicalizedReordering::ScoreFinalHypothesis(
     prev_span = SourceSpan(0,0);
   }
   uint8_t index = BACKWARD + PhraseRelation(prev_span, hypo_span);
-  const pt::Row *target = pt_row_(hypothesis.Previous()->Target());
-  collector.AddDense(index, -phrase_access_->lexical_reordering(target)[index]);
+  float score = phrase_access_->lexical_reordering(pt_row_(hypothesis.Previous()->Target()))[index];
+  collector.AddDense(index, -score);
 }
 
 LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(

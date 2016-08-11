@@ -29,11 +29,6 @@ namespace decode {
 void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache, VocabMap &vocab_map,
     const StringPiece in,
     ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  FeatureStore feature_store;
-  if (verbose) {
-    feature_store.resize(system.GetObjective().weights.size());
-    system.GetObjective().feature_storage = &feature_store;
-  }
   Chart chart(table.Stats().max_source_phrase_length, vocab_map, system.GetObjective(), cache);
   chart.ReadSentence(in);
   chart.LoadPhrases(table);
@@ -44,13 +39,24 @@ void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache, V
 	
   if (hyp) {
     Output(*hyp, vocab_map, history_map, out, system.GetObjective().GetFeatureInit(), verbose);
+    std::cerr << "score: " << hyp->GetScore() << std::endl;
   }
   out << '\n';
 
-  if (verbose) { // TODO feature vector collects data of all paths, not only the chosen one
+  if (verbose && hyp) {
+    std::vector<float> feature_values(system.GetObjective().weights.size());
+    while (hyp->Previous() && hyp->Target()) {
+      std::size_t i = 0;
+      for (float v : system.GetObjective().GetFeatureValues(*hyp)) {
+        feature_values[i++] += v;
+        std::cerr << v << " ";
+      }
+      std::cerr << std::endl;
+      hyp = hyp->Previous();
+    }
     std::cerr << "feature values: [ \n";
     std::size_t i = 0;
-    for (auto value : feature_store) {
+    for (auto value : feature_values) {
       std::cerr << system.GetObjective().FeatureDescription(i++) << ": " << value << std::endl;
     }
     std::cerr << "]\n";
@@ -109,6 +115,7 @@ int main(int argc, char *argv[]) {
     sys.GetObjective().AddFeature(lexro);
 
     sys.LoadVocab(table.Vocab(), table.Stats().vocab_size);
+    sys.GetObjective().SetStoreFeatureValues(verbose);
     sys.GetObjective().LoadWeights(weights);
 
     util::FilePiece f(0, NULL, &std::cerr);

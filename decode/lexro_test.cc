@@ -46,39 +46,41 @@ BOOST_AUTO_TEST_CASE(LexRo) {
 
   // setup scoring
   std::vector<float> weights({1,1,1,1,1,1});
-  FeatureStore store({0,0,0,0,0,0});
+  util::Layout fstore_layout;
+  util::ArrayField<float> fstore(fstore_layout, 6);
+  FeatureStore store(fstore, fstore_layout.Allocate(pool));
   std::vector<VocabWord*> sentence;
   for (int i=0; i<6; ++i) sentence.push_back(nullptr);
   SourcePhrase source_phrase(sentence, 5,6);
-  ScoreCollector collector(weights, next, nullptr, &store);
+  ScoreCollector collector(weights, next, nullptr, store);
   collector.SetDenseOffset(0);
 
   // monotone source, forward scoring
   lexro.ScoreHypothesisWithSourcePhrase(*hypo, source_phrase, collector);
   BOOST_CHECK_EQUAL(14, collector.Score());
-  BOOST_CHECK_EQUAL(0, store[0]);
-  BOOST_CHECK_EQUAL(14, store[3]);
+  BOOST_CHECK_EQUAL(0, store()[0]);
+  BOOST_CHECK_EQUAL(14, store()[3]);
   lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair(source_phrase, row2), collector);
   BOOST_CHECK_EQUAL(14+3, collector.Score());
-  BOOST_CHECK_EQUAL(3, store[0]);
-  BOOST_CHECK_EQUAL(14, store[3]);
+  BOOST_CHECK_EQUAL(3, store()[0]);
+  BOOST_CHECK_EQUAL(14, store()[3]);
 
   // for next source phrase we can use backwards reordering score
   SourcePhrase swap_source(sentence,1,5);
-  FeatureStore store2({0,0,0,0,0,0});
-  ScoreCollector collector2(weights, snd_next, nullptr, &store2);
+  FeatureStore store2(fstore, fstore_layout.Allocate(pool));
+  ScoreCollector collector2(weights, snd_next, nullptr, store2);
   collector2.SetDenseOffset(0);
   lexro.ScoreHypothesisWithSourcePhrase(*next, swap_source, collector2);
   BOOST_CHECK_EQUAL(15, collector2.Score());
-  BOOST_CHECK_EQUAL(0, store2[1]);
-  BOOST_CHECK_EQUAL(15, store2[4]);
+  BOOST_CHECK_EQUAL(0, store2()[1]);
+  BOOST_CHECK_EQUAL(15, store2()[4]);
 
   // on a final hypothesis, we can get a final score
   init.hypothesis_field(next) = Hypothesis(3,hypo,5,6,row2);
   lexro.ScoreFinalHypothesis(*next, collector);
   BOOST_CHECK_EQUAL(14+3-14, collector.Score());
-  BOOST_CHECK_EQUAL(3, store[0]);
-  BOOST_CHECK_EQUAL(0, store[3]);
+  BOOST_CHECK_EQUAL(3, store()[0]);
+  BOOST_CHECK_EQUAL(0, store()[3]);
 }
 
 } // namespace

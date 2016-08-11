@@ -17,6 +17,15 @@ void Objective::AddFeature(Feature &feature) {
   weights.resize(dense_feature_count_, 1);
 }
 
+std::vector<float> Objective::GetFeatureValues(const Hypothesis &hypothesis) {
+  assert(store_feature_values_);
+  std::vector<float> values;
+  for (std::size_t i = 0; i < hypothesis_feature_values_.size(); ++i) {
+    values.push_back(hypothesis_feature_values_(&hypothesis)[i]);
+  }
+  return values;
+}
+
 void Objective::LoadWeights(const Weights &loaded_weights) {
   assert(weights.size() == DenseFeatureCount());
   for (FeatureInfo feature : features_) {
@@ -25,6 +34,12 @@ void Objective::LoadWeights(const Weights &loaded_weights) {
     for (std::size_t j=0; j < feature_weights.size(); j++) {
       weights[feature.offset + j] = feature_weights[j];
     }
+  }
+  if (store_feature_values_) {
+    phrase_feature_values_ = util::ArrayField<float>(
+        feature_init_.target_phrase_layout, DenseFeatureCount());
+    hypothesis_feature_values_ = util::ArrayField<float>(
+        feature_init_.hypothesis_layout, DenseFeatureCount());
   }
 }
 
@@ -42,7 +57,9 @@ void Objective::InitPassthroughPhrase(pt::Row *passthrough) const {
 
 float Objective::ScoreTargetPhrase(TargetPhraseInfo target) const {
   Hypothesis *null_hypo = nullptr;
-  auto collector = GetCollector(null_hypo, nullptr);
+  FeatureStore store(phrase_feature_values_, store_feature_values_ ? target.phrase : nullptr);
+  store.Init();
+  auto collector = GetCollector(null_hypo, nullptr, store);
   for (auto feature : features_) {
     collector.SetDenseOffset(feature.offset);
     feature.feature->ScoreTargetPhrase(target, collector);
@@ -53,7 +70,9 @@ float Objective::ScoreTargetPhrase(TargetPhraseInfo target) const {
 float Objective::ScoreHypothesisWithSourcePhrase(
     const Hypothesis &hypothesis, const SourcePhrase source_phrase,
     Hypothesis *&new_hypothesis) const {
-  auto collector = GetCollector(new_hypothesis, nullptr);
+  FeatureStore store(hypothesis_feature_values_, store_feature_values_ ? new_hypothesis : nullptr);
+  store.Init();
+  auto collector = GetCollector(new_hypothesis, nullptr, store);
   for (auto feature : features_) {
     collector.SetDenseOffset(feature.offset);
     feature.feature->ScoreHypothesisWithSourcePhrase(hypothesis, source_phrase, collector);
@@ -64,7 +83,13 @@ float Objective::ScoreHypothesisWithSourcePhrase(
 float Objective::ScoreHypothesisWithPhrasePair(
     const Hypothesis &hypothesis, PhrasePair phrase_pair,
     Hypothesis *&new_hypothesis, util::Pool &hypothesis_pool) const {
-  auto collector = GetCollector(new_hypothesis, &hypothesis_pool);
+  FeatureStore store(hypothesis_feature_values_, store_feature_values_ ? new_hypothesis : nullptr);
+  if (store_feature_values_) { // copy phrase values to hypothesis
+    for (std::size_t i = 0; i < phrase_feature_values_.size(); ++i) {
+      store()[i] += phrase_feature_values_(phrase_pair.target)[i];
+    }
+  }
+  auto collector = GetCollector(new_hypothesis, &hypothesis_pool, store);
   for (auto feature : features_) {
     collector.SetDenseOffset(feature.offset);
     feature.feature->ScoreHypothesisWithPhrasePair(hypothesis, phrase_pair, collector);
@@ -72,9 +97,10 @@ float Objective::ScoreHypothesisWithPhrasePair(
   return collector.Score();
 }
 
-float Objective::ScoreFinalHypothesis(const Hypothesis &hypothesis) const {
+float Objective::ScoreFinalHypothesis(Hypothesis &hypothesis) const {
   Hypothesis *null_hypo = nullptr;
-  auto collector = GetCollector(null_hypo, nullptr);
+  FeatureStore store(hypothesis_feature_values_, store_feature_values_ ? &hypothesis : nullptr);
+  auto collector = GetCollector(null_hypo, nullptr, store);
   for (auto feature : features_) {
     collector.SetDenseOffset(feature.offset);
     feature.feature->ScoreFinalHypothesis(hypothesis, collector);
@@ -98,8 +124,9 @@ std::string Objective::FeatureDescription(std::size_t index) const {
 
 ScoreCollector Objective::GetCollector(
     Hypothesis *&new_hypothesis,
-    util::Pool *hypothesis_pool) const {
-  return ScoreCollector(weights, new_hypothesis, hypothesis_pool, feature_storage);
+    util::Pool *hypothesis_pool,
+    FeatureStore feature_store) const {
+  return ScoreCollector(weights, new_hypothesis, hypothesis_pool, feature_store);
 }
 
 } // namespace decode

@@ -14,13 +14,17 @@ class TargetPhraseInitializer;
 class Objective {
   public:
     std::vector<float> weights = std::vector<float>();
-    // if non-null, individual feature values are stored here
-    std::vector<float> *feature_storage = nullptr;
 
     explicit Objective(const pt::Access &phrase_access,
         const lm::ngram::State &lm_begin_sentence_state);
 
     void AddFeature(Feature &feature);
+
+    void SetStoreFeatureValues(bool store) {
+      store_feature_values_ = store;
+    }
+
+    std::vector<float> GetFeatureValues(const Hypothesis &hypothesis);
 
     void RegisterLanguageModel(TargetPhraseInitializer &lm_feature) {
       lm_feature_ = &lm_feature;
@@ -50,7 +54,7 @@ class Objective {
         const Hypothesis &hypothesis, PhrasePair phrase_pair,
         Hypothesis *&new_hypothesis, util::Pool &hypothesis_pool) const;
 
-    float ScoreFinalHypothesis(const Hypothesis &hypothesis) const;
+    float ScoreFinalHypothesis(Hypothesis &hypothesis) const;
 
     std::size_t DenseFeatureCount() const;
 
@@ -68,11 +72,16 @@ class Objective {
 
     ScoreCollector GetCollector(
         Hypothesis *&new_hypothesis,
-        util::Pool *hypothesis_pool) const;
+        util::Pool *hypothesis_pool,
+        FeatureStore feature_store) const;
 
     // TODO use ScoreMethod values to make list of features for each method
     std::vector<FeatureInfo> features_;
     std::size_t dense_feature_count_ = 0;
+
+    bool store_feature_values_;
+    util::ArrayField<float> phrase_feature_values_;
+    util::ArrayField<float> hypothesis_feature_values_;
 
     FeatureInit feature_init_;
     const TargetPhraseInitializer *lm_feature_ = nullptr;

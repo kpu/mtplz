@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstddef>
-#include <iterator>
-#include <vector>
+#include "util/layout.hh"
 
 namespace util { class Pool; }
 
@@ -10,7 +8,29 @@ namespace decode {
 
 class Hypothesis;
 
-typedef std::vector<float> FeatureStore;
+class FeatureStore {
+  public:
+    FeatureStore(const util::ArrayField<float> access, void *data)
+      : access_(access), data_(data) {}
+
+    void Init() {
+      if (data_) {
+        // TODO memset instead?
+        for (std::size_t i = 0; i < access_.size(); ++i) {
+          access_(data_)[i] = 0;
+        }
+      }
+    }
+
+    operator bool() const { return data_; }
+
+    boost::iterator_range<float*> operator()() {
+      return access_(data_);
+    }
+  private:
+    const util::ArrayField<float> access_;
+    void *data_;
+};
 
 class ScoreCollector {
   public:
@@ -18,7 +38,7 @@ class ScoreCollector {
         const std::vector<float> &weights,
         Hypothesis *&new_hypothesis,
         util::Pool *hypothesis_pool,
-        FeatureStore *dense_features) :
+        FeatureStore dense_features) :
       weights_(weights),
       new_hypothesis_(new_hypothesis),
       hypothesis_pool_(hypothesis_pool),
@@ -51,7 +71,7 @@ class ScoreCollector {
     Hypothesis *&new_hypothesis_;
     util::Pool *hypothesis_pool_;
     std::size_t dense_feature_offset_;
-    FeatureStore *dense_features_;
+    FeatureStore dense_features_;
 };
 
 } // namespace decode
