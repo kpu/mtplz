@@ -21,6 +21,7 @@ namespace decode {
 
 class Objective;
 struct FeatureInit;
+struct BaseVocab;
 
 typedef search::Vertex TargetPhrases;
 
@@ -38,7 +39,7 @@ class Chart {
 
     static constexpr ID EOS_WORD = 2;
 
-    Chart(std::size_t max_source_phrase_length, VocabMap &vocab_map, Objective &objective, VertexCache &cache);
+    Chart(std::size_t max_source_phrase_length, const BaseVocab &vocab, Objective &objective, VertexCache &cache);
 
     void ReadSentence(StringPiece input);
 
@@ -48,21 +49,25 @@ class Chart {
       for (std::size_t begin = 0; begin != sentence_.size(); ++begin) {
         for (std::size_t end = begin + 1; (end != sentence_.size() + 1) && (end <= begin + max_source_phrase_length_); ++end) {
           SourcePhrase source_phrase(sentence_, begin, end);
-          SourcePhraseHasher hasher;
-          search::Vertex &vertex = cache_.map[source_phrase];
-          if (vertex.Empty()) {
-            auto phrases = table.Lookup(&sentence_ids_[begin], &*sentence_ids_.begin() + end);
-            if (phrases) {
-              vertex.Root().InitRoot();
-              for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
-                AddTargetPhraseToVertex(&*phrase, vertex, false);
-              }
-              vertex.Root().FinishRoot(search::kPolicyLeft);
-              cache_.map.insert(std::make_pair(source_phrase,vertex));
-              SetRange(begin, end, &vertex);
+          search::Vertex *vertex;
+          bool use_cache = end - begin <= cached_phrase_max_length_;
+          if (use_cache) {
+            vertex = &cache_.map[source_phrase];
+            if (!vertex->Empty()) {
+              SetRange(begin, end, vertex);
+              continue;
             }
           } else {
-            SetRange(begin, end, &vertex);
+            vertex = vertex_pool_.construct();
+          }
+          auto phrases = table.Lookup(&sentence_ids_[begin], &*sentence_ids_.begin() + end);
+          if (phrases) {
+            vertex->Root().InitRoot();
+            for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
+              AddTargetPhraseToVertex(&*phrase, *vertex, false, use_cache);
+            }
+            vertex->Root().FinishRoot(search::kPolicyLeft);
+            SetRange(begin, end, vertex);
           }
         }
         if (!Range(begin, begin + 1)) {
@@ -99,13 +104,15 @@ class Chart {
     void AddTargetPhraseToVertex(
         const pt::Row *phrase,
         search::Vertex &vertex,
-        bool passthrough);
+        bool passthrough,
+        bool use_cache);
 
     void AddPassthrough(std::size_t position);
 
-    VocabMap &vocab_map_;
+    VocabMap vocab_map_;
 
     boost::object_pool<search::Vertex> vertex_pool_;
+    util::Pool target_phrase_pool_;
 
     Objective &objective_;
     FeatureInit &feature_init_;
@@ -122,6 +129,7 @@ class Chart {
     std::vector<TargetPhrases*> entries_;
 
     const std::size_t max_source_phrase_length_;
+    const std::size_t cached_phrase_max_length_ = 2;
 
     // TODO replace with something better, possibly remove totally.
     // or at least pre-fill and make constant

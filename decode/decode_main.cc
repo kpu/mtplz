@@ -26,10 +26,10 @@
 #include <vector>
 
 namespace decode {
-void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache, VocabMap &vocab_map,
+void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache,
     const StringPiece in,
     ScoreHistoryMap &history_map, bool verbose, util::FileStream &out) {
-  Chart chart(table.Stats().max_source_phrase_length, vocab_map, system.GetObjective(), cache);
+  Chart chart(table.Stats().max_source_phrase_length, system.GetBaseVocab(), system.GetObjective(), cache);
   chart.ReadSentence(in);
   chart.LoadPhrases(table);
   Stacks stacks(system, chart);
@@ -38,7 +38,7 @@ void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache, V
   history_map.clear();
 	
   if (hyp) {
-    Output(*hyp, vocab_map, history_map, out, system.GetObjective().GetFeatureInit(), verbose);
+    Output(*hyp, chart.VocabMapping(), history_map, out, system.GetObjective().GetFeatureInit(), verbose);
     std::cerr << "score: " << hyp->GetScore() << std::endl;
   }
   out << '\n';
@@ -49,9 +49,7 @@ void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache, V
       std::size_t i = 0;
       for (float v : system.GetObjective().GetFeatureValues(*hyp)) {
         feature_values[i++] += v;
-        std::cerr << v << " ";
       }
-      std::cerr << std::endl;
       hyp = hyp->Previous();
     }
     std::cerr << "feature values: [ \n";
@@ -124,7 +122,6 @@ int main(int argc, char *argv[]) {
     // TODO vocab map originally exists to avoid having a global dictionary.
     // it is now here because we need backing for cache, which only exists
     // to make speed comparable to the previous mtplz
-    decode::VocabMap vocab_map(sys.GetObjective(), sys.GetBaseVocab());
     decode::ScoreHistoryMap history_map;
     std::size_t i = 0;
     while (true) {
@@ -134,7 +131,7 @@ int main(int argc, char *argv[]) {
       } catch (const util::EndOfFileException &e) { break; }
       util::PrintUsage(std::cerr);
       std::cerr << "sentence " << i++ << std::endl;
-      decode::Decode(sys, table, cache, vocab_map, line, history_map, verbose, out);
+      decode::Decode(sys, table, cache, line, history_map, verbose, out);
       out.flush();
       f.UpdateProgress();
     }

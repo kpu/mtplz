@@ -8,14 +8,14 @@
 namespace decode {
 
 Chart::Chart(std::size_t max_source_phrase_length,
-    VocabMap &vocab_map,
+    const BaseVocab &vocab,
     Objective &objective,
     VertexCache &cache)
     : max_source_phrase_length_(max_source_phrase_length),
       objective_(objective),
       feature_init_(objective.GetFeatureInit()),
-      vocab_map_(vocab_map),
-      cache_(cache) {
+      cache_(cache),
+      vocab_map_(objective, vocab) {
   UTIL_THROW_IF(objective.GetLanguageModelFeature() == nullptr, util::Exception,
       "Missing language model for objective!");
   pt::Access access = feature_init_.phrase_access;
@@ -38,13 +38,15 @@ void Chart::ReadSentence(StringPiece input) {
 void Chart::AddTargetPhraseToVertex(
     const pt::Row *phrase,
     search::Vertex &vertex,
-    bool passthrough) {
+    bool passthrough,
+    bool use_cache) {
+  util::Pool &phrase_pool = use_cache ? cache_.target_phrase_pool : target_phrase_pool_;
   TargetPhrase *phrase_wrapper = reinterpret_cast<TargetPhrase*>(
-      feature_init_.target_phrase_layout.Allocate(cache_.target_phrase_pool));
+      feature_init_.target_phrase_layout.Allocate(phrase_pool));
   feature_init_.pt_row_field(phrase_wrapper) = phrase;
   feature_init_.passthrough_field(phrase_wrapper) = passthrough;
   search::HypoState hypo;
-  TargetPhraseInfo target{phrase_wrapper, vocab_map_, cache_.target_phrase_pool};
+  TargetPhraseInfo target{phrase_wrapper, vocab_map_, phrase_pool};
   // Bypass objective to allow the language model access to a hypo.state reference.
   objective_.GetLanguageModelFeature()->InitTargetPhrase(target, hypo.state);
   float score = objective_.ScoreTargetPhrase(target);
@@ -64,7 +66,7 @@ void Chart::AddPassthrough(std::size_t position) {
     access.target(pt_phrase)[0] = sentence_ids_[position];
   }
   objective_.InitPassthroughPhrase(pt_phrase);
-  AddTargetPhraseToVertex(pt_phrase, *pass, true);
+  AddTargetPhraseToVertex(pt_phrase, *pass, true, false);
   pass->Root().FinishRoot(search::kPolicyLeft);
   SetRange(position, position+1, pass);
 }
@@ -72,7 +74,7 @@ void Chart::AddPassthrough(std::size_t position) {
 TargetPhrases &Chart::EndOfSentence() {
   search::Vertex &eos = *vertex_pool_.construct();
   eos.Root().InitRoot();
-  AddTargetPhraseToVertex(eos_phrase_, eos, false);
+  AddTargetPhraseToVertex(eos_phrase_, eos, false, false);
   eos.Root().FinishRoot(search::kPolicyLeft);
   return eos;
 }
