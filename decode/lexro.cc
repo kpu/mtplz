@@ -11,7 +11,7 @@ void LexicalizedReordering::Init(FeatureInit &feature_init) {
   phrase_access_ = &feature_init.phrase_access;
 }
 
-void LexicalizedReordering::InitPassthroughPhrase(pt::Row *passthrough) const {
+void LexicalizedReordering::InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const {
   for(uint8_t i = 0; i < VALUE_COUNT; ++i) {
     phrase_access_->lexical_reordering(passthrough)[i] = DEFAULT_VALUE;
   }

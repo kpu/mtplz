@@ -51,7 +51,7 @@ class Feature {
 
     /** Allows to add constant-length data to a passthrough or eos pt-phrase.
      * See documentation in pt/access.hh */
-    virtual void InitPassthroughPhrase(pt::Row *passthrough) const = 0;
+    virtual void InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const = 0;
 
     /** Score isolated target phrase.
      * Allows to store data in target phrase. */

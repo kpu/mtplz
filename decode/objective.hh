@@ -42,7 +42,7 @@ class Objective {
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const;
 
-    void InitPassthroughPhrase(pt::Row *passthrough) const;
+    void InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const;
 
     float ScoreTargetPhrase(TargetPhraseInfo target) const;
 

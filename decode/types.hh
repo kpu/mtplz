@@ -5,7 +5,7 @@
 namespace decode {
 
 enum class TargetPhraseType : uint8_t {
-  Table, Passthrough, EOS
+  Table, Passthrough, Begin, EOS
 };
 
 } // namespace decode

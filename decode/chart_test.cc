@@ -28,7 +28,7 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
       rep_buffer_->push_back(string_rep);
       word_buffer_->push_back(word);
     }
-    void InitPassthroughPhrase(pt::Row *passthrough) const override {}
+    void InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const override {}
     void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {
       phrase_pair_buffer_->push_back(target);
     }

@@ -17,7 +17,7 @@ class LM : public Feature, public TargetPhraseInitializer {
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override;
 
-    void InitPassthroughPhrase(pt::Row *passthrough) const override {}
+    void InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const override {}
 
     void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const override;
 

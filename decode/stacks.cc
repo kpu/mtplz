@@ -187,7 +187,7 @@ Stacks::Stacks(System &system, Chart &chart) :
   // Initialize root hypothesis with <s> context and future cost for everything.
   pt::Access access = feature_init.phrase_access;
   pt::Row *target = access.Allocate(hypothesis_pool_);
-  system.GetObjective().InitPassthroughPhrase(target);
+  system.GetObjective().InitPassthroughPhrase(target, TargetPhraseType::Begin);
   stacks_[0].push_back(hypothesis_builder_.BuildHypothesis(
         system.GetObjective().BeginSentenceState(),
         future.Full(), target));

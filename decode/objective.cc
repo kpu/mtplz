@@ -49,9 +49,9 @@ void Objective::NewWord(const StringPiece string_rep, VocabWord *word) const {
   }
 }
 
-void Objective::InitPassthroughPhrase(pt::Row *passthrough) const {
+void Objective::InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const {
   for (auto feature : features_) {
-    feature.feature->InitPassthroughPhrase(passthrough);
+    feature.feature->InitPassthroughPhrase(passthrough, type);
   }
 }
 

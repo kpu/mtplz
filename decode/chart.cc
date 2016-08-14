@@ -24,7 +24,7 @@ Chart::Chart(std::size_t max_source_phrase_length,
     access.target(eos_phrase_, passthrough_pool_).resize(1);
     access.target(eos_phrase_)[0] = EOS_WORD;
   }
-  objective_.InitPassthroughPhrase(eos_phrase_);
+  objective_.InitPassthroughPhrase(eos_phrase_, TargetPhraseType::EOS);
 }
 
 void Chart::ReadSentence(StringPiece input) {
@@ -64,7 +64,7 @@ void Chart::AddPassthrough(std::size_t position) {
     access.target(pt_phrase, passthrough_pool_).resize(1);
     access.target(pt_phrase)[0] = sentence_ids_[position];
   }
-  objective_.InitPassthroughPhrase(pt_phrase);
+  objective_.InitPassthroughPhrase(pt_phrase, TargetPhraseType::Passthrough);
   AddTargetPhraseToVertex(pt_phrase, *pass, TargetPhraseType::Passthrough, false);
   pass->Root().FinishRoot(search::kPolicyLeft);
   SetRange(position, position+1, pass);

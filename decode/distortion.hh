@@ -12,7 +12,7 @@ class Distortion : public Feature {
 
     void NewWord(const StringPiece string_rep, VocabWord *word) const override {}
 
-    void InitPassthroughPhrase(pt::Row *passthrough) const override {}
+    void InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const override {}
 
     void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {}
 
