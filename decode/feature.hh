@@ -3,6 +3,7 @@
 #include "decode/source_phrase.hh"
 #include "decode/feature_init.hh"
 #include "decode/score_collector.hh"
+#include "decode/types.hh"
 // TODO cleanup imports
 
 #include <cstddef>
@@ -20,6 +21,7 @@ struct TargetPhraseInfo {
   TargetPhrase *&phrase;
   const VocabMap &vocab_map;
   util::Pool &phrase_pool; // for dynamic-length access to phrase
+  TargetPhraseType type;
 };
  
 struct PhrasePair {

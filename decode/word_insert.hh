@@ -24,7 +24,9 @@ class WordInsertion : public Feature {
     void InitPassthroughPhrase(pt::Row *passthrough) const override {}
 
     void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override {
-      collector.AddDense(0, phrase_access_->target(pt_row_field_(target.phrase)).size());
+      if (target.type != TargetPhraseType::EOS) {
+        collector.AddDense(0, phrase_access_->target(pt_row_field_(target.phrase)).size());
+      }
     }
 
     void ScoreHypothesisWithSourcePhrase(
@@ -34,9 +36,7 @@ class WordInsertion : public Feature {
         const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override {}
 
     void ScoreFinalHypothesis(
-        const Hypothesis &hypothesis, ScoreCollector &collector) const override {
-      collector.AddDense(0, -1); // compensate for counting eos as insert
-    }
+        const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
 
     std::size_t DenseFeatureCount() const override { return 1; }
 

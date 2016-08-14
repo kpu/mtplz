@@ -3,6 +3,7 @@
 
 #include "decode/source_phrase.hh"
 #include "decode/vocab_map.hh"
+#include "decode/types.hh"
 #include "pt/format.hh"
 #include "search/vertex.hh"
 #include "util/pool.hh"
@@ -64,7 +65,7 @@ class Chart {
           if (phrases) {
             vertex->Root().InitRoot();
             for (auto phrase = phrases.begin(); phrase != phrases.end(); ++phrase) {
-              AddTargetPhraseToVertex(&*phrase, *vertex, false, use_cache);
+              AddTargetPhraseToVertex(&*phrase, *vertex, TargetPhraseType::Table, use_cache);
             }
             vertex->Root().FinishRoot(search::kPolicyLeft);
             SetRange(begin, end, vertex);
@@ -104,7 +105,7 @@ class Chart {
     void AddTargetPhraseToVertex(
         const pt::Row *phrase,
         search::Vertex &vertex,
-        bool passthrough,
+        TargetPhraseType type,
         bool use_cache);
 
     void AddPassthrough(std::size_t position);

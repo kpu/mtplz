@@ -23,8 +23,7 @@ struct FeatureInit {
     lm_state_field(hypothesis_layout),
     pt_id_field(word_layout),
     pt_row_field(target_phrase_layout),
-    phrase_score_field(target_phrase_layout),
-    passthrough_field(target_phrase_layout) {}
+    phrase_score_field(target_phrase_layout) {}
 
   /** The first field of a hypothesis layout is always the Hypothesis
     * object, which stores the most important attributes of a hypothesis.
@@ -45,7 +44,6 @@ struct FeatureInit {
   util::Layout target_phrase_layout;
   const util::PODField<const pt::Row*> pt_row_field; // has to be first field
   const util::PODField<float> phrase_score_field;
-  const util::PODField<bool> passthrough_field;
 
   /** Store info about a word when NewWord is called. This call happens
     * once in bulk for all known source words from training and later every

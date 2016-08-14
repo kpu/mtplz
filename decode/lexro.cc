@@ -19,6 +19,8 @@ void LexicalizedReordering::InitPassthroughPhrase(pt::Row *passthrough) const {
 
 void LexicalizedReordering::ScoreHypothesisWithSourcePhrase(
     const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const {
+  // do not score eos
+  if (source_phrase.Length() == 0) { return; }
   // store phrase start index in layout; phrase end is already stored in the hypothesis
   phrase_start_(collector.NewHypothesis()) = source_phrase.Span().first;
   // score backward lexro
@@ -40,21 +42,6 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
   const pt::Row *target = pt_row_(phrase_pair.target);
   float score = phrase_access_->lexical_reordering(target)[index];
   collector.AddDense(index, score);
-}
-
-void LexicalizedReordering::ScoreFinalHypothesis(
-    const Hypothesis &hypothesis, ScoreCollector &collector) const {
-  // remove eos scoring
-  SourceSpan hypo_span = SourceSpan(phrase_start_(&hypothesis), hypothesis.SourceEndIndex());
-  SourceSpan prev_span;
-  if (hypothesis.Previous()->Previous()) {
-    prev_span = SourceSpan(phrase_start_(hypothesis.Previous()), hypothesis.Previous()->SourceEndIndex());
-  } else { // start of sentence
-    prev_span = SourceSpan(0,0);
-  }
-  uint8_t index = BACKWARD + PhraseRelation(prev_span, hypo_span);
-  float score = phrase_access_->lexical_reordering(pt_row_(hypothesis.Previous()->Target()))[index];
-  collector.AddDense(index, -score);
 }
 
 LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(

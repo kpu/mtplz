@@ -75,12 +75,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   BOOST_CHECK_EQUAL(0, store2()[1]);
   BOOST_CHECK_EQUAL(15, store2()[4]);
 
-  // on a final hypothesis, we can get a final score
-  init.hypothesis_field(next) = Hypothesis(3,hypo,5,6,row2);
-  lexro.ScoreFinalHypothesis(*next, collector);
-  BOOST_CHECK_EQUAL(14+3-14, collector.Score());
-  BOOST_CHECK_EQUAL(3, store()[0]);
-  BOOST_CHECK_EQUAL(0, store()[3]);
+  // TODO test no score on addition of zero-length source phrase (eos)
 }
 
 } // namespace
