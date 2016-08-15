@@ -15,7 +15,7 @@ namespace {
 
 typedef std::pair<std::size_t,std::size_t> Range;
 
-class FeatureMock : public Feature, public TargetPhraseInitializer {
+class FeatureMock : public Feature, public ObjectiveBypass {
   public:
     FeatureMock() : Feature("mock") {}
     FeatureMock(std::vector<StringPiece> &rep_buffer, std::vector<VocabWord*> &word_buffer)
@@ -41,6 +41,7 @@ class FeatureMock : public Feature, public TargetPhraseInitializer {
     std::size_t DenseFeatureCount() const override { return 1; }
     std::string FeatureDescription(std::size_t index) const override { return ""; }
     void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const override {}
+    void SetSearchScore(Hypothesis *new_hypo, float score) const override {}
 
     std::vector<StringPiece> *rep_buffer_;
     std::vector<VocabWord*> *word_buffer_;

@@ -77,10 +77,10 @@ class Feature {
     virtual std::string FeatureDescription(std::size_t index) const = 0;
 };
 
-// for LM bypass
-class TargetPhraseInitializer {
+class ObjectiveBypass {
   public:
     virtual void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const = 0;
+    virtual void SetSearchScore(Hypothesis *new_hypothesis, float score) const = 0;
 };
 
 

@@ -26,11 +26,11 @@ class Objective {
 
     std::vector<float> GetFeatureValues(const Hypothesis &hypothesis);
 
-    void RegisterLanguageModel(TargetPhraseInitializer &lm_feature) {
+    void RegisterLanguageModel(ObjectiveBypass &lm_feature) {
       lm_feature_ = &lm_feature;
     }
 
-    const TargetPhraseInitializer *GetLanguageModelFeature() const {
+    const ObjectiveBypass *GetLanguageModelFeature() const {
       return lm_feature_;
     }
 
@@ -84,9 +84,9 @@ class Objective {
     util::ArrayField<float> hypothesis_feature_values_;
 
     FeatureInit feature_init_;
-    const TargetPhraseInitializer *lm_feature_ = nullptr;
+    const ObjectiveBypass *lm_feature_ = nullptr;
 
-    const lm::ngram::State &lm_begin_sentence_state_;
+    const lm::ngram::State lm_begin_sentence_state_;
 };
 
 } // namespace decode

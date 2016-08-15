@@ -21,8 +21,8 @@ namespace util { class MutableVocab; }
 namespace decode {
 
 class Objective;
-struct FeatureInit;
 struct BaseVocab;
+struct FeatureInit;
 
 typedef search::Vertex TargetPhrases;
 

@@ -9,7 +9,7 @@ namespace util { class MutableVocab; }
 
 namespace decode {
 
-class LM : public Feature, public TargetPhraseInitializer {
+class LM : public Feature, public ObjectiveBypass {
   public:
     LM(const char *model);
 
@@ -19,7 +19,9 @@ class LM : public Feature, public TargetPhraseInitializer {
 
     void InitPassthroughPhrase(pt::Row *passthrough, TargetPhraseType type) const override {}
 
+    // from ObjectiveBypass
     void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const override;
+    void SetSearchScore(Hypothesis *new_hypothesis, float score) const override;
 
     void ScoreTargetPhrase(TargetPhraseInfo target, ScoreCollector &collector) const override;
 
@@ -27,7 +29,7 @@ class LM : public Feature, public TargetPhraseInitializer {
         const Hypothesis &hypothesis, const SourcePhrase source_phrase, ScoreCollector &collector) const override {}
 
     void ScoreHypothesisWithPhrasePair(
-        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override {}
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override;
 
     void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
@@ -44,6 +46,7 @@ class LM : public Feature, public TargetPhraseInitializer {
     util::PODField<const pt::Row*> pt_row_field_;
     util::PODField<lm::WordIndex> lm_word_index_;
     util::PODField<float> phrase_score_field_;
+    util::PODField<float> hypothesis_with_phrase_pair_score_;
 };
 
 } // namespace decode

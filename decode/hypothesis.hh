@@ -90,11 +90,14 @@ class Hypothesis {
     Coverage coverage_;
 };
 
+// TODO let features judge equality?
 template <class LMState>
 class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<const Hypothesis*> {
   public:
-    Recombinator(const util::PODField<LMState> lm_state_field)
-      : lm_state_field_(lm_state_field) {}
+    Recombinator(
+        const util::PODField<LMState> lm_state_field,
+        const util::PODField<const pt::Row*> pt_row_field)
+      : lm_state_field_(lm_state_field), pt_row_field_(pt_row_field) {}
 
     size_t operator()(const Hypothesis *hypothesis) const {
       std::size_t source_index = hypothesis->SourceEndIndex();
@@ -105,11 +108,13 @@ class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<c
     bool operator()(const Hypothesis *first, const Hypothesis *second) const {
       if (! (lm_state_field_(first) == lm_state_field_(second))) return false;
       if (! (first->GetCoverage() == second->GetCoverage())) return false;
-      return (first->SourceEndIndex() == second->SourceEndIndex());
+      if (! (first->SourceEndIndex() == second->SourceEndIndex())) return false;
+      return pt_row_field_(first) == pt_row_field_(second);
     }
 
   private:
     const util::PODField<LMState> lm_state_field_;
+    const util::PODField<const pt::Row*> pt_row_field_;
 };
 
 } // namespace decode

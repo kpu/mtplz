@@ -72,7 +72,7 @@ class Vertices {
         // Record source range in the note for the edge.
         search::Note note;
         note.ints = i->first;
-        AddEdge(i->second, *chart.Range(i->first.first, i->first.second), note, out);
+        AddEdge(i->second, *chart.Range(note.ints.first, note.ints.second), note, out);
       }
     }
 
@@ -88,6 +88,7 @@ struct MergeInfo {
   Objective &objective;
   HypothesisBuilder &hypo_builder;
   const Chart& chart;
+  float lm_weight;
 };
 
 Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {
@@ -102,9 +103,13 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   Hypothesis *next_hypo = merge_info.hypo_builder.CopyHypothesis(sourcephrase_hypo);
   PhrasePair phrase_pair(source_phrase, target_phrase);
   phrase_pair.vocab_map = &merge_info.chart.VocabMapping();
-  search::Score score = complete.GetScore()
-    + merge_info.objective.ScoreHypothesisWithPhrasePair(
-        *prev_hypo, phrase_pair, next_hypo, merge_info.hypo_builder.HypothesisPool());
+
+  float score = next_hypo->GetScore() + merge_info.objective.GetFeatureInit().phrase_score_field(target_phrase);
+  // get language model score only
+  float search_score = (complete.GetScore() - score) / merge_info.lm_weight;
+  merge_info.objective.GetLanguageModelFeature()->SetSearchScore(next_hypo, search_score);
+  score += merge_info.objective.ScoreHypothesisWithPhrasePair(
+      *prev_hypo, phrase_pair, next_hypo, merge_info.hypo_builder.HypothesisPool());
 
   return merge_info.hypo_builder.BuildHypothesis(
       next_hypo,
@@ -215,6 +220,7 @@ Stacks::Stacks(System &system, Chart &chart) :
               *ant_hypo, SourcePhrase(chart.Sentence(), begin, begin + phrase_length), next_hypo);
           // Future costs: remove span to be filled.
           score_delta += future.Change(coverage, begin, begin + phrase_length);
+          next_hypo->SetScore(ant_hypo->GetScore() + score_delta);
           vertices.Add(*ant, begin, begin + phrase_length, next_hypo, score_delta);
         // Enforce the reordering limit on later iterations.
         } while (++begin <= last_begin);
@@ -224,9 +230,10 @@ Stacks::Stacks(System &system, Chart &chart) :
     vertices.Apply(chart, gen);
     stacks_.resize(stacks_.size() + 1);
     stacks_.back().reserve(system.SearchContext().PopLimit());
-    Recombinator<LMState> recombinator(feature_init.lm_state_field);
-    EdgeOutput::Dedupe deduper(stacks_.back().size()*4/3, recombinator, recombinator);
-    EdgeOutput output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart}, deduper);
+    Recombinator<LMState> recombinator(feature_init.lm_state_field, feature_init.pt_row_field);
+    EdgeOutput::Dedupe deduper(stacks_.back().size(), recombinator, recombinator);
+    MergeInfo merge_info{system.GetObjective(), hypothesis_builder_, chart, system.SearchContext().LMWeight()};
+    EdgeOutput output(stacks_.back(), merge_info, deduper);
     gen.Search(system.SearchContext(), output);
   }
   PopulateLastStack(system, chart);
@@ -242,6 +249,7 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
     SourcePhrase source_phrase(chart.Sentence(), chart.SentenceLength(), chart.SentenceLength());
     float score_delta = system.GetObjective().ScoreHypothesisWithSourcePhrase(
         *ant_hypo, source_phrase, next_hypo);
+    next_hypo->SetScore(ant_hypo->GetScore() + score_delta);
     AddHypothesisToVertex(ant_hypo, score_delta, next_hypo, all_hyps, system.GetObjective().GetFeatureInit());
   }
   
@@ -256,7 +264,8 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
   AddEdge(all_hyps, eos_vertex, note, gen);
 
   stacks_.resize(stacks_.size() + 1);
-  PickBest output(stacks_.back(), MergeInfo{system.GetObjective(), hypothesis_builder_, chart});
+  MergeInfo merge_info{system.GetObjective(), hypothesis_builder_, chart,system.SearchContext().LMWeight()};
+  PickBest output(stacks_.back(), merge_info);
   gen.Search(system.SearchContext(), output);
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];

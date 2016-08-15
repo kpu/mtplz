@@ -17,6 +17,7 @@ void LM::Init(FeatureInit &feature_init) {
   phrase_access_ = &feature_init.phrase_access;
   lm_word_index_ = util::PODField<lm::WordIndex>(feature_init.word_layout);
   phrase_score_field_ = util::PODField<float>(feature_init.target_phrase_layout);
+  hypothesis_with_phrase_pair_score_ = util::PODField<float>(feature_init.hypothesis_layout);
 }
 
 void LM::NewWord(const StringPiece string_rep, VocabWord *word) const {
@@ -34,6 +35,16 @@ void LM::InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state)
     scorer.Terminal(lm_word_index_(target.vocab_map.Find(i)));
   }
   phrase_score_field_(target.phrase) = scorer.Finish();
+}
+
+void LM::SetSearchScore(Hypothesis *new_hypothesis, float score) const {
+  hypothesis_with_phrase_pair_score_(new_hypothesis) = score;
+}
+
+void LM::ScoreHypothesisWithPhrasePair(
+        const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const {
+  float score = hypothesis_with_phrase_pair_score_(collector.NewHypothesis());
+  collector.AddDense(0, score);
 }
 
 std::size_t LM::DenseFeatureCount() const { return 1; }
