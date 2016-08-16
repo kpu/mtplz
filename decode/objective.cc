@@ -108,6 +108,13 @@ float Objective::ScoreFinalHypothesis(Hypothesis &hypothesis) const {
   return collector.Score();
 }
 
+bool Objective::HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const {
+  for (auto feature : features_) {
+    if (!feature.feature->HypothesisEqual(first, second)) { return false; }
+  }
+  return true;
+}
+
 std::size_t Objective::DenseFeatureCount() const {
   return dense_feature_count_;
 }

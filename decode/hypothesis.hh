@@ -4,7 +4,6 @@
 #include "decode/coverage.hh"
 #include "decode/id.hh"
 #include "lm/state.hh"
-#include "pt/query.hh"
 #include "util/murmur_hash.hh"
 
 #include <boost/utility.hpp>
@@ -88,33 +87,6 @@ class Hypothesis {
     const TargetPhrase *target_;
 
     Coverage coverage_;
-};
-
-// TODO let features judge equality?
-template <class LMState>
-class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<const Hypothesis*> {
-  public:
-    Recombinator(
-        const util::PODField<LMState> lm_state_field,
-        const util::PODField<const pt::Row*> pt_row_field)
-      : lm_state_field_(lm_state_field), pt_row_field_(pt_row_field) {}
-
-    size_t operator()(const Hypothesis *hypothesis) const {
-      std::size_t source_index = hypothesis->SourceEndIndex();
-      return util::MurmurHashNative(&source_index, sizeof(std::size_t),
-          hash_value(lm_state_field_(hypothesis), hash_value(hypothesis->GetCoverage())));
-    }
-
-    bool operator()(const Hypothesis *first, const Hypothesis *second) const {
-      if (! (lm_state_field_(first) == lm_state_field_(second))) return false;
-      if (! (first->GetCoverage() == second->GetCoverage())) return false;
-      if (! (first->SourceEndIndex() == second->SourceEndIndex())) return false;
-      return pt_row_field_(first) == pt_row_field_(second);
-    }
-
-  private:
-    const util::PODField<LMState> lm_state_field_;
-    const util::PODField<const pt::Row*> pt_row_field_;
 };
 
 } // namespace decode

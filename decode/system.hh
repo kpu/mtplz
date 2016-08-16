@@ -5,6 +5,11 @@
 #include "decode/weights.hh"
 #include "search/context.hh"
 
+namespace pt {
+  struct VocabRange;
+  class Access;
+}
+
 namespace decode {
 
 struct Config {

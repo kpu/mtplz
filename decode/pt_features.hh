@@ -42,6 +42,10 @@ class PhraseTableFeatures : public Feature {
     void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
 
+    bool HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const override {
+      return true;
+    }
+
     std::size_t DenseFeatureCount() const override {
       return phrase_access_->dense_features.size();
     }

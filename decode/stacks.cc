@@ -91,6 +91,32 @@ struct MergeInfo {
   float lm_weight;
 };
 
+template <class LMState>
+class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<const Hypothesis*> {
+  public:
+    Recombinator(
+        const util::PODField<LMState> lm_state_field,
+        const Objective &objective)
+      : lm_state_field_(lm_state_field), objective_(objective) {}
+
+    size_t operator()(const Hypothesis *hypothesis) const {
+      std::size_t source_index = hypothesis->SourceEndIndex();
+      return util::MurmurHashNative(&source_index, sizeof(std::size_t),
+          hash_value(lm_state_field_(hypothesis), hash_value(hypothesis->GetCoverage())));
+    }
+
+    bool operator()(const Hypothesis *first, const Hypothesis *second) const {
+      if (! (lm_state_field_(first) == lm_state_field_(second))) return false;
+      if (! (first->GetCoverage() == second->GetCoverage())) return false;
+      if (! (first->SourceEndIndex() == second->SourceEndIndex())) return false;
+      return objective_.HypothesisEqual(*first, *second);
+    }
+
+  private:
+    const util::PODField<LMState> lm_state_field_;
+    const Objective &objective_;
+};
+
 Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {
   assert(complete.Valid());
   const search::IntPair &source_range = complete.GetNote().ints;
@@ -230,7 +256,7 @@ Stacks::Stacks(System &system, Chart &chart) :
     vertices.Apply(chart, gen);
     stacks_.resize(stacks_.size() + 1);
     stacks_.back().reserve(system.SearchContext().PopLimit());
-    Recombinator<LMState> recombinator(feature_init.lm_state_field, feature_init.pt_row_field);
+    Recombinator<LMState> recombinator(feature_init.lm_state_field, system.GetObjective());
     EdgeOutput::Dedupe deduper(stacks_.back().size(), recombinator, recombinator);
     MergeInfo merge_info{system.GetObjective(), hypothesis_builder_, chart, system.SearchContext().LMWeight()};
     EdgeOutput output(stacks_.back(), merge_info, deduper);

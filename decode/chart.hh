@@ -15,7 +15,6 @@
 
 #include <vector>
 
-namespace pt { class Row; }
 namespace util { class MutableVocab; }
 
 namespace decode {

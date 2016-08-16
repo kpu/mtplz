@@ -56,6 +56,8 @@ class Objective {
 
     float ScoreFinalHypothesis(Hypothesis &hypothesis) const;
 
+    bool HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const;
+
     std::size_t DenseFeatureCount() const;
 
     std::string FeatureDescription(std::size_t index) const;

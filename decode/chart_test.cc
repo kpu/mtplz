@@ -38,6 +38,7 @@ class FeatureMock : public Feature, public ObjectiveBypass {
         const Hypothesis &hypothesis, PhrasePair phrase_pair, ScoreCollector &collector) const override {}
     void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
+    bool HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const override {}
     std::size_t DenseFeatureCount() const override { return 1; }
     std::string FeatureDescription(std::size_t index) const override { return ""; }
     void InitTargetPhrase(TargetPhraseInfo target, lm::ngram::ChartState &state) const override {}

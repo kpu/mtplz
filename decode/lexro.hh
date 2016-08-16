@@ -36,6 +36,8 @@ class LexicalizedReordering : public Feature {
     void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const override {}
 
+    bool HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const override;
+
     std::size_t DenseFeatureCount() const override { return 6; }
 
     std::string FeatureDescription(std::size_t index) const override;

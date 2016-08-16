@@ -4,7 +4,7 @@
 #include "decode/feature_init.hh"
 #include "decode/score_collector.hh"
 #include "decode/types.hh"
-// TODO cleanup imports
+#include "util/string_piece.hh"
 
 #include <cstddef>
 #include <string>
@@ -71,6 +71,9 @@ class Feature {
     /** collects score for a completed hypothesis */
     virtual void ScoreFinalHypothesis(
         const Hypothesis &hypothesis, ScoreCollector &collector) const = 0;
+
+    /** does the feature consider these hypotheses to be equivalent? */
+    virtual bool HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const = 0;
 
     virtual std::size_t DenseFeatureCount() const = 0;
 

@@ -44,6 +44,18 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
   collector.AddDense(index, score);
 }
 
+bool LexicalizedReordering::HypothesisEqual(
+    const Hypothesis &first, const Hypothesis &second) const {
+  const pt::Row *row_first = pt_row_(first.Target());
+  const pt::Row *row_second = pt_row_(second.Target());
+  if (row_first == row_second) return true;
+  auto lexro = phrase_access_->lexical_reordering;
+  for (uint8_t i = BACKWARD; i < VALUE_COUNT; ++i) {
+    if (lexro(row_first)[i] != lexro(row_second)[i]) return false;
+  }
+  return true;
+}
+
 LexicalizedReordering::Relation LexicalizedReordering::PhraseRelation(
     SourceSpan phrase1, SourceSpan phrase2) const {
   if (phrase1.second == phrase2.first) {

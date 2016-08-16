@@ -1,6 +1,7 @@
 #include "decode/chart.hh"
 
 #include "decode/system.hh"
+#include "pt/access.hh"
 #include "util/exception.hh"
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"

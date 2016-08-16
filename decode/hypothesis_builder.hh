@@ -3,6 +3,8 @@
 #include "decode/hypothesis.hh"
 #include "decode/feature_init.hh"
 
+namespace pt { struct Row; }
+
 namespace decode {
 
 /**HypothesisBuilder:

@@ -1,5 +1,8 @@
 #include "decode/system.hh"
 
+#include "pt/access.hh"
+#include "pt/format.hh"
+
 namespace decode {
   
 System::System(const Config config, const pt::Access &phrase_access,
