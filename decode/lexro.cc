@@ -46,6 +46,7 @@ void LexicalizedReordering::ScoreHypothesisWithPhrasePair(
 
 bool LexicalizedReordering::HypothesisEqual(
     const Hypothesis &first, const Hypothesis &second) const {
+  if (phrase_start_(&first) != phrase_start_(&second)) return false;
   const pt::Row *row_first = pt_row_(first.Target());
   const pt::Row *row_second = pt_row_(second.Target());
   if (row_first == row_second) return true;

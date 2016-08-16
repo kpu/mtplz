@@ -36,7 +36,9 @@ class LM : public Feature, public ObjectiveBypass {
 
     // already implemented in the Recombinator, move here when you separate
     // out the language model
-    bool HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const override {}
+    bool HypothesisEqual(const Hypothesis &first, const Hypothesis &second) const override {
+      return true;
+    }
 
     std::size_t DenseFeatureCount() const override;
 
