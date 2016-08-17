@@ -117,6 +117,16 @@ class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<c
     const Objective &objective_;
 };
 
+Hypothesis *GetHypothesis(search::PartialEdge complete) {
+  return reinterpret_cast<Hypothesis*>(complete.NT()[0].End().cvp);
+}
+
+bool IsCompleteHypothesis(search::PartialEdge complete) {
+  assert(complete.Valid());
+  Hypothesis *hypo = GetHypothesis(complete);
+  return hypo->Target() != NULL;
+}
+
 Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {
   assert(complete.Valid());
   const search::IntPair &source_range = complete.GetNote().ints;
@@ -140,7 +150,7 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   return merge_info.hypo_builder.BuildHypothesis(
       next_hypo,
       complete.CompletedState().right,
-      score,
+      score - search_score,
       prev_hypo,
       (std::size_t)source_range.first,
       (std::size_t)source_range.second,
@@ -152,11 +162,19 @@ class EdgeOutput {
   public:
     typedef boost::unordered_set<Hypothesis *, Recombinator<LMState>, Recombinator<LMState>> Dedupe;
 
-    EdgeOutput(Stack &stack, MergeInfo merge_info, Dedupe deduper)
-      : stack_(stack), merge_info_(merge_info), deduper_(deduper) {}
+    EdgeOutput(Stack &stack, MergeInfo merge_info, Dedupe deduper, search::EdgeGenerator &gen)
+      : stack_(stack), merge_info_(merge_info), deduper_(deduper), queue_(gen) {}
 
-    void NewHypothesis(search::PartialEdge complete) {
-      stack_.push_back(HypothesisFromEdge(complete, merge_info_));
+    bool NewHypothesis(search::PartialEdge complete) {
+      // TODO refactor and deduplicate code with PickBest
+      if (!IsCompleteHypothesis(complete)) {
+        Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
+        complete.NT()[0].UpdateCvp(new_hypo);
+        complete.SetScore(new_hypo->GetScore());
+        queue_.AddEdge(complete);
+        return false;
+      }
+      stack_.push_back(GetHypothesis(complete));
       // Note: stack_ has reserved for pop limit so pointers should survive.
       std::pair<Dedupe::iterator, bool> res(deduper_.insert(stack_.back()));
       if (!res.second) {
@@ -167,6 +185,7 @@ class EdgeOutput {
         }
         stack_.resize(stack_.size() - 1);
       }
+      return true;
     }
 
     void FinishedSearch() {}
@@ -176,23 +195,34 @@ class EdgeOutput {
 
     Stack &stack_;
 
+    search::EdgeGenerator &queue_;
+
     MergeInfo merge_info_;
 };
 
 // Pick only the best hypothesis for end of sentence.
 class PickBest {
   public:
-    PickBest(Stack &stack, MergeInfo merge_info) : stack_(stack), merge_info_(merge_info) {
+    PickBest(Stack &stack, MergeInfo merge_info, search::EdgeGenerator &gen) :
+      stack_(stack), merge_info_(merge_info), queue_(gen) {
       stack_.clear();
       stack_.reserve(1);
     }
 
-    void NewHypothesis(search::PartialEdge complete) {
-      Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
+    bool NewHypothesis(search::PartialEdge complete) {
+      if (!IsCompleteHypothesis(complete)) {
+        Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
+        complete.NT()[0].UpdateCvp(new_hypo);
+        complete.SetScore(new_hypo->GetScore());
+        queue_.AddEdge(complete);
+        return false;
+      }
+      Hypothesis *new_hypo = GetHypothesis(complete);
       new_hypo->SetScore(new_hypo->GetScore() + merge_info_.objective.ScoreFinalHypothesis(*new_hypo));
       if (best_ == NULL || new_hypo->GetScore() > best_->GetScore()) {
         best_ = new_hypo;
       }
+      return true;
     }
 
     void FinishedSearch() {
@@ -202,6 +232,7 @@ class PickBest {
 
   private:
     Stack &stack_;
+    search::EdgeGenerator &queue_;
     MergeInfo merge_info_;
     Hypothesis *best_ = NULL;
 };
@@ -259,7 +290,7 @@ Stacks::Stacks(System &system, Chart &chart) :
     Recombinator<LMState> recombinator(feature_init.lm_state_field, system.GetObjective());
     EdgeOutput::Dedupe deduper(system.SearchContext().PopLimit(), recombinator, recombinator);
     MergeInfo merge_info{system.GetObjective(), hypothesis_builder_, chart, system.SearchContext().LMWeight()};
-    EdgeOutput output(stacks_.back(), merge_info, deduper);
+    EdgeOutput output(stacks_.back(), merge_info, deduper, gen);
     gen.Search(system.SearchContext(), output);
   }
   PopulateLastStack(system, chart);
@@ -291,7 +322,7 @@ void Stacks::PopulateLastStack(System &system, Chart &chart) {
 
   stacks_.resize(stacks_.size() + 1);
   MergeInfo merge_info{system.GetObjective(), hypothesis_builder_, chart,system.SearchContext().LMWeight()};
-  PickBest output(stacks_.back(), merge_info);
+  PickBest output(stacks_.back(), merge_info, gen);
   gen.Search(system.SearchContext(), output);
 
   end_ = stacks_.back().empty() ? NULL : stacks_.back()[0];

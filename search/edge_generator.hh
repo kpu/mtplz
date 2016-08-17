@@ -43,8 +43,9 @@ class EdgeGenerator {
       while (to_pop > 0 && !generate_.empty()) {
         PartialEdge got(Pop(context));
         if (got.Valid()) {
-          output.NewHypothesis(got);
-          --to_pop;
+          if (output.NewHypothesis(got)) {
+            --to_pop;
+          }
         }
       }
       output.FinishedSearch();
