@@ -73,6 +73,8 @@ target_link_libraries(kenlm_util ${Boost_LIBRARIES} ${READ_COMPRESSED_LIBS} ${TH
 
 AddExes(EXES probing_hash_table_benchmark
         LIBRARIES kenlm_util ${Boost_LIBRARIES} ${THREADS})
+AddExes(EXES cat_compressed
+        LIBRARIES kenlm_util ${Boost_LIBRARIES} ${THREADS})
 
 # Only compile and run unit tests if tests should be run
 if(BUILD_TESTING)
