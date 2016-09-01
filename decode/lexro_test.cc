@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   // monotone source, forward scoring
   lexro.ScoreHypothesisWithSourcePhrase(*hypo, source_phrase, collector);
   BOOST_CHECK_EQUAL(14, collector.Score());
-  BOOST_CHECK_EQUAL(0, store()[0]);
+  BOOST_CHECK_SMALL(store()[0], 0.00001f);
   BOOST_CHECK_EQUAL(14, store()[3]);
   lexro.ScoreHypothesisWithPhrasePair(*hypo, PhrasePair(source_phrase, row2), collector);
   BOOST_CHECK_EQUAL(14+3, collector.Score());
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(LexRo) {
   collector2.SetDenseOffset(0);
   lexro.ScoreHypothesisWithSourcePhrase(*next, swap_source, collector2);
   BOOST_CHECK_EQUAL(15, collector2.Score());
-  BOOST_CHECK_EQUAL(0, store2()[1]);
+  BOOST_CHECK_SMALL(store2()[1], 0.000001f);
   BOOST_CHECK_EQUAL(15, store2()[4]);
 
   // TODO test no score on addition of zero-length source phrase (eos)
