@@ -150,7 +150,7 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   return merge_info.hypo_builder.BuildHypothesis(
       next_hypo,
       complete.CompletedState().right,
-      score - search_score,
+      score,
       prev_hypo,
       (std::size_t)source_range.first,
       (std::size_t)source_range.second,
