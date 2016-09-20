@@ -89,10 +89,6 @@ class VertexNode {
       return hypos_.front().history;
     }
 
-    void UpdateCvp(void *cvp) {
-      hypos_.front().history.cvp = cvp;
-    }
-
     VertexNode &operator[](size_t index) {
       assert(!extend_.empty());
       return extend_[index];
@@ -161,10 +157,6 @@ class PartialVertex {
 
     Note End() const {
       return back_->End();
-    }
-
-    void UpdateCvp(void *cvp) {
-      back_->UpdateCvp(cvp);
     }
 
   private:

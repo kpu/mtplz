@@ -52,10 +52,12 @@ void Decode(System &system, const pt::Table &table, Chart::VertexCache &cache,
       }
       hyp = hyp->Previous();
     }
-    std::cerr << "feature values: [ \n";
+    std::cerr << "feature values (weighted): [ \n";
     std::size_t i = 0;
     for (auto value : feature_values) {
-      std::cerr << system.GetObjective().FeatureDescription(i++) << ": " << value << std::endl;
+      std::cerr << system.GetObjective().FeatureDescription(i) << ": " << value <<
+        " (" << value * system.GetObjective().weights[i] << ")" << std::endl;
+      i++;
     }
     std::cerr << "]\n";
   }

@@ -118,13 +118,12 @@ class Recombinator : public std::hash<const Hypothesis*>, public std::equal_to<c
 };
 
 Hypothesis *GetHypothesis(search::PartialEdge complete) {
-  return reinterpret_cast<Hypothesis*>(complete.NT()[0].End().cvp);
+  return reinterpret_cast<Hypothesis*>(complete.GetData());
 }
 
 bool IsCompleteHypothesis(search::PartialEdge complete) {
   assert(complete.Valid());
-  Hypothesis *hypo = GetHypothesis(complete);
-  return hypo->Target() != NULL;
+  return complete.GetData() != NULL;
 }
 
 Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {
@@ -169,7 +168,7 @@ class EdgeOutput {
       // TODO refactor and deduplicate code with PickBest
       if (!IsCompleteHypothesis(complete)) {
         Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
-        complete.NT()[0].UpdateCvp(new_hypo);
+        complete.SetData(new_hypo);
         complete.SetScore(new_hypo->GetScore());
         queue_.AddEdge(complete);
         return false;
@@ -212,7 +211,7 @@ class PickBest {
     bool NewHypothesis(search::PartialEdge complete) {
       if (!IsCompleteHypothesis(complete)) {
         Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
-        complete.NT()[0].UpdateCvp(new_hypo);
+        complete.SetData(new_hypo);
         complete.SetScore(new_hypo->GetScore());
         queue_.AddEdge(complete);
         return false;
