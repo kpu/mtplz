@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/murmur_hash.hh"
+
 #include <vector>
 #include <utility> // for std::pair
 #include <assert.h>
@@ -39,12 +41,8 @@ class SourcePhrase {
 };
 
 struct SourcePhraseHasher {
-  std::size_t operator()(const SourcePhrase &source) const noexcept {
-    std::size_t result = 0;
-    for (VocabWord *word : source) {
-      result = 13 + 13*result + (std::size_t)word;
-    }
-    return result;
+  std::size_t operator()(const SourcePhrase &source) const {
+    return util::MurmurHashNative(&*source.begin(), source.Length() * sizeof(VocabWord*));
   }
 };
 
