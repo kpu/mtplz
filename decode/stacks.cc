@@ -126,7 +126,7 @@ bool IsCompleteHypothesis(search::PartialEdge complete) {
   return complete.GetData() != NULL;
 }
 
-Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_info) {
+void UpdateHypothesisInEdge(search::PartialEdge complete, MergeInfo &merge_info) {
   assert(complete.Valid());
   const search::IntPair &source_range = complete.GetNote().ints;
   // The note for the first NT is the hypothesis.  The note for the second
@@ -145,8 +145,8 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
   merge_info.objective.GetLanguageModelFeature()->SetSearchScore(next_hypo, search_score);
   score += merge_info.objective.ScoreHypothesisWithPhrasePair(
       *prev_hypo, phrase_pair, next_hypo, merge_info.hypo_builder.HypothesisPool());
-
-  return merge_info.hypo_builder.BuildHypothesis(
+  
+  merge_info.hypo_builder.BuildHypothesis(
       next_hypo,
       complete.CompletedState().right,
       score,
@@ -154,6 +154,8 @@ Hypothesis *HypothesisFromEdge(search::PartialEdge complete, MergeInfo &merge_in
       (std::size_t)source_range.first,
       (std::size_t)source_range.second,
       target_phrase);
+  complete.SetData(next_hypo);
+  complete.SetScore(score);
 }
 
 // TODO n-best lists.
@@ -165,11 +167,8 @@ class EdgeOutput {
       : stack_(stack), merge_info_(merge_info), deduper_(deduper), queue_(gen) {}
 
     bool NewHypothesis(search::PartialEdge complete) {
-      // TODO refactor and deduplicate code with PickBest
       if (!IsCompleteHypothesis(complete)) {
-        Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
-        complete.SetData(new_hypo);
-        complete.SetScore(new_hypo->GetScore());
+        UpdateHypothesisInEdge(complete, merge_info_);
         queue_.AddEdge(complete);
         return false;
       }
@@ -180,7 +179,12 @@ class EdgeOutput {
         // Already present.  Keep the top-scoring one.
         Hypothesis *already = *res.first;
         if (already->GetScore() < stack_.back()->GetScore()) {
-          already = stack_.back();
+          already->SetScore(stack_.back()->GetScore());
+          for (Hypothesis *h : stack_) {
+            if (h == already) {
+              h = stack_.back();
+            }
+          }
         }
         stack_.resize(stack_.size() - 1);
       }
@@ -210,9 +214,7 @@ class PickBest {
 
     bool NewHypothesis(search::PartialEdge complete) {
       if (!IsCompleteHypothesis(complete)) {
-        Hypothesis *new_hypo = HypothesisFromEdge(complete, merge_info_);
-        complete.SetData(new_hypo);
-        complete.SetScore(new_hypo->GetScore());
+        UpdateHypothesisInEdge(complete, merge_info_);
         queue_.AddEdge(complete);
         return false;
       }
