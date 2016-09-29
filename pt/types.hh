@@ -17,6 +17,6 @@ struct SparseFeature {
 class Row;
 
 // Number of target phrases per source phrase.
-typedef uint16_t RowCount;
+typedef uint32_t RowCount;
 
 } // namespace pt

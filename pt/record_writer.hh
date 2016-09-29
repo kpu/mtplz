@@ -8,12 +8,12 @@
 namespace pt {
 
 /* Format written:
- * uin16_t count of target phrases
+ * uint32_t count of target phrases
  * bunch of layouts one after another with target phrases
  */
 class TargetWriter {
   public:
-    TargetWriter(FileFormat &file, std::size_t initial_buffer = 16384)
+    TargetWriter(FileFormat &file, std::size_t initial_buffer = /*TODO Lars: was 16384 before, now 2^28. Reasonable replacement?*/268435456)
       : buffer_(initial_buffer), 
         buffer_end_(static_cast<char*>(buffer_.get()) + initial_buffer),
         file_(file) {}
