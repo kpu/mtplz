@@ -1,9 +1,9 @@
-#include "util/file_piece.hh"
+#include "file_piece.hh"
 
-#include "util/double-conversion/double-conversion.h"
-#include "util/exception.hh"
-#include "util/file.hh"
-#include "util/mmap.hh"
+#include "double-conversion/double-conversion.h"
+#include "exception.hh"
+#include "file.hh"
+#include "mmap.hh"
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <io.h>
@@ -11,6 +11,7 @@
 #include <unistd.h>
 #endif
 
+#include <algorithm>
 #include <cassert>
 #include <cerrno>
 #include <cmath>
@@ -23,7 +24,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if defined(_WIN32) || defined(_WIN64)
 #include <math.h>
+#endif
 
 namespace util {
 
@@ -58,7 +61,7 @@ FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std:
   Initialize(NamePossiblyFind(fd, name).c_str(), show_progress, min_buffer);
 }
 
-FilePiece::FilePiece(std::istream &stream, const char *name, std::size_t min_buffer) :
+FilePiece::FilePiece(std::istream &stream, const char * /*name*/, std::size_t min_buffer) :
   total_size_(kBadSize) {
   InitializeNoRead("istream", min_buffer);
 
@@ -73,17 +76,16 @@ FilePiece::FilePiece(std::istream &stream, const char *name, std::size_t min_buf
 StringPiece FilePiece::ReadLine(char delim, bool strip_cr) {
   std::size_t skip = 0;
   while (true) {
-    for (const char *i = position_ + skip; i < position_end_; ++i) {
-      if (*i == delim) {
-        // End of line.
-        // Take 1 byte off the end if it's an unwanted carriage return.
-        const std::size_t subtract_cr = (
-            (strip_cr && i > position_ && *(i - 1) == '\r') ?
-            1 : 0);
-        StringPiece ret(position_, i - position_ - subtract_cr);
-        position_ = i + 1;
-        return ret;
-      }
+    const char *i = std::find(position_ + skip, position_end_, delim);
+    if (UTIL_LIKELY(i != position_end_)) {
+      // End of line.
+      // Take 1 byte off the end if it's an unwanted carriage return.
+      const std::size_t subtract_cr = (
+          (strip_cr && i > position_ && *(i - 1) == '\r') ?
+          1 : 0);
+      StringPiece ret(position_, i - position_ - subtract_cr);
+      position_ = i + 1;
+      return ret;
     }
     if (at_end_) {
       if (position_ == position_end_) {
@@ -175,19 +177,25 @@ StringPiece FirstToken(StringPiece str) {
   return StringPiece(str.data(), i - str.data());
 }
 
+// std::isnan is technically C++11 not C++98.  But in practice this is a problem for visual studio.
+template <class T> inline int CrossPlatformIsNaN(T value) {
+#if defined(_WIN32) || defined(_WIN64)
+  return isnan(value);
+#else
+  return std::isnan(value);
+#endif
+}
+
 const char *ParseNumber(StringPiece str, float &out) {
   int count;
   out = kConverter.StringToFloat(str.data(), str.size(), &count);
-  // std::isnan is C++11, not C++98
-  using namespace std;
-  UTIL_THROW_IF_ARG(isnan(out) && str != "NaN" && str != "nan", ParseNumberException, (FirstToken(str)), "float");
+  UTIL_THROW_IF_ARG(CrossPlatformIsNaN(out) && str != "NaN" && str != "nan", ParseNumberException, (FirstToken(str)), "float");
   return str.data() + count;
 }
 const char *ParseNumber(StringPiece str, double &out) {
   int count;
   out = kConverter.StringToDouble(str.data(), str.size(), &count);
-  using namespace std;
-  UTIL_THROW_IF_ARG(isnan(out) && str != "NaN" && str != "nan", ParseNumberException, (FirstToken(str)), "double");
+  UTIL_THROW_IF_ARG(CrossPlatformIsNaN(out) && str != "NaN" && str != "nan", ParseNumberException, (FirstToken(str)), "double");
   return str.data() + count;
 }
 const char *ParseNumber(StringPiece str, long int &out) {
@@ -284,7 +292,7 @@ void FilePiece::MMapShift(uint64_t desired_begin) {
   data_.reset();
   try {
     MapRead(POPULATE_OR_LAZY, *file_, mapped_offset, mapped_size, data_);
-  } catch (const util::ErrnoException &e) {
+  } catch (const util::ErrnoException &) {
     if (desired_begin) {
       SeekOrThrow(*file_, desired_begin);
     }

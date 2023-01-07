@@ -1,9 +1,9 @@
 #define _LARGEFILE64_SOURCE
 #define _FILE_OFFSET_BITS 64
 
-#include "util/file.hh"
+#include "file.hh"
 
-#include "util/exception.hh"
+#include "exception.hh"
 
 #include <algorithm>
 #include <cstdlib>
@@ -490,7 +490,7 @@ int
 mkstemp_and_unlink(char *tmpl) {
   int ret = mkstemp(tmpl);
   if (ret != -1) {
-    UTIL_THROW_IF(unlink(tmpl), ErrnoException, "while deleting delete " << tmpl);
+    UTIL_THROW_IF(unlink(tmpl), ErrnoException, "while deleting " << tmpl);
   }
   return ret;
 }
@@ -540,7 +540,7 @@ std::string DefaultTempDirectory() {
   const char *const vars[] = {"TMPDIR", "TMP", "TEMPDIR", "TEMP", 0};
   for (int i=0; vars[i]; ++i) {
     char *val =
-#if defined(_GNU_SOURCE)
+#if defined(_GNU_SOURCE) && defined(__GLIBC_PREREQ)
 #if __GLIBC_PREREQ(2,17)
       secure_getenv
 #else // __GLIBC_PREREQ

@@ -18,15 +18,15 @@
 #ifndef UTIL_STREAM_SORT_H
 #define UTIL_STREAM_SORT_H
 
-#include "util/stream/chain.hh"
-#include "util/stream/config.hh"
-#include "util/stream/io.hh"
-#include "util/stream/stream.hh"
+#include "chain.hh"
+#include "config.hh"
+#include "io.hh"
+#include "stream.hh"
 
-#include "util/file.hh"
-#include "util/fixed_array.hh"
-#include "util/scoped.hh"
-#include "util/sized_iterator.hh"
+#include "../file.hh"
+#include "../fixed_array.hh"
+#include "../scoped.hh"
+#include "../sized_iterator.hh"
 
 #include <algorithm>
 #include <iostream>
@@ -186,7 +186,7 @@ template <class Compare> class MergeQueue {
           // Try to free the space, but don't be disappointed if we can't.
           try {
             HolePunch(fd, offset_, amount);
-          } catch (const util::Exception &e) {}
+          } catch (const util::Exception &) {}
           offset_ += amount;
           assert(current_ <= buffer_end_);
           remaining_ -= amount;

@@ -5,9 +5,9 @@
 #include <iostream>
 #include <string>
 
-#include "util/file_stream.hh"
-#include "util/file.hh"
-#include "util/file_piece.hh"
+#include "../../util/file_stream.hh"
+#include "../../util/file.hh"
+#include "../../util/file_piece.hh"
 
 namespace lm {
 
@@ -81,7 +81,7 @@ template <class Output> void ReadCount(util::FilePiece &in_file, Output &out) {
       }
       out.AddNGram(*tabber, line);
     }
-  } catch (const util::EndOfFileException &e) {}
+  } catch (const util::EndOfFileException &) {}
 }
 
 } // namespace lm

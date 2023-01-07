@@ -1,9 +1,9 @@
 #ifndef LM_BUILDER_CORPUS_COUNT_H
 #define LM_BUILDER_CORPUS_COUNT_H
 
-#include "lm/lm_exception.hh"
-#include "lm/word_index.hh"
-#include "util/scoped.hh"
+#include "../lm_exception.hh"
+#include "../word_index.hh"
+#include "../../util/scoped.hh"
 
 #include <cstddef>
 #include <string>
@@ -42,8 +42,8 @@ class CorpusCount {
     bool dynamic_vocab_;
     uint64_t &token_count_;
     WordIndex &type_count_;
-    std::vector<bool>& prune_words_;
-    const std::string& prune_vocab_filename_;
+    std::vector<bool> &prune_words_;
+    const std::string prune_vocab_filename_;
 
     std::size_t dedupe_mem_size_;
     util::scoped_malloc dedupe_mem_;

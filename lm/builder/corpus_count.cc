@@ -1,18 +1,18 @@
-#include "lm/builder/corpus_count.hh"
+#include "corpus_count.hh"
 
-#include "lm/builder/payload.hh"
-#include "lm/common/ngram.hh"
-#include "lm/lm_exception.hh"
-#include "lm/vocab.hh"
-#include "lm/word_index.hh"
-#include "util/file_stream.hh"
-#include "util/file.hh"
-#include "util/file_piece.hh"
-#include "util/murmur_hash.hh"
-#include "util/probing_hash_table.hh"
-#include "util/scoped.hh"
-#include "util/stream/chain.hh"
-#include "util/tokenize_piece.hh"
+#include "payload.hh"
+#include "../common/ngram.hh"
+#include "../lm_exception.hh"
+#include "../vocab.hh"
+#include "../word_index.hh"
+#include "../../util/file_stream.hh"
+#include "../../util/file.hh"
+#include "../../util/file_piece.hh"
+#include "../../util/murmur_hash.hh"
+#include "../../util/probing_hash_table.hh"
+#include "../../util/scoped.hh"
+#include "../../util/stream/chain.hh"
+#include "../../util/tokenize_piece.hh"
 
 #include <functional>
 
@@ -155,7 +155,7 @@ float CorpusCount::DedupeMultiplier(std::size_t order) {
 }
 
 std::size_t CorpusCount::VocabUsage(std::size_t vocab_estimate) {
-  return util::GrowableVocab<ngram::WriteUniqueWords>::MemUsage(vocab_estimate);
+  return ngram::GrowableVocab<ngram::WriteUniqueWords>::MemUsage(vocab_estimate);
 }
 
 CorpusCount::CorpusCount(util::FilePiece &from, int vocab_write, bool dynamic_vocab, uint64_t &token_count, WordIndex &type_count, std::vector<bool> &prune_words, const std::string& prune_vocab_filename, std::size_t entries_per_block, WarningAction disallowed_symbol)
@@ -215,7 +215,7 @@ class VocabGiven {
   private:
     util::scoped_memory table_backing_;
 
-    typedef util::ProbingHashTable<util::ProbingVocabularyEntry, util::IdentityHash> Table;
+    typedef util::ProbingHashTable<ngram::ProbingVocabularyEntry, util::IdentityHash> Table;
     Table table_;
 
     WordIndex bos_, eos_;
@@ -224,7 +224,7 @@ class VocabGiven {
 
 void CorpusCount::Run(const util::stream::ChainPosition &position) {
   if (dynamic_vocab_) {
-    util::GrowableVocab<ngram::WriteUniqueWords> vocab(type_count_, vocab_write_);
+    ngram::GrowableVocab<ngram::WriteUniqueWords> vocab(type_count_, vocab_write_);
     RunWithVocab(position, vocab);
   } else {
     VocabGiven vocab(vocab_write_);

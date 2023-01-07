@@ -1,9 +1,9 @@
-#include "util/stream/chain.hh"
+#include "chain.hh"
 
-#include "util/stream/io.hh"
+#include "io.hh"
 
-#include "util/exception.hh"
-#include "util/pcqueue.hh"
+#include "../exception.hh"
+#include "../pcqueue.hh"
 
 #include <cstdlib>
 #include <new>
@@ -120,8 +120,8 @@ Link::Link(const ChainPosition &position) : in_(NULL) {
 Link::~Link() {
   if (current_) {
     // Probably an exception unwinding.
-    std::cerr << "Last input should have been poison." << std::endl;
-    abort();
+    std::cerr << "Last input should have been poison.  The program should end soon with an error.  If it doesn't, there's a bug." << std::endl;
+//    abort();
   } else {
     if (!poisoned_) {
       // Poison is a block whose memory pointer is NULL.

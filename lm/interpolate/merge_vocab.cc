@@ -1,10 +1,10 @@
-#include "lm/interpolate/merge_vocab.hh"
+#include "merge_vocab.hh"
 
-#include "lm/enumerate_vocab.hh"
-#include "lm/interpolate/universal_vocab.hh"
-#include "lm/lm_exception.hh"
-#include "lm/vocab.hh"
-#include "util/file_piece.hh"
+#include "../enumerate_vocab.hh"
+#include "universal_vocab.hh"
+#include "../lm_exception.hh"
+#include "../vocab.hh"
+#include "../../util/file_piece.hh"
 
 #include <queue>
 #include <string>
@@ -60,7 +60,7 @@ VocabFileReader &VocabFileReader::operator++() {
     return *this;
   }
   uint64_t prev_hash_value = hash_value_;
-  hash_value_ = util::HashForVocab(word_.data(), word_.size());
+  hash_value_ = ngram::detail::HashForVocab(word_.data(), word_.size());
 
   // hash values should be monotonically increasing
   UTIL_THROW_IF(hash_value_ < prev_hash_value, FormatLoadException,

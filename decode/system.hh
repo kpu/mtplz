@@ -4,6 +4,7 @@
 #include "decode/objective.hh"
 #include "decode/weights.hh"
 #include "search/context.hh"
+#include "util/mutable_vocab.hh"
 
 namespace pt {
   struct VocabRange;

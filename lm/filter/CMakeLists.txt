@@ -23,11 +23,18 @@ set(KENLM_FILTER_SOURCE
 # refer to these objects as $<TARGET_OBJECTS:foo>
 #
 add_library(kenlm_filter ${KENLM_FILTER_SOURCE})
-
-if (NOT MSVC)
-	set(THREADS pthread)
-endif()
+target_link_libraries(kenlm_filter PUBLIC kenlm_util)
+# Since headers are relative to `include/kenlm` at install time, not just `include`
+target_include_directories(kenlm_filter PUBLIC $<INSTALL_INTERFACE:include/kenlm>)
 
 AddExes(EXES filter phrase_table_vocab
-        LIBRARIES kenlm_filter kenlm kenlm_util ${Boost_LIBRARIES} ${THREADS})
+        LIBRARIES kenlm_filter kenlm)
 
+install(
+  TARGETS kenlm_filter
+  EXPORT kenlmTargets
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  INCLUDES DESTINATION include
+)

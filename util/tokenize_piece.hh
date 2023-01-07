@@ -1,14 +1,13 @@
 #ifndef UTIL_TOKENIZE_PIECE_H
 #define UTIL_TOKENIZE_PIECE_H
 
-#include "util/exception.hh"
-#include "util/spaces.hh"
-#include "util/string_piece.hh"
-
-#include <boost/iterator/iterator_facade.hpp>
+#include "exception.hh"
+#include "spaces.hh"
+#include "string_piece.hh"
 
 #include <algorithm>
 #include <cstring>
+#include <iterator>
 
 namespace util {
 
@@ -95,15 +94,15 @@ class AnyCharacterLast {
     StringPiece chars_;
 };
 
-template <class Find, bool SkipEmpty = false> class TokenIter : public boost::iterator_facade<TokenIter<Find, SkipEmpty>, const StringPiece, boost::forward_traversal_tag> {
+template <class Find, bool SkipEmpty = false> class TokenIter : public std::iterator<std::forward_iterator_tag, const StringPiece, std::ptrdiff_t, const StringPiece *, const StringPiece &> {
   public:
     TokenIter() {}
 
     template <class Construct> TokenIter(const StringPiece &str, const Construct &construct) : after_(str), finder_(construct) {
-      increment();
+      ++*this;
     }
-    explicit TokenIter(const StringPiece &str) : after_(str), finder_() {
-      increment();
+    TokenIter(const StringPiece &str) : after_(str), finder_() {
+      ++*this;
     }
 
     bool operator!() const {
@@ -117,10 +116,15 @@ template <class Find, bool SkipEmpty = false> class TokenIter : public boost::it
       return TokenIter<Find, SkipEmpty>();
     }
 
-  private:
-    friend class boost::iterator_core_access;
+    bool operator==(const TokenIter<Find, SkipEmpty> &other) const {
+      return current_.data() == other.current_.data();
+    }
 
-    void increment() {
+    bool operator!=(const TokenIter<Find, SkipEmpty> &other) const {
+      return !(*this == other);
+    }
+
+    TokenIter<Find, SkipEmpty> &operator++() {
       do {
         StringPiece found(finder_.Find(after_));
         current_ = StringPiece(after_.data(), found.data() - after_.data());
@@ -130,17 +134,25 @@ template <class Find, bool SkipEmpty = false> class TokenIter : public boost::it
           after_ = StringPiece(found.data() + found.size(), after_.data() - found.data() + after_.size() - found.size());
         }
       } while (SkipEmpty && current_.data() && current_.empty()); // Compiler should optimize this away if SkipEmpty is false.
+      return *this;
     }
 
-    bool equal(const TokenIter<Find, SkipEmpty> &other) const {
-      return current_.data() == other.current_.data();
+    TokenIter<Find, SkipEmpty> operator++(int) {
+      TokenIter<Find, SkipEmpty> ret(*this);
+      ++*this;
+      return ret;
     }
 
-    const StringPiece &dereference() const {
+    const StringPiece &operator*() const {
       UTIL_THROW_IF(!current_.data(), OutOfTokens, "Ran out of tokens");
       return current_;
     }
+    const StringPiece *operator->() const {
+      UTIL_THROW_IF(!current_.data(), OutOfTokens, "Ran out of tokens");
+      return &current_;
+    }
 
+  private:
     StringPiece current_;
     StringPiece after_;
 
@@ -151,7 +163,7 @@ inline StringPiece Trim(StringPiece str, const bool *spaces = kSpaces) {
   while (!str.empty() && spaces[static_cast<unsigned char>(*str.data())]) {
     str = StringPiece(str.data() + 1, str.size() - 1);
   }
-  while (!str.empty() && spaces[static_cast<unsigned char>(str[str.size() - 1])]) {
+  while (!str.empty() && spaces[static_cast<unsigned char>(str.data()[str.size() - 1])]) {
     str = StringPiece(str.data(), str.size() - 1);
   }
   return str;

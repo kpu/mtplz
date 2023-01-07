@@ -53,11 +53,11 @@ class UInt128 {
     accumulator >>= 32;
     accumulator = accumulator + (high_bits_ >> 32) * multiplicand;
     high_bits_ = (accumulator << 32) + part;
-    ASSERT((accumulator >> 32) == 0);
+    DOUBLE_CONVERSION_ASSERT((accumulator >> 32) == 0);
   }
 
   void Shift(int shift_amount) {
-    ASSERT(-64 <= shift_amount && shift_amount <= 64);
+    DOUBLE_CONVERSION_ASSERT(-64 <= shift_amount && shift_amount <= 64);
     if (shift_amount == 0) {
       return;
     } else if (shift_amount == -64) {
@@ -98,7 +98,7 @@ class UInt128 {
     return high_bits_ == 0 && low_bits_ == 0;
   }
 
-  int BitAt(int position) {
+  int BitAt(int position) const {
     if (position >= 64) {
       return static_cast<int>(high_bits_ >> (position - 64)) & 1;
     } else {
@@ -133,7 +133,7 @@ static void FillDigits32(uint32_t number, Vector<char> buffer, int* length) {
   while (number != 0) {
     int digit = number % 10;
     number /= 10;
-    buffer[(*length) + number_length] = '0' + digit;
+    buffer[(*length) + number_length] = static_cast<char>('0' + digit);
     number_length++;
   }
   // Exchange the digits.
@@ -150,7 +150,7 @@ static void FillDigits32(uint32_t number, Vector<char> buffer, int* length) {
 }
 
 
-static void FillDigits64FixedLength(uint64_t number, int requested_length,
+static void FillDigits64FixedLength(uint64_t number,
                                     Vector<char> buffer, int* length) {
   const uint32_t kTen7 = 10000000;
   // For efficiency cut the number into 3 uint32_t parts, and print those.
@@ -230,13 +230,13 @@ static void RoundUp(Vector<char> buffer, int* length, int* decimal_point) {
 static void FillFractionals(uint64_t fractionals, int exponent,
                             int fractional_count, Vector<char> buffer,
                             int* length, int* decimal_point) {
-  ASSERT(-128 <= exponent && exponent <= 0);
+  DOUBLE_CONVERSION_ASSERT(-128 <= exponent && exponent <= 0);
   // 'fractionals' is a fixed-point number, with binary point at bit
   // (-exponent). Inside the function the non-converted remainder of fractionals
   // is a fixed-point number, with binary point at bit 'point'.
   if (-exponent <= 64) {
     // One 64 bit number is sufficient.
-    ASSERT(fractionals >> 56 == 0);
+    DOUBLE_CONVERSION_ASSERT(fractionals >> 56 == 0);
     int point = -exponent;
     for (int i = 0; i < fractional_count; ++i) {
       if (fractionals == 0) break;
@@ -253,16 +253,18 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       fractionals *= 5;
       point--;
       int digit = static_cast<int>(fractionals >> point);
-      buffer[*length] = '0' + digit;
+      DOUBLE_CONVERSION_ASSERT(digit <= 9);
+      buffer[*length] = static_cast<char>('0' + digit);
       (*length)++;
       fractionals -= static_cast<uint64_t>(digit) << point;
     }
     // If the first bit after the point is set we have to round up.
-    if (((fractionals >> (point - 1)) & 1) == 1) {
+    DOUBLE_CONVERSION_ASSERT(fractionals == 0 || point - 1 >= 0);
+    if ((fractionals != 0) && ((fractionals >> (point - 1)) & 1) == 1) {
       RoundUp(buffer, length, decimal_point);
     }
   } else {  // We need 128 bits.
-    ASSERT(64 < -exponent && -exponent <= 128);
+    DOUBLE_CONVERSION_ASSERT(64 < -exponent && -exponent <= 128);
     UInt128 fractionals128 = UInt128(fractionals, 0);
     fractionals128.Shift(-exponent - 64);
     int point = 128;
@@ -274,7 +276,8 @@ static void FillFractionals(uint64_t fractionals, int exponent,
       fractionals128.Multiply(5);
       point--;
       int digit = fractionals128.DivModPowerOf2(point);
-      buffer[*length] = '0' + digit;
+      DOUBLE_CONVERSION_ASSERT(digit <= 9);
+      buffer[*length] = static_cast<char>('0' + digit);
       (*length)++;
     }
     if (fractionals128.BitAt(point - 1) == 1) {
@@ -332,7 +335,7 @@ bool FastFixedDtoa(double v,
     // The quotient delivers the first digits, and the remainder fits into a 64
     // bit number.
     // Dividing by 10^17 is equivalent to dividing by 5^17*2^17.
-    const uint64_t kFive17 = UINT64_2PART_C(0xB1, A2BC2EC5);  // 5^17
+    const uint64_t kFive17 = DOUBLE_CONVERSION_UINT64_2PART_C(0xB1, A2BC2EC5);  // 5^17
     uint64_t divisor = kFive17;
     int divisor_power = 17;
     uint64_t dividend = significand;
@@ -358,7 +361,7 @@ bool FastFixedDtoa(double v,
       remainder = (dividend % divisor) << exponent;
     }
     FillDigits32(quotient, buffer, length);
-    FillDigits64FixedLength(remainder, divisor_power, buffer, length);
+    FillDigits64FixedLength(remainder, buffer, length);
     *decimal_point = *length;
   } else if (exponent >= 0) {
     // 0 <= exponent <= 11
@@ -380,7 +383,7 @@ bool FastFixedDtoa(double v,
   } else if (exponent < -128) {
     // This configuration (with at most 20 digits) means that all digits must be
     // 0.
-    ASSERT(fractional_count <= 20);
+    DOUBLE_CONVERSION_ASSERT(fractional_count <= 20);
     buffer[0] = '\0';
     *length = 0;
     *decimal_point = -fractional_count;
@@ -392,8 +395,8 @@ bool FastFixedDtoa(double v,
   TrimZeros(buffer, length, decimal_point);
   buffer[*length] = '\0';
   if ((*length) == 0) {
-    // The string is empty and the decimal_point thus has no importance. Mimick
-    // Gay's dtoa and and set it to -fractional_count.
+    // The string is empty and the decimal_point thus has no importance. Mimic
+    // Gay's dtoa and set it to -fractional_count.
     *decimal_point = -fractional_count;
   }
   return true;

@@ -1,16 +1,16 @@
-#include "lm/vocab.hh"
+#include "vocab.hh"
 
-#include "lm/binary_format.hh"
-#include "lm/enumerate_vocab.hh"
-#include "lm/lm_exception.hh"
-#include "lm/config.hh"
-#include "lm/weights.hh"
-#include "util/exception.hh"
-#include "util/file_stream.hh"
-#include "util/file.hh"
-#include "util/joint_sort.hh"
-#include "util/murmur_hash.hh"
-#include "util/probing_hash_table.hh"
+#include "binary_format.hh"
+#include "enumerate_vocab.hh"
+#include "lm_exception.hh"
+#include "config.hh"
+#include "weights.hh"
+#include "../util/exception.hh"
+#include "../util/file_stream.hh"
+#include "../util/file.hh"
+#include "../util/joint_sort.hh"
+#include "../util/murmur_hash.hh"
+#include "../util/probing_hash_table.hh"
 
 #include <cstring>
 #include <string>
@@ -18,11 +18,19 @@
 namespace lm {
 namespace ngram {
 
+namespace detail {
+uint64_t HashForVocab(const char *str, std::size_t len) {
+  // This proved faster than Boost's hash in speed trials: total load time Murmur 67090000, Boost 72210000
+  // Chose to use 64A instead of native so binary format will be portable across 64 and 32 bit.
+  return util::MurmurHash64A(str, len, 0);
+}
+} // namespace detail
+
 namespace {
 // Normally static initialization is a bad idea but MurmurHash is pure arithmetic, so this is ok.
-const uint64_t kUnknownHash = util::HashForVocab("<unk>", 5);
+const uint64_t kUnknownHash = detail::HashForVocab("<unk>", 5);
 // Sadly some LMs have <UNK>.
-const uint64_t kUnknownCapHash = util::HashForVocab("<UNK>", 5);
+const uint64_t kUnknownCapHash = detail::HashForVocab("<UNK>", 5);
 
 void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint64_t offset) {
   util::SeekOrThrow(fd, offset);
@@ -100,7 +108,7 @@ void SortedVocabulary::ConfigureEnumerate(EnumerateVocab *to, std::size_t max_en
 }
 
 WordIndex SortedVocabulary::Insert(const StringPiece &str) {
-  uint64_t hashed = util::HashForVocab(str);
+  uint64_t hashed = detail::HashForVocab(str);
   if (hashed == kUnknownHash || hashed == kUnknownCapHash) {
     saw_unk_ = true;
     return 0;
@@ -147,7 +155,7 @@ void SortedVocabulary::ComputeRenumbering(WordIndex types, int from_words, int t
   entry.old = 1;
   for (entry.str = start + 6 /* skip <unk>\0 */; entry.str < start + file_size; ++entry.old) {
     StringPiece str(entry.str, strlen(entry.str));
-    entry.hash = util::HashForVocab(str);
+    entry.hash = detail::HashForVocab(str);
     entries.push_back(entry);
     entry.str += str.size() + 1;
   }
@@ -248,14 +256,14 @@ void ProbingVocabulary::ConfigureEnumerate(EnumerateVocab *to, std::size_t /*max
 }
 
 WordIndex ProbingVocabulary::Insert(const StringPiece &str) {
-  uint64_t hashed = util::HashForVocab(str);
+  uint64_t hashed = detail::HashForVocab(str);
   // Prevent unknown from going into the table.
   if (hashed == kUnknownHash || hashed == kUnknownCapHash) {
     saw_unk_ = true;
     return 0;
   } else {
     if (enumerate_) enumerate_->Add(bound_, str);
-    lookup_.Insert(util::ProbingVocabularyEntry::Make(hashed, bound_));
+    lookup_.Insert(ProbingVocabularyEntry::Make(hashed, bound_));
     return bound_++;
   }
 }
@@ -274,7 +282,7 @@ void ProbingVocabulary::LoadedBinary(bool have_words, int fd, EnumerateVocab *to
   if (have_words) ReadWords(fd, to, bound_, offset);
 }
 
-void MissingUnknown(const Config &config) throw(SpecialWordMissingException) {
+void MissingUnknown(const Config &config) {
   switch(config.unknown_missing) {
     case SILENT:
       return;
@@ -286,7 +294,7 @@ void MissingUnknown(const Config &config) throw(SpecialWordMissingException) {
   }
 }
 
-void MissingSentenceMarker(const Config &config, const char *str) throw(SpecialWordMissingException) {
+void MissingSentenceMarker(const Config &config, const char *str) {
   switch (config.sentence_marker_missing) {
     case SILENT:
       return;
