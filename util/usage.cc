@@ -46,6 +46,10 @@ typedef WINBOOL (WINAPI *PFN_MS_EX) (lMEMORYSTATUSEX*);
 #include <libproc.h>
 #endif
 
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#endif
+
 namespace util {
 namespace {
 
@@ -200,6 +204,12 @@ uint64_t RSSMax() {
 void PrintUsage(std::ostream &out) {
 #if !defined(_WIN32) && !defined(_WIN64)
   #if defined(__MACH__) || defined(__APPLE__)
+  #if MAC_OS_X_VERSION_MAX_ALLOWED < 1080
+    #define MACH_TASK_BASIC_INFO_COUNT TASK_BASIC_INFO_COUNT
+    #define mach_task_basic_info_data_t task_basic_info_data_t
+    #define MACH_TASK_BASIC_INFO TASK_BASIC_INFO
+    #define mach_task_basic_info task_basic_info
+  #endif
   struct mach_task_basic_info t_info;
   char name[2 * MAXCOMLEN] = {0};
 
@@ -208,7 +218,9 @@ void PrintUsage(std::ostream &out) {
   task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count);
 
   out << name << '\t';
+  #if MAC_OS_X_VERSION_MAX_ALLOWED > 1070
   out << t_info.resident_size_max << '\t';
+  #endif
   out << t_info.resident_size << '\t';
   #else
   // Linux doesn't set memory usage in getrusage :-(
